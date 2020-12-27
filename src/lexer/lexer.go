@@ -35,7 +35,13 @@ func (l *Lexer) NextToken() token.Token {
 	case '+':
 		tok = l.newToken(token.PLUS, l.ch)
 	case '-':
-		tok = l.newToken(token.MINUS, l.ch)
+		if l.peekChar() == '>' {
+			ch := l.ch
+			l.readChar()
+			tok = token.Token{Type: token.RARR, Literal: string(ch) + string(l.ch)}
+		} else {
+			tok = l.newToken(token.MINUS, l.ch)
+		}
 
 	case '/':
 		tok = l.newToken(token.SLASH, l.ch)
@@ -52,9 +58,26 @@ func (l *Lexer) NextToken() token.Token {
 		}
 
 	case '<':
-		tok = l.newToken(token.LT, l.ch)
+		if l.peekChar() == '=' {
+			ch := l.ch
+			l.readChar()
+			tok = token.Token{Type: token.LTEQ, Literal: string(ch) + string(l.ch)}
+		} else if l.peekChar() == '-' {
+			ch := l.ch
+			l.readChar()
+			tok = token.Token{Type: token.LARR, Literal: string(ch) + string(l.ch)}
+		} else {
+			tok = l.newToken(token.LT, l.ch)
+		}
 	case '>':
-		tok = l.newToken(token.GT, l.ch)
+		if l.peekChar() == '=' {
+			ch := l.ch
+			l.readChar()
+			tok = token.Token{Type: token.GTEQ, Literal: string(ch) + string(l.ch)}
+		} else {
+			tok = l.newToken(token.GT, l.ch)
+		}
+
 	case ';':
 		tok = l.newToken(token.SEMICOLON, l.ch)
 	case ',':

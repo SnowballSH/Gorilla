@@ -18,6 +18,7 @@ let add = fun(x, y) {
 let result = add(five, ten)
 !-/*5
 5 < 10 > 5
+<= >= <- ->
 
 if (5 < 10) {
 	return true
@@ -85,6 +86,11 @@ if (5 < 10) {
 		{token.INT, "10"},
 		{token.GT, ">"},
 		{token.INT, "5"},
+		{token.SEMICOLON, nl},
+		{token.LTEQ, "<="},
+		{token.GTEQ, ">="},
+		{token.LARR, "<-"},
+		{token.RARR, "->"},
 		{token.SEMICOLON, nl},
 		{token.SEMICOLON, nl},
 		{token.IF, "if"},
