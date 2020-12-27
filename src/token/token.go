@@ -7,8 +7,8 @@ const (
 	EOF     = "EOF"
 
 	// Identifiers + literals
-	IDENT = "IDENT" // add, foobar, x, y, ...
-	INT   = "INT"   // 1343456
+	IDENT = "IDENTIFIER" // add, foobar, x, y, ...
+	INT   = "INT"        // 1343456
 
 	// Operators
 	ASSIGN   = "="
@@ -26,7 +26,7 @@ const (
 
 	// Delimiters
 	COMMA     = ","
-	SEMICOLON = ";"
+	SEMICOLON = "; or newline"
 
 	LPAREN = "("
 	RPAREN = ")"

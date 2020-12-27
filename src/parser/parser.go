@@ -1,7 +1,7 @@
 package parser
 
 import (
-	//"fmt"
+	"fmt"
 	//"strconv"
 
 	"../ast"
@@ -35,6 +35,7 @@ func New(l *lexer.Lexer) *Parser {
 func (p *Parser) nextToken() {
 	p.curToken = p.peekToken
 	p.peekToken = p.l.NextToken()
+	println(p.curToken.Line)
 }
 
 func (p *Parser) curTokenIs(t token.TType) bool {
@@ -48,8 +49,18 @@ func (p *Parser) expectPeek(t token.TType) bool {
 		p.nextToken()
 		return true
 	} else {
+		p.peekError(t)
 		return false
 	}
+}
+
+func (p *Parser) Errors() []string {
+	return p.errors
+}
+func (p *Parser) peekError(t token.TType) {
+	msg := fmt.Sprintf("[Line %d] expected %s, got %s instead",
+		p.peekToken.Line, t, p.peekToken.Type)
+	p.errors = append(p.errors, msg)
 }
 
 // HELPER END
@@ -67,6 +78,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 		if stmt != nil {
 			program.Statements = append(program.Statements, stmt)
 		}
+		p.nextToken()
 	}
 	return program
 }
