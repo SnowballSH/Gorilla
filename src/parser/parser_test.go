@@ -395,7 +395,7 @@ func TestBooleanExpression(t *testing.T) {
 }
 
 func TestIfExpression(t *testing.T) {
-	input := `if (x < y) { x }`
+	input := `if x < y { x }`
 
 	l := lexer.New(input)
 	p := New(l)
@@ -444,7 +444,7 @@ func TestIfExpression(t *testing.T) {
 }
 
 func TestIfElseExpression(t *testing.T) {
-	input := `if (x < y) { x } else { y }`
+	input := `if x < y { x } else { y }`
 
 	l := lexer.New(input)
 	p := New(l)

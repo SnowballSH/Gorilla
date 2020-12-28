@@ -139,7 +139,7 @@ func (p *Parser) curPrecedence() int {
 }
 
 func (p *Parser) noPrefixParseFnError(t token.TType) {
-	msg := fmt.Sprintf("Dev Error: no prefix parse function for %s found", t)
+	msg := fmt.Sprintf("Invalid Syntax: unexpected '%s'", t)
 	p.errors = append(p.errors, msg)
 }
 
@@ -310,16 +310,8 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 func (p *Parser) parseIfExpression() ast.Expression {
 	expression := &ast.IfExpression{Token: p.curToken}
 
-	if !p.expectPeek(token.LPAREN) {
-		return nil
-	}
-
 	p.nextToken()
 	expression.Condition = p.parseExpression(LOWEST)
-
-	if !p.expectPeek(token.RPAREN) {
-		return nil
-	}
 
 	if !p.expectPeek(token.LBRACE) {
 		return nil

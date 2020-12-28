@@ -4,37 +4,41 @@ import (
 	"bufio"
 	"fmt"
 	"io"
-	"strings"
 
 	"../lexer"
-	"../token"
+	"../parser"
 )
 
+// PROMPT is the REPL prompt displayed for each input
 const PROMPT = ">> "
 
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 
-	i := 0
 	for {
-		fmt.Printf("Gorilla " + fmt.Sprintf("[%d]", i) + PROMPT)
+		fmt.Printf(PROMPT)
 		scanned := scanner.Scan()
 		if !scanned {
 			return
 		}
 
 		line := scanner.Text()
-
-		if strings.TrimSpace(line) == ":quit" {
-			fmt.Println("You quit!")
-			break
-		}
-
 		l := lexer.New(line)
+		p := parser.New(l)
 
-		for tok := l.NextToken(); tok.Type != token.EOF; tok = l.NextToken() {
-			fmt.Printf("%+v\n", tok)
+		program := p.ParseProgram()
+		if len(p.Errors()) != 0 {
+			printParserErrors(out, p.Errors())
+			continue
 		}
-		i++
+
+		_, _ = io.WriteString(out, program.String()+"\n")
+	}
+}
+
+func printParserErrors(out io.Writer, errors []string) {
+	_, _ = io.WriteString(out, " parser errors:\n")
+	for _, msg := range errors {
+		_, _ = io.WriteString(out, "\t"+msg+"\n")
 	}
 }
