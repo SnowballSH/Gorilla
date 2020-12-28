@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 
+	"../eval"
 	"../lexer"
 	"../parser"
 )
@@ -15,8 +16,10 @@ const PROMPT = ">> "
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 
+	_, _ = io.WriteString(out, "Gorilla 0.1\n")
+	i := 0
 	for {
-		fmt.Printf(PROMPT)
+		_, _ = io.WriteString(out, fmt.Sprintf("[%d]%s", i, PROMPT))
 		scanned := scanner.Scan()
 		if !scanned {
 			return
@@ -32,7 +35,11 @@ func Start(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		_, _ = io.WriteString(out, program.String()+"\n")
+		obj := eval.Eval(program)
+		if obj != nil {
+			_, _ = io.WriteString(out, obj.Inspect()+"\n")
+		}
+		i++
 	}
 }
 

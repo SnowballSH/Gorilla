@@ -120,7 +120,7 @@ func (es *ExpressionStatement) TokenLiteral() string { return es.Token.Literal }
 // String returns a stringified version of the AST for debugging
 func (es *ExpressionStatement) String() string {
 	if es.Expression != nil {
-		return es.Expression.String()
+		return es.Expression.String() + ";"
 	}
 	return ""
 }

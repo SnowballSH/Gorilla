@@ -139,7 +139,7 @@ func (p *Parser) curPrecedence() int {
 }
 
 func (p *Parser) noPrefixParseFnError(t token.TType) {
-	msg := fmt.Sprintf("Invalid Syntax: unexpected '%s'", t)
+	msg := fmt.Sprintf("[Line %d] Invalid Syntax: unexpected '%s'", p.curToken.Line, t)
 	p.errors = append(p.errors, msg)
 }
 
@@ -166,6 +166,15 @@ func (p *Parser) ParseProgram() *ast.Program {
 			program.Statements = append(program.Statements, stmt)
 		}
 		p.nextToken()
+
+		if !p.curTokenIs(token.SEMICOLON) && !p.curTokenIs(token.EOF) {
+			msg := fmt.Sprintf(
+				"[Line %d] Invalid Syntax: Expected Newline or ';', got '%s'",
+				p.curToken.Line, p.curToken.Type,
+			)
+			p.errors = append(p.errors, msg)
+		}
+
 		for p.curTokenIs(token.SEMICOLON) {
 			p.nextToken()
 		}
