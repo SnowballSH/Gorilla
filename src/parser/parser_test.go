@@ -78,6 +78,38 @@ func TestReturnStatements(t *testing.T) {
 	}
 }
 
+func TestFuncStatements(t *testing.T) {
+	tests := []struct {
+		input            string
+		expectedName     string
+		expectedBlockLen int
+	}{
+		{"func myFun(a, b) {a + b; b + c; a + c}", "myFun", 3},
+		{"func blank() {}", "blank", 0},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		if len(program.Statements) != 1 {
+			t.Fatalf("program.Statements does not contain 1 statements. got=%d",
+				len(program.Statements))
+		}
+
+		stmt := program.Statements[0].(*ast.FunctionStmt)
+		if stmt.Name != tt.expectedName {
+			t.Fatalf("Expected name to be %s, got %s", tt.expectedName, stmt.Name)
+		}
+		x := len(stmt.Body.Statements)
+		if x != tt.expectedBlockLen {
+			t.Fatalf("Expected number of statements to be %d, got %d", tt.expectedBlockLen, x)
+		}
+	}
+}
+
 func TestIdentifierExpression(t *testing.T) {
 	input := "foobar;"
 
@@ -503,7 +535,7 @@ func TestIfElseExpression(t *testing.T) {
 }
 
 func TestFunctionLiteralParsing(t *testing.T) {
-	input := `fun(x, y) { x + y }`
+	input := `fn(x, y) { x + y }`
 
 	l := lexer.New(input)
 	p := New(l)
@@ -554,9 +586,9 @@ func TestFunctionParameterParsing(t *testing.T) {
 		input          string
 		expectedParams []string
 	}{
-		{input: "fun() {}", expectedParams: []string{}},
-		{input: "fun(x) {}", expectedParams: []string{"x"}},
-		{input: "fun(x, y, z) {}", expectedParams: []string{"x", "y", "z"}},
+		{input: "fn() {}", expectedParams: []string{}},
+		{input: "fn(x) {}", expectedParams: []string{"x"}},
+		{input: "fn(x, y, z) {}", expectedParams: []string{"x", "y", "z"}},
 	}
 
 	for _, tt := range tests {

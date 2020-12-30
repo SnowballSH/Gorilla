@@ -39,13 +39,14 @@ const (
 	RBRACE = "}"
 
 	// Keywords
-	FUNCTION = "FUNCTION"
-	LET      = "LET"
-	TRUE     = "TRUE"
-	FALSE    = "FALSE"
-	IF       = "IF"
-	ELSE     = "ELSE"
-	RETURN   = "RETURN"
+	FUNCTION     = "FUNCTION"
+	STMTFUNCTION = "STMTFUNCTION"
+	LET          = "LET"
+	TRUE         = "TRUE"
+	FALSE        = "FALSE"
+	IF           = "IF"
+	ELSE         = "ELSE"
+	RETURN       = "RETURN"
 )
 
 type Token struct {
@@ -55,7 +56,8 @@ type Token struct {
 }
 
 var keywords = map[string]TType{
-	"fun":    FUNCTION,
+	"fn":     FUNCTION,
+	"func":   STMTFUNCTION,
 	"let":    LET,
 	"true":   TRUE,
 	"false":  FALSE,

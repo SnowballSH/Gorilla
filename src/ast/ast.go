@@ -79,7 +79,7 @@ func (ls *LetStatement) String() string {
 	return out.String()
 }
 
-// ReturnStatement represenets the `return` statement node
+// ReturnStatement represents the `return` statement node
 type ReturnStatement struct {
 	Token       token.Token // the 'return' token
 	ReturnValue Expression
@@ -101,6 +101,39 @@ func (rs *ReturnStatement) String() string {
 	}
 
 	out.WriteString(";")
+
+	return out.String()
+}
+
+// FunctionStmt represents a literal functions and holds the function's
+// formal parameters and boy of the function as a block statement
+type FunctionStmt struct {
+	Token      token.Token // The 'fn' token
+	Name       string
+	Parameters []*Identifier
+	Body       *BlockStatement
+}
+
+func (fs *FunctionStmt) statementNode() {}
+
+// TokenLiteral prints the literal value of the token associated with this node
+func (fs *FunctionStmt) TokenLiteral() string { return fs.Token.Literal }
+
+// String returns a stringified version of the AST for debugging
+func (fs *FunctionStmt) String() string {
+	var out bytes.Buffer
+
+	var params []string
+	for _, p := range fs.Parameters {
+		params = append(params, p.String())
+	}
+
+	out.WriteString(fs.TokenLiteral() + " ")
+	out.WriteString(fs.Name)
+	out.WriteString("(")
+	out.WriteString(strings.Join(params, ", "))
+	out.WriteString(") ")
+	out.WriteString(fs.Body.String())
 
 	return out.String()
 }
