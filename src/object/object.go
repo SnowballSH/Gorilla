@@ -17,6 +17,12 @@ const (
 
 	// NULL is the Null object type
 	NULL = "NULL"
+
+	// RETURN is the Return object type
+	RETURN = "RETURN"
+
+	// ERROR is the ERROR object
+	ERROR = "ERROR"
 )
 
 // Type represents the type of an object
@@ -60,3 +66,25 @@ func (n *Null) Type() Type { return NULL }
 
 // Inspect returns a stringified version of the object for debugging
 func (n *Null) Inspect() string { return "null" }
+
+// Return is the return statement
+type Return struct {
+	Value Object
+}
+
+// Type returns the type of the object
+func (rv *Return) Type() Type { return RETURN }
+
+// Inspect returns a stringified version of the object for debugging
+func (rv *Return) Inspect() string { return rv.Value.Inspect() }
+
+// Error the the error object
+type Error struct {
+	Message string
+}
+
+// Type returns the type of the object
+func (e *Error) Type() Type { return ERROR }
+
+// Inspect returns a stringified version of the object for debugging
+func (e *Error) Inspect() string { return "ERROR: " + e.Message }
