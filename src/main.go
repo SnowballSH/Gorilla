@@ -1,11 +1,9 @@
 package main
 
 import (
-	"os"
-
-	"./repl"
+	"./gorilla"
 )
 
 func main() {
-	repl.Start(os.Stdin, os.Stdout)
+	gorilla.RunFile()
 }

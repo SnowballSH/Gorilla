@@ -7,6 +7,7 @@ import (
 
 	"../eval"
 	"../lexer"
+	"../object"
 	"../parser"
 )
 
@@ -15,6 +16,7 @@ const PROMPT = ">> "
 
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
+	env := object.NewEnvironment()
 
 	_, _ = io.WriteString(out, "Gorilla 0.1\n")
 	i := 0
@@ -31,11 +33,11 @@ func Start(in io.Reader, out io.Writer) {
 
 		program := p.ParseProgram()
 		if len(p.Errors()) != 0 {
-			printParserErrors(out, p.Errors())
+			PrintParserErrors(out, p.Errors())
 			continue
 		}
 
-		obj := eval.Eval(program)
+		obj := eval.Eval(program, env)
 		if obj != nil {
 			_, _ = io.WriteString(out, obj.Inspect()+"\n")
 		}
@@ -43,7 +45,7 @@ func Start(in io.Reader, out io.Writer) {
 	}
 }
 
-func printParserErrors(out io.Writer, errors []string) {
+func PrintParserErrors(out io.Writer, errors []string) {
 	_, _ = io.WriteString(out, " parser errors:\n")
 	for _, msg := range errors {
 		_, _ = io.WriteString(out, "\t"+msg+"\n")

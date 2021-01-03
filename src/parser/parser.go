@@ -121,7 +121,7 @@ func (p *Parser) Errors() []string {
 }
 func (p *Parser) peekError(t token.TType) {
 	msg := fmt.Sprintf("[Line %d] expected %s, got %s instead",
-		p.peekToken.Line, t, p.peekToken.Type)
+		p.peekToken.Line+1, t, p.peekToken.Type)
 	p.errors = append(p.errors, msg)
 }
 
@@ -139,7 +139,7 @@ func (p *Parser) curPrecedence() int {
 }
 
 func (p *Parser) noPrefixParseFnError(t token.TType) {
-	msg := fmt.Sprintf("[Line %d] Invalid Syntax: unexpected '%s'", p.curToken.Line, t)
+	msg := fmt.Sprintf("[Line %d] Invalid Syntax: unexpected '%s'", p.curToken.Line+1, t)
 	p.errors = append(p.errors, msg)
 }
 
@@ -170,7 +170,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 		if !p.curTokenIs(token.SEMICOLON) && !p.curTokenIs(token.EOF) {
 			msg := fmt.Sprintf(
 				"[Line %d] Invalid Syntax: Expected Newline or ';', got '%s'",
-				p.curToken.Line, p.curToken.Type,
+				p.curToken.Line+1, p.curToken.Type,
 			)
 			p.errors = append(p.errors, msg)
 		}
@@ -183,6 +183,9 @@ func (p *Parser) ParseProgram() *ast.Program {
 }
 
 func (p *Parser) parseStatement() ast.Statement {
+	for p.curTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
 	switch p.curToken.Type {
 	case token.LET:
 		return p.parseLetStatement()
@@ -212,10 +215,6 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 
 	stmt.Value = p.parseExpression(LOWEST)
 
-	if p.peekTokenIs(token.SEMICOLON) {
-		p.nextToken()
-	}
-
 	return stmt
 }
 
@@ -225,10 +224,6 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	p.nextToken()
 
 	stmt.ReturnValue = p.parseExpression(LOWEST)
-
-	if p.peekTokenIs(token.SEMICOLON) {
-		p.nextToken()
-	}
 
 	return stmt
 }
