@@ -10,7 +10,7 @@
 
 #### Download the [latest release](https://github.com/SnowballSH/Gorilla/releases)
 
-#### View the [Get Started](https://github.com/SnowballSH/Gorilla/docs/start.md)
+#### View the [Get Started](https://github.com/SnowballSH/Gorilla/blob/master/docs/start.md)
 
 ---
 

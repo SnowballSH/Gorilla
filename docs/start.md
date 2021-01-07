@@ -49,4 +49,4 @@ to run it
 
 ### Tutorial
 
-View the [Tutorial](https://github.com/SnowballSH/Gorilla/docs/tut.md)!
+View the [Tutorial](https://github.com/SnowballSH/Gorilla/blob/master/docs/tut.md)!
