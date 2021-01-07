@@ -7,13 +7,9 @@ import (
 	"strings"
 )
 
-var (
-	TRUE = &object.Boolean{Value: true}
-
-	FALSE = &object.Boolean{Value: false}
-
-	NULL = &object.Null{}
-)
+var TRUE = object.TRUE
+var FALSE = object.FALSE
+var NULL = object.NULL
 
 func fromNativeBoolean(input bool, l int) *object.Boolean {
 	if input {
@@ -81,6 +77,12 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return val
 		}
 		env.Set(node.Name.Value, val)
+
+	case *ast.FunctionStmt:
+		params := node.Parameters
+		body := node.Body
+		fn := &object.Function{Parameters: params, Env: env, Body: body, SLine: node.Token.Line}
+		env.Set(node.Name, fn)
 
 	case *ast.FunctionLiteral:
 		params := node.Parameters
@@ -303,12 +305,14 @@ func evalIdentifier(
 	node *ast.Identifier,
 	env *object.Environment,
 ) object.Object {
-	val, ok := env.Get(node.Value)
-	if !ok {
-		return newError("[Line %d] Variable '%s' is not defined", node.Token.Line+1, node.Value)
+	if val, ok := env.Get(node.Value); ok {
+		return val
+	}
+	if builtin, ok := builtins[node.Value]; ok {
+		return builtin
 	}
 
-	return val
+	return newError("[Line %d] Variable '%s' is not defined", node.Token.Line+1, node.Value)
 }
 
 func evalExpressions(
@@ -347,19 +351,24 @@ func isError(obj object.Object) bool {
 }
 
 func applyFunction(fn object.Object, args []object.Object) object.Object {
-	function, ok := fn.(*object.Function)
-	if !ok {
+	switch fn := fn.(type) {
+
+	case *object.Function:
+		if len(fn.Parameters) != len(args) {
+			return newError("[Line %d] Argument mismatch (expected %d, got %d)", fn.Line(),
+				len(fn.Parameters), len(args))
+		}
+		env := extendFunctionEnv(fn, args)
+		return unwrapReturnValue(Eval(fn.Body, env))
+
+	case *object.Builtin:
+		return fn.Fn(fn.Line(), args...)
+
+	default:
 		return newError("[Line %d] Type '%s' is not callable", fn.Line(), fn.Type())
 	}
-	if len(function.Parameters) != len(args) {
-		return newError("[Line %d] Argument mismatch (expected %d, got %d)", fn.Line(),
-			len(function.Parameters), len(args))
-	}
-
-	extendedEnv := extendFunctionEnv(function, args)
-	evaluated := Eval(function.Body, extendedEnv)
-	return unwrapReturnValue(evaluated)
 }
+
 func extendFunctionEnv(
 	fn *object.Function,
 	args []object.Object,
@@ -370,6 +379,7 @@ func extendFunctionEnv(
 	}
 	return env
 }
+
 func unwrapReturnValue(obj object.Object) object.Object {
 	if returnValue, ok := obj.(*object.Return); ok {
 		return returnValue.Value

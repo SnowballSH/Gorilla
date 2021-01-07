@@ -23,7 +23,7 @@ const (
 	BOOLEAN = "BOOLEAN"
 
 	// NULL is the Null object type
-	NULL = "NULL"
+	NULLT = "NULL"
 
 	// RETURN is the Return object type
 	RETURN = "RETURN"
@@ -33,7 +33,21 @@ const (
 
 	// FUNCTION is the Function object
 	FUNCTION = "FUNCTION"
+
+	// BUILTIN is the Builtin object type
+	BUILTIN = "BUILTIN"
 )
+
+var (
+	TRUE = &Boolean{Value: true}
+
+	FALSE = &Boolean{Value: false}
+
+	NULL = &Null{}
+)
+
+// BuiltinFunction represents the builtin function type
+type BuiltinFunction func(line int, args ...Object) Object
 
 // Type represents the type of an object
 type Type string
@@ -91,7 +105,7 @@ type Null struct {
 }
 
 // Type returns the type of the object
-func (n *Null) Type() Type { return NULL }
+func (n *Null) Type() Type { return NULLT }
 
 // Inspect returns a stringified version of the object for debugging
 func (n *Null) Inspect() string { return "null" }
@@ -157,3 +171,16 @@ func (f *Function) Inspect() string {
 }
 
 func (f *Function) Line() int { return f.SLine }
+
+type Builtin struct {
+	Fn    BuiltinFunction
+	SLine int
+}
+
+// Type returns the type of the object
+func (b *Builtin) Type() Type { return BUILTIN }
+
+// Inspect returns a stringified version of the object for debugging
+func (b *Builtin) Inspect() string { return "Builtin Function" }
+
+func (b *Builtin) Line() int { return b.SLine }

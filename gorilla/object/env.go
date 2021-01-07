@@ -5,9 +5,15 @@ func NewEnclosedEnvironment(outer *Environment) *Environment {
 	env.outer = outer
 	return env
 }
+
 func NewEnvironment() *Environment {
 	s := make(map[string]Object)
 	return &Environment{store: s, outer: nil}
+}
+
+func (e *Environment) AddBuiltin() *Environment {
+	e.Set("null", NULL)
+	return e
 }
 
 type Environment struct {

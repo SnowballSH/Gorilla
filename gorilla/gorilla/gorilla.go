@@ -32,7 +32,7 @@ func RunFile() {
 
 	code := string(b)
 
-	env := object.NewEnvironment()
+	env := object.NewEnvironment().AddBuiltin()
 
 	l := lexer.New(code)
 	p := parser.New(l)
@@ -43,10 +43,7 @@ func RunFile() {
 		os.Exit(1)
 	}
 
-	obj := eval.Eval(program, env)
-	if obj != nil {
-		_, _ = io.WriteString(os.Stdout, obj.Inspect()+"\n")
-	}
+	eval.Eval(program, env)
 
 	os.Exit(0)
 }

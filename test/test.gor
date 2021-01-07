@@ -3,7 +3,7 @@ let fib = fn(n) {
     let b = 1
 
     if n < 0 {
-        false
+        null
     } else {
         if n <= 1 {
             n
@@ -20,4 +20,4 @@ let fib = fn(n) {
     }
 }
 
-fib(999)
+display(fib(9))

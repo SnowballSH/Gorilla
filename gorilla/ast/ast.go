@@ -105,10 +105,9 @@ func (rs *ReturnStatement) String() string {
 	return out.String()
 }
 
-// FunctionStmt represents a literal functions and holds the function's
-// formal parameters and boy of the function as a block statement
+// FunctionStmt
 type FunctionStmt struct {
-	Token      token.Token // The 'fn' token
+	Token      token.Token
 	Name       string
 	Parameters []*Identifier
 	Body       *BlockStatement

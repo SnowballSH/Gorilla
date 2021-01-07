@@ -16,7 +16,7 @@ const PROMPT = ">> "
 
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
-	env := object.NewEnvironment()
+	env := object.NewEnvironment().AddBuiltin()
 
 	_, _ = io.WriteString(out, "Gorilla 0.1\n")
 	i := 0
