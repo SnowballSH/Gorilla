@@ -10,7 +10,7 @@ display("Hello, world!")
 ```
 
 Function-oriented hello world:
-```c
+```go
 func hello(name) {
     display("Hello, " + name + "!")
 }
