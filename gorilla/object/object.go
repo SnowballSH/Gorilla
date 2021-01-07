@@ -16,6 +16,9 @@ const (
 	// INTEGER is the Integer object type
 	INTEGER = "INTEGER"
 
+	// STRING is the String object type
+	STRING = "STRING"
+
 	// BOOLEAN is the Boolean object type
 	BOOLEAN = "BOOLEAN"
 
@@ -57,6 +60,16 @@ func (i *Integer) Type() Type { return INTEGER }
 func (i *Integer) Inspect() string { return fmt.Sprintf("%d", i.Value) }
 
 func (i *Integer) Line() int { return i.SLine }
+
+// String
+type String struct {
+	Value string
+	SLine int
+}
+
+func (s *String) Type() Type      { return STRING }
+func (s *String) Inspect() string { return "\"" + s.Value + "\"" }
+func (s *String) Line() int       { return s.SLine }
 
 // Boolean is the boolean type and used to represent boolean literals and holds an interval bool value
 type Boolean struct {

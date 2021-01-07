@@ -4,6 +4,7 @@ import (
 	"../ast"
 	"../object"
 	"fmt"
+	"strings"
 )
 
 var (
@@ -102,6 +103,9 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			return args[0]
 		}
 		return applyFunction(function, args)
+
+	case *ast.StringLiteral:
+		return &object.String{Value: node.Value}
 	}
 
 	return nil
@@ -208,6 +212,11 @@ func evalInfixExpression(
 	switch {
 	case left.Type() == object.INTEGER && right.Type() == object.INTEGER:
 		return evalIntegerInfixExpression(operator, left, right)
+	case left.Type() == object.STRING && right.Type() == object.STRING:
+		return evalStringInfixExpression(operator, left, right)
+	case left.Type() == object.STRING && right.Type() == object.INTEGER:
+		return evalStringInfixExpression(operator, left, right)
+
 	case operator == "==":
 		return fromNativeBoolean(left == right, left.Line())
 	case operator == "!=":
@@ -251,6 +260,28 @@ func evalIntegerInfixExpression(
 	default:
 		return NULL
 	}
+}
+
+func evalStringInfixExpression(
+	operator string,
+	left, right object.Object,
+) object.Object {
+	if operator == "+" {
+		leftVal := left.(*object.String).Value
+		rightVal := right.(*object.String).Value
+		return &object.String{Value: leftVal + rightVal}
+	}
+	if operator == "*" {
+		leftVal := left.(*object.String).Value
+		rightVal := right.(*object.Integer).Value
+		if rightVal < 0 {
+			return NULL
+		}
+		return &object.String{Value: strings.Repeat(leftVal, int(rightVal))}
+	}
+
+	return newError("unknown operator: %s %s %s",
+		left.Type(), operator, right.Type())
 }
 
 func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Object {

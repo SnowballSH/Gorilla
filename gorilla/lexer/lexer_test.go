@@ -28,6 +28,7 @@ if (5 < 10) {
 
 10 == 10
 10 != 9
+"hehehehe"
 `
 
 	nl := config.GetOSNewline("linux")
@@ -121,6 +122,8 @@ if (5 < 10) {
 		{token.INT, "10"},
 		{token.NEQ, "!="},
 		{token.INT, "9"},
+		{token.SEMICOLON, nl},
+		{token.STRING, "hehehehe"},
 		{token.SEMICOLON, nl},
 		{token.EOF, ""},
 	}

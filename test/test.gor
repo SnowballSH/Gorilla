@@ -1,7 +1,23 @@
-let a = 5
-let b = a > 3
-let c = a * 99
+let fib = fn(n) {
+    let a = 0
+    let b = 1
 
-let d = if c > a { 99 } else { 100 }
+    if n < 0 {
+        false
+    } else {
+        if n <= 1 {
+            n
+        } else {
+            let rep = fn(k, x, y) {
+                if k == n - 1 {
+                    y
+                } else {
+                    rep(k + 1, y, x + y)
+                }
+            }
+            rep(0, a, b)
+        }
+    }
+}
 
-return d * c * a
+fib(999)
