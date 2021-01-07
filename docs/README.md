@@ -4,9 +4,13 @@
 
 #### Notice that this is not a production-ready language ~~, and it will never be~~.
 
-### The language will have basic functionalities and will be able to program most algorithms, but will not have the same level of garbage collecting, speed, and powerfulness comparing to Go, Java, Python, and others.
+### The language will have basic functionalities and will be able to program most algorithms.
 
 ### This language is an extension to [the Monkey Programming Language](https://monkeylang.org/), but it contains a lot of new features as well as more simple and flexible syntax.
+
+#### Download the [latest release](https://github.com/SnowballSH/Gorilla/releases)
+
+#### View the [Get Started](https://github.com/SnowballSH/Gorilla/docs/start.md)
 
 ---
 

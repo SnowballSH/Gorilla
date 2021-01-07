@@ -82,7 +82,7 @@ type String struct {
 }
 
 func (s *String) Type() Type      { return STRING }
-func (s *String) Inspect() string { return "\"" + s.Value + "\"" }
+func (s *String) Inspect() string { return s.Value }
 func (s *String) Line() int       { return s.SLine }
 
 // Boolean is the boolean type and used to represent boolean literals and holds an interval bool value
