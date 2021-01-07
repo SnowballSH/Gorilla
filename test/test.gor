@@ -1,4 +1,4 @@
-let fib = fn(n) {
+func fib(n) {
     let a = 0
     let b = 1
 
@@ -8,7 +8,7 @@ let fib = fn(n) {
         if n <= 1 {
             n
         } else {
-            let rep = fn(k, x, y) {
+            func rep(k, x, y) {
                 if k == n - 1 {
                     y
                 } else {
