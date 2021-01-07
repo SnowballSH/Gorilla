@@ -18,7 +18,7 @@ func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 	env := object.NewEnvironment().AddBuiltin()
 
-	_, _ = io.WriteString(out, "Gorilla 0.1\n")
+	_, _ = io.WriteString(out, "Gorilla 0.2\n")
 	i := 0
 	for {
 		_, _ = io.WriteString(out, fmt.Sprintf("[%d]%s", i, PROMPT))

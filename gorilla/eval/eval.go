@@ -359,7 +359,11 @@ func applyFunction(fn object.Object, args []object.Object) object.Object {
 				len(fn.Parameters), len(args))
 		}
 		env := extendFunctionEnv(fn, args)
-		return unwrapReturnValue(Eval(fn.Body, env))
+		res := Eval(fn.Body, env)
+		if res == nil {
+			res = NULL
+		}
+		return unwrapReturnValue(res)
 
 	case *object.Builtin:
 		return fn.Fn(fn.Line(), args...)
