@@ -366,6 +366,29 @@ func (ce *CallExpression) String() string {
 	return out.String()
 }
 
+// GetAttr is x.y
+type GetAttr struct {
+	Token token.Token
+	Expr  Expression
+	Name  Expression
+}
+
+func (ge *GetAttr) expressionNode() {}
+
+// TokenLiteral prints the literal value of the token associated with this node
+func (ge *GetAttr) TokenLiteral() string { return ge.Token.Literal }
+
+// String returns a stringified version of the AST for debugging
+func (ge *GetAttr) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(ge.Expr.String())
+	out.WriteString(".")
+	out.WriteString(ge.Name.String())
+
+	return out.String()
+}
+
 // StringLiteral is the string ast
 type StringLiteral struct {
 	Token token.Token

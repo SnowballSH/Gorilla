@@ -7,8 +7,8 @@ const (
 	EOF     = "EOF"
 
 	// Identifiers + literals
-	IDENT  = "IDENTIFIER" // add, foobar, x, y, ...
-	INT    = "INT"        // 1343456
+	IDENT  = "IDENTIFIER"
+	INT    = "INT"
 	STRING = "STRING"
 
 	// Operators
@@ -23,6 +23,8 @@ const (
 	GT   = ">"
 	LTEQ = "<="
 	GTEQ = ">="
+
+	DOT = "."
 
 	EQ  = "=="
 	NEQ = "!="

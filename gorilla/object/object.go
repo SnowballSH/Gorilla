@@ -46,6 +46,8 @@ var (
 	NULL = &Null{}
 )
 
+var noAttr = map[string]Object{}
+
 // BuiltinFunction represents the builtin function type
 type BuiltinFunction func(line int, args ...Object) Object
 
@@ -58,6 +60,7 @@ type Object interface {
 	Type() Type
 	Inspect() string
 	Line() int
+	Attributes() map[string]Object
 }
 
 // Integer is the integer type used to represent integer literals and holds
@@ -75,15 +78,18 @@ func (i *Integer) Inspect() string { return fmt.Sprintf("%d", i.Value) }
 
 func (i *Integer) Line() int { return i.SLine }
 
+func (i *Integer) Attributes() map[string]Object { return noAttr }
+
 // String
 type String struct {
 	Value string
 	SLine int
 }
 
-func (s *String) Type() Type      { return STRING }
-func (s *String) Inspect() string { return s.Value }
-func (s *String) Line() int       { return s.SLine }
+func (s *String) Type() Type                    { return STRING }
+func (s *String) Inspect() string               { return s.Value }
+func (s *String) Line() int                     { return s.SLine }
+func (s *String) Attributes() map[string]Object { return noAttr }
 
 // Boolean is the boolean type and used to represent boolean literals and holds an interval bool value
 type Boolean struct {
@@ -97,7 +103,8 @@ func (b *Boolean) Type() Type { return BOOLEAN }
 // Inspect returns a stringified version of the object for debugging
 func (b *Boolean) Inspect() string { return fmt.Sprintf("%t", b.Value) }
 
-func (b *Boolean) Line() int { return b.SLine }
+func (b *Boolean) Line() int                     { return b.SLine }
+func (b *Boolean) Attributes() map[string]Object { return noAttr }
 
 // Null is the null type and used to represent the absence of a value
 type Null struct {
@@ -110,7 +117,8 @@ func (n *Null) Type() Type { return NULLT }
 // Inspect returns a stringified version of the object for debugging
 func (n *Null) Inspect() string { return "null" }
 
-func (n *Null) Line() int { return n.SLine }
+func (n *Null) Line() int                     { return n.SLine }
+func (n *Null) Attributes() map[string]Object { return noAttr }
 
 // Return is the return statement
 type Return struct {
@@ -124,7 +132,8 @@ func (rv *Return) Type() Type { return RETURN }
 // Inspect returns a stringified version of the object for debugging
 func (rv *Return) Inspect() string { return rv.Value.Inspect() }
 
-func (rv *Return) Line() int { return rv.SLine }
+func (rv *Return) Line() int                     { return rv.SLine }
+func (rv *Return) Attributes() map[string]Object { return noAttr }
 
 // Error the the error object
 type Error struct {
@@ -138,7 +147,8 @@ func (e *Error) Type() Type { return ERROR }
 // Inspect returns a stringified version of the object for debugging
 func (e *Error) Inspect() string { return " Runtime Error:\n\t" + e.Message }
 
-func (e *Error) Line() int { return e.SLine }
+func (e *Error) Line() int                     { return e.SLine }
+func (e *Error) Attributes() map[string]Object { return noAttr }
 
 // Function is the base function object type
 type Function struct {
@@ -170,7 +180,8 @@ func (f *Function) Inspect() string {
 	return out.String()
 }
 
-func (f *Function) Line() int { return f.SLine }
+func (f *Function) Line() int                     { return f.SLine }
+func (f *Function) Attributes() map[string]Object { return noAttr }
 
 type Builtin struct {
 	Fn    BuiltinFunction
@@ -183,4 +194,5 @@ func (b *Builtin) Type() Type { return BUILTIN }
 // Inspect returns a stringified version of the object for debugging
 func (b *Builtin) Inspect() string { return "Builtin Function" }
 
-func (b *Builtin) Line() int { return b.SLine }
+func (b *Builtin) Line() int                     { return b.SLine }
+func (b *Builtin) Attributes() map[string]Object { return noAttr }

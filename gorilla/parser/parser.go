@@ -22,6 +22,7 @@ const (
 	SUM         // +
 	PRODUCT     // *
 	PREFIX      // -X or !X
+	DOT         // a.b
 	CALL        // myFunction(X)
 )
 
@@ -37,6 +38,7 @@ var precedences = map[token.TType]int{
 	token.SLASH:    PRODUCT,
 	token.ASTERISK: PRODUCT,
 	token.LPAREN:   CALL,
+	token.DOT:      DOT,
 }
 
 type Parser struct {
@@ -86,6 +88,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.GTEQ, p.parseInfixExpression)
 
 	p.registerInfix(token.LPAREN, p.parseCallExpression)
+	p.registerInfix(token.DOT, p.parseGetAttr)
 
 	// Read two tokens
 	p.nextToken()
@@ -206,7 +209,7 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 		return nil
 	}
 
-	stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	stmt.Name = p.parseIdentifierIden()
 
 	if !p.expectPeek(token.ASSIGN) {
 		return nil
@@ -282,6 +285,10 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 
 func (p *Parser) parseIdentifier() ast.Expression {
 	//defer untrace(trace("parseIdentifier"))
+	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+}
+
+func (p *Parser) parseIdentifierIden() *ast.Identifier {
 	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 }
 
@@ -415,13 +422,13 @@ func (p *Parser) parseFunctionParameters() []*ast.Identifier {
 
 	p.nextToken()
 
-	ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	ident := p.parseIdentifierIden()
 	identifiers = append(identifiers, ident)
 
 	for p.peekTokenIs(token.COMMA) {
 		p.nextToken()
 		p.nextToken()
-		ident := &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+		ident := p.parseIdentifierIden()
 		identifiers = append(identifiers, ident)
 	}
 
@@ -460,4 +467,19 @@ func (p *Parser) parseCallArguments() []ast.Expression {
 	}
 
 	return args
+}
+
+func (p *Parser) parseGetAttr(expr ast.Expression) ast.Expression {
+	if !p.expectPeek(token.IDENT) {
+		return nil
+	}
+
+	crr := p.curToken
+	iden := p.parseIdentifierIden()
+
+	return &ast.GetAttr{
+		Token: crr,
+		Expr:  expr,
+		Name:  iden,
+	}
 }

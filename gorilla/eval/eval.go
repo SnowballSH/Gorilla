@@ -106,6 +106,25 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		}
 		return applyFunction(function, args)
 
+	case *ast.GetAttr:
+		expr := Eval(node.Expr, env)
+		if isError(expr) {
+			return expr
+		}
+
+		attributes := expr.Attributes()
+		obj := attributes[node.Name.String()]
+		if obj == nil {
+			return newError(
+				"[Line %d] Type '%s' does not have attribute '%s'",
+				node.Token.Line+1,
+				expr.Type(),
+				node.Name.String(),
+			)
+		}
+
+		return obj
+
 	case *ast.StringLiteral:
 		return &object.String{Value: node.Value}
 	}
@@ -170,20 +189,6 @@ func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
 
 	value := right.(*object.Integer).Value
 	return &object.Integer{Value: -value, SLine: right.Line()}
-}
-
-func evalStatements(stmts []ast.Statement, env *object.Environment) object.Object {
-	var result object.Object
-
-	for _, statement := range stmts {
-		result = Eval(statement, env)
-
-		if returnValue, ok := result.(*object.Return); ok {
-			return returnValue.Value
-		}
-	}
-
-	return result
 }
 
 func evalBlockStatement(block *ast.BlockStatement, env *object.Environment) object.Object {

@@ -48,6 +48,9 @@ func (l *Lexer) NextToken() token.Token {
 	case '*':
 		tok = l.newToken(token.ASTERISK, l.ch)
 
+	case '.':
+		tok = l.newToken(token.DOT, l.ch)
+
 	case '!':
 		if l.peekChar() == '=' {
 			ch := l.ch
