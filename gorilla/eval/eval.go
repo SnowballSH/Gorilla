@@ -81,13 +81,13 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	case *ast.FunctionStmt:
 		params := node.Parameters
 		body := node.Body
-		fn := &object.Function{Parameters: params, Env: env, Body: body, SLine: node.Token.Line}
+		fn := NewFunction(params, body, env, node.Token.Line)
 		env.Set(node.Name, fn)
 
 	case *ast.FunctionLiteral:
 		params := node.Parameters
 		body := node.Body
-		return &object.Function{Parameters: params, Env: env, Body: body, SLine: node.Token.Line}
+		return NewFunction(params, body, env, node.Token.Line)
 
 	case *ast.IfExpression:
 		return evalIfExpression(node, env)
@@ -107,26 +107,10 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return applyFunction(function, args)
 
 	case *ast.GetAttr:
-		expr := Eval(node.Expr, env)
-		if isError(expr) {
-			return expr
-		}
-
-		attributes := expr.Attributes()
-		obj := attributes[node.Name.String()]
-		if obj == nil {
-			return newError(
-				"[Line %d] Type '%s' does not have attribute '%s'",
-				node.Token.Line+1,
-				expr.Type(),
-				node.Name.String(),
-			)
-		}
-
-		return obj
+		return evalGetAttr(node, env)
 
 	case *ast.StringLiteral:
-		return &object.String{Value: node.Value}
+		return NewString(node.Value, node.Token.Line)
 	}
 
 	return nil
@@ -147,6 +131,49 @@ func evalProgram(program *ast.Program, env *object.Environment) object.Object {
 	}
 
 	return result
+}
+
+func evalGetAttr(node *ast.GetAttr, env *object.Environment) object.Object {
+	expr := Eval(node.Expr, env)
+	if isError(expr) {
+		return expr
+	}
+
+	attributes := expr.Attributes()
+	obj := attributes[node.Name.String()]
+	if obj == nil {
+		return newError(
+			"[Line %d] Type '%s' does not have attribute '%s'",
+			node.Token.Line+1,
+			expr.Type(),
+			node.Name.String(),
+		)
+	}
+
+	obj.SetParent(expr)
+
+	return obj
+}
+
+func CallAttr(expr object.Object, attr string, line int, args ...object.Object) object.Object {
+	attributes := expr.Attributes()
+	obj := attributes[attr]
+	if obj == nil {
+		return newError(
+			"[Line %d] Type '%s' does not have attribute '%s'",
+			line+1,
+			expr.Type(),
+			attr,
+		)
+	}
+
+	obj.SetParent(expr)
+
+	fn := obj.(*object.Builtin)
+
+	res := fn.Fn(fn.Parent(), fn.Line(), args...)
+
+	return res
 }
 
 func evalPrefixExpression(operator string, right object.Object) object.Object {
@@ -360,7 +387,7 @@ func applyFunction(fn object.Object, args []object.Object) object.Object {
 
 	case *object.Function:
 		if len(fn.Parameters) != len(args) {
-			return newError("[Line %d] Argument mismatch (expected %d, got %d)", fn.Line(),
+			return newError("[Line %d] Argument mismatch (expected %d, got %d)", fn.Line()+1,
 				len(fn.Parameters), len(args))
 		}
 		env := extendFunctionEnv(fn, args)
@@ -371,10 +398,10 @@ func applyFunction(fn object.Object, args []object.Object) object.Object {
 		return unwrapReturnValue(res)
 
 	case *object.Builtin:
-		return fn.Fn(fn.Line(), args...)
+		return fn.Fn(fn.Parent(), fn.Line(), args...)
 
 	default:
-		return newError("[Line %d] Type '%s' is not callable", fn.Line(), fn.Type())
+		return newError("[Line %d] Type '%s' is not callable", fn.Line()+1, fn.Type())
 	}
 }
 

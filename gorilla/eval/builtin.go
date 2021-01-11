@@ -1,34 +1,63 @@
 package eval
 
 import (
+	"../ast"
 	"../object"
 	"fmt"
+	"strings"
 )
 
 var builtins = map[string]*object.Builtin{
-	"len": {
-		Fn: func(line int, args ...object.Object) object.Object {
-			if len(args) != 1 {
-				return newError("[Line %d] Argument mismatch (expected %d, got %d)", line,
-					1, len(args))
-			}
-
-			switch arg := args[0].(type) {
-			case *object.String:
-				return &object.Integer{Value: int64(len(arg.Value))}
-			default:
-				return newError("argument to `len` not supported, got %s",
-					args[0].Type())
-			}
-		},
-	},
+	"len": {Fn: LenFunc},
 
 	"display": {
-		Fn: func(line int, args ...object.Object) object.Object {
+		Fn: func(self object.Object, line int, args ...object.Object) object.Object {
 			for _, arg := range args {
 				fmt.Println(arg.Inspect())
 			}
 			return NULL
 		},
 	},
+}
+
+func LenFunc(_ object.Object, line int, args ...object.Object) object.Object {
+	if len(args) != 1 {
+		return newError("[Line %d] Argument mismatch (expected %d, got %d)", line,
+			1, len(args))
+	}
+
+	return CallAttr(args[0], "_len", line)
+}
+
+func NewFunction(
+	params []*ast.Identifier,
+	body *ast.BlockStatement,
+	env *object.Environment,
+	line int,
+) *object.Function {
+	return &object.Function{
+		Parameters: params,
+		Body:       body,
+		Env:        env,
+		SLine:      line,
+	}
+}
+
+func NewString(value string, line int) *object.String {
+	return &object.String{
+		Value: value,
+		SLine: line,
+		Attrs: map[string]object.Object{
+			"strip": &object.Builtin{
+				Fn: func(self object.Object, line int, args ...object.Object) object.Object {
+					return NewString(strings.TrimSpace(self.(*object.String).Value), line)
+				},
+			},
+			"_len": &object.Builtin{
+				Fn: func(self object.Object, line int, args ...object.Object) object.Object {
+					return &object.Integer{Value: int64(len(self.(*object.String).Value))}
+				},
+			},
+		},
+	}
 }
