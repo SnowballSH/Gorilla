@@ -38,7 +38,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 
 	// Expressions
 	case *ast.IntegerLiteral:
-		return &object.Integer{Value: node.Value, SLine: node.Token.Line}
+		return NewInt(node.Value, node.Token.Line)
 
 	case *ast.Boolean:
 		return fromNativeBoolean(node.Value, node.Token.Line)
@@ -215,7 +215,7 @@ func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
 	}
 
 	value := right.(*object.Integer).Value
-	return &object.Integer{Value: -value, SLine: right.Line()}
+	return NewInt(-value, right.Line())
 }
 
 func evalBlockStatement(block *ast.BlockStatement, env *object.Environment) object.Object {
@@ -272,13 +272,13 @@ func evalIntegerInfixExpression(
 
 	switch operator {
 	case "+":
-		return &object.Integer{Value: leftVal + rightVal, SLine: left.Line()}
+		return NewInt(leftVal+rightVal, left.Line())
 	case "-":
-		return &object.Integer{Value: leftVal - rightVal, SLine: left.Line()}
+		return NewInt(leftVal-rightVal, left.Line())
 	case "*":
-		return &object.Integer{Value: leftVal * rightVal, SLine: left.Line()}
+		return NewInt(leftVal*rightVal, left.Line())
 	case "/":
-		return &object.Integer{Value: leftVal / rightVal, SLine: left.Line()}
+		return NewInt(leftVal/rightVal, left.Line())
 	case "<":
 		return fromNativeBoolean(leftVal < rightVal, left.Line())
 	case ">":
@@ -300,22 +300,28 @@ func evalStringInfixExpression(
 	operator string,
 	left, right object.Object,
 ) object.Object {
-	if operator == "+" {
-		leftVal := left.(*object.String).Value
-		rightVal := right.(*object.String).Value
+	leftVal := left.(*object.String).Value
+	rightVal := right.(*object.String).Value
+	switch operator {
+	case "+":
 		return &object.String{Value: leftVal + rightVal}
-	}
-	if operator == "*" {
-		leftVal := left.(*object.String).Value
+
+	case "*":
 		rightVal := right.(*object.Integer).Value
 		if rightVal < 0 {
 			return NULL
 		}
 		return &object.String{Value: strings.Repeat(leftVal, int(rightVal))}
-	}
 
-	return newError("unknown operator: %s %s %s",
-		left.Type(), operator, right.Type())
+	case "==":
+		return fromNativeBoolean(leftVal == rightVal, left.Line())
+	case "!=":
+		return fromNativeBoolean(leftVal != rightVal, left.Line())
+
+	default:
+		return newError("unknown operator: %s %s %s",
+			left.Type(), operator, right.Type())
+	}
 }
 
 func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Object {

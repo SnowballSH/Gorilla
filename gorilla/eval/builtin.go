@@ -4,6 +4,7 @@ import (
 	"../ast"
 	"../object"
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -43,6 +44,20 @@ func NewFunction(
 	}
 }
 
+func NewInt(value int64, line int) *object.Integer {
+	return &object.Integer{
+		Value: value,
+		SLine: line,
+		Attrs: map[string]object.Object{
+			"toStr": &object.Builtin{
+				Fn: func(self object.Object, line int, args ...object.Object) object.Object {
+					return NewString(strconv.Itoa(int(self.(*object.Integer).Value)), line)
+				},
+			},
+		},
+	}
+}
+
 func NewString(value string, line int) *object.String {
 	return &object.String{
 		Value: value,
@@ -55,7 +70,17 @@ func NewString(value string, line int) *object.String {
 			},
 			"_len": &object.Builtin{
 				Fn: func(self object.Object, line int, args ...object.Object) object.Object {
-					return &object.Integer{Value: int64(len(self.(*object.String).Value))}
+					return NewInt(int64(len(self.(*object.String).Value)), line)
+				},
+			},
+			"toInt": &object.Builtin{
+				Fn: func(self object.Object, line int, args ...object.Object) object.Object {
+					k := self.(*object.String).Value
+					val, err := strconv.Atoi(k)
+					if err != nil {
+						return newError("[Line %d] Cannot parse to Int: '%s'", line, k)
+					}
+					return NewInt(int64(val), line)
 				},
 			},
 		},

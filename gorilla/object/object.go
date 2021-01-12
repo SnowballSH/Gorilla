@@ -71,6 +71,7 @@ type Integer struct {
 	Value   int64
 	SLine   int
 	SParent Object
+	Attrs   map[string]Object
 }
 
 // Type returns the type of the object
@@ -81,7 +82,7 @@ func (i *Integer) Inspect() string { return fmt.Sprintf("%d", i.Value) }
 
 func (i *Integer) Line() int { return i.SLine }
 
-func (i *Integer) Attributes() map[string]Object { return noAttr }
+func (i *Integer) Attributes() map[string]Object { return i.Attrs }
 func (i *Integer) Parent() Object                { return i.SParent }
 func (i *Integer) SetParent(x Object)            { i.SParent = x }
 
