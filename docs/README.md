@@ -25,3 +25,9 @@
 
 P.S. the two books cost you about 50 USD total, but I think it is worth it to buy it at a lower price on
 Amazon or other websites (or get it for free in some online archives, but it is always good to purchase it -- to pay the author respect).
+
+---
+
+Credits:
+
+Icon: [Binx](https://github.com/Binx-Codes)
