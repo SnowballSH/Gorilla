@@ -43,7 +43,11 @@ func RunFile() {
 		os.Exit(1)
 	}
 
-	eval.Eval(program, env)
+	obj := eval.Eval(program, env)
+
+	if obj != nil && obj.Type() == "ERROR" {
+		_, _ = io.WriteString(os.Stdout, obj.Inspect()+"\n")
+	}
 
 	os.Exit(0)
 }

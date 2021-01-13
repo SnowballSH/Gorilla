@@ -39,7 +39,11 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	k, _ := w.(io.Writer)
-	eval.Eval(program, env, k)
+	obj := eval.Eval(program, env, k)
+
+	if obj != nil && obj.Type() == "ERROR" {
+		_, _ = io.WriteString(w, obj.Inspect()+"\n")
+	}
 }
 
 func doNothing(_ http.ResponseWriter, _ *http.Request) {}
