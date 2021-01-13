@@ -310,7 +310,7 @@ func evalStringInfixExpression(
 ) object.Object {
 	switch operator {
 	case "+":
-		if right.Type() != "String" {
+		if right.Type() != "STRING" {
 			break
 		}
 		leftVal := left.(*object.String).Value
@@ -318,7 +318,7 @@ func evalStringInfixExpression(
 		return &object.String{Value: leftVal + rightVal}
 
 	case "*":
-		if right.Type() != "Integer" {
+		if right.Type() != "INTEGER" {
 			break
 		}
 		leftVal := left.(*object.String).Value
@@ -329,7 +329,7 @@ func evalStringInfixExpression(
 		return &object.String{Value: strings.Repeat(leftVal, int(rightVal))}
 
 	case "==":
-		if right.Type() != "String" {
+		if right.Type() != "STRING" {
 			return FALSE
 		}
 		leftVal := left.(*object.String).Value
