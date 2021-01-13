@@ -300,13 +300,20 @@ func evalStringInfixExpression(
 	operator string,
 	left, right object.Object,
 ) object.Object {
-	leftVal := left.(*object.String).Value
-	rightVal := right.(*object.String).Value
 	switch operator {
 	case "+":
+		if right.Type() != "String" {
+			break
+		}
+		leftVal := left.(*object.String).Value
+		rightVal := right.(*object.String).Value
 		return &object.String{Value: leftVal + rightVal}
 
 	case "*":
+		if right.Type() != "Integer" {
+			break
+		}
+		leftVal := left.(*object.String).Value
 		rightVal := right.(*object.Integer).Value
 		if rightVal < 0 {
 			return NULL
@@ -314,14 +321,27 @@ func evalStringInfixExpression(
 		return &object.String{Value: strings.Repeat(leftVal, int(rightVal))}
 
 	case "==":
+		if right.Type() != "String" {
+			return FALSE
+		}
+		leftVal := left.(*object.String).Value
+		rightVal := right.(*object.String).Value
 		return fromNativeBoolean(leftVal == rightVal, left.Line())
+
 	case "!=":
+		if right.Type() != "String" {
+			return TRUE
+		}
+		leftVal := left.(*object.String).Value
+		rightVal := right.(*object.String).Value
 		return fromNativeBoolean(leftVal != rightVal, left.Line())
 
 	default:
-		return newError("unknown operator: %s %s %s",
-			left.Type(), operator, right.Type())
+		break
 	}
+
+	return newError("unknown operator: %s %s %s",
+		left.Type(), operator, right.Type())
 }
 
 func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Object {

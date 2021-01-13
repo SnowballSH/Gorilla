@@ -129,6 +129,12 @@ func (p *Parser) peekError(t token.TType) {
 	p.errors = append(p.errors, msg)
 }
 
+func (p *Parser) curError(t token.TType) {
+	msg := fmt.Sprintf("[Line %d] expected %s, got %s instead",
+		p.curToken.Line+1, t, p.curToken.Type)
+	p.errors = append(p.errors, msg)
+}
+
 func (p *Parser) peekPrecedence() int {
 	if p, ok := precedences[p.peekToken.Type]; ok {
 		return p
@@ -389,6 +395,11 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 		for p.curTokenIs(token.SEMICOLON) {
 			p.nextToken()
 		}
+	}
+
+	if p.curTokenIs(token.EOF) {
+		p.curError(token.RBRACE)
+		return nil
 	}
 
 	return block

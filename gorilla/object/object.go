@@ -95,7 +95,7 @@ type String struct {
 }
 
 func (s *String) Type() Type                    { return STRING }
-func (s *String) Inspect() string               { return s.Value }
+func (s *String) Inspect() string               { return "\"" + s.Value + "\"" }
 func (s *String) Line() int                     { return s.SLine }
 func (s *String) Attributes() map[string]Object { return s.Attrs }
 func (s *String) Parent() Object                { return s.SParent }
