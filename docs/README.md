@@ -1,3 +1,5 @@
+![Gorilla](https://i.imgur.com/5PWCyfl.png)
+
 # Gorilla Programming Language
 
 ## Gorilla is a programming language that is built to help me understand the basics of Lexers, Parsers, Interpreters, Virtual Machines, and Compilers, and Efficient Go.
