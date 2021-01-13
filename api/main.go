@@ -16,6 +16,9 @@ import (
 )
 
 func homePage(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+
 	u, ok := url.QueryUnescape(r.URL.String()[1:])
 	if ok != nil {
 		return
