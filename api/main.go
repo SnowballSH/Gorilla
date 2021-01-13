@@ -1,18 +1,16 @@
 package main
 
 import (
-	"fmt"
-	"io"
-	"log"
-	"net/http"
-	"net/url"
-	"os"
-
 	"../gorilla/eval"
 	"../gorilla/lexer"
 	"../gorilla/object"
 	"../gorilla/parser"
 	"../gorilla/repl"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"net/url"
 
 	"github.com/rs/cors"
 )
@@ -38,7 +36,6 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 
 	if len(p.Errors()) != 0 {
 		repl.PrintParserErrors(w, p.Errors())
-		os.Exit(1)
 	}
 
 	k, _ := w.(io.Writer)
