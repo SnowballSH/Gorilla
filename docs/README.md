@@ -1,4 +1,4 @@
-![Gorilla](https://i.imgur.com/5PWCyfl.png)
+![Gorilla](https://i.imgur.com/lX7Vzr0.png)
 
 # Gorilla Programming Language
 
