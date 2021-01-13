@@ -13,6 +13,8 @@ import (
 	"../gorilla/object"
 	"../gorilla/parser"
 	"../gorilla/repl"
+
+	"github.com/rs/cors"
 )
 
 func homePage(w http.ResponseWriter, r *http.Request) {
@@ -46,9 +48,11 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 func doNothing(_ http.ResponseWriter, _ *http.Request) {}
 
 func handleRequests() {
-	http.HandleFunc("/", homePage)
-	http.HandleFunc("/favicon.ico", doNothing)
-	log.Fatal(http.ListenAndServe(":10000", nil))
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", homePage)
+	mux.HandleFunc("/favicon.ico", doNothing)
+	handler := cors.Default().Handler(mux)
+	log.Fatal(http.ListenAndServe(":10000", handler))
 }
 
 func main() {
