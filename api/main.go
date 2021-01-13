@@ -36,12 +36,17 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 
 	if len(p.Errors()) != 0 {
 		repl.PrintParserErrors(w, p.Errors())
+		return
 	}
 
 	k, _ := w.(io.Writer)
 	obj := eval.Eval(program, env, k)
 
-	if obj != nil && obj.Type() == "ERROR" {
+	if obj == nil {
+		return
+	}
+
+	if obj.Type() == "ERROR" {
 		_, _ = io.WriteString(w, obj.Inspect()+"\n")
 	}
 }
