@@ -14,7 +14,7 @@ var builtins = map[string]*object.Builtin{
 	"display": {
 		Fn: func(self object.Object, line int, args ...object.Object) object.Object {
 			for _, arg := range args {
-				fmt.Println(arg.Inspect())
+				_, _ = fmt.Fprintf(OUT, arg.Inspect()+"\n")
 			}
 			return NULL
 		},

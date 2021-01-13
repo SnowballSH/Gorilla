@@ -4,12 +4,16 @@ import (
 	"../ast"
 	"../object"
 	"fmt"
+	"io"
+	"os"
 	"strings"
 )
 
 var TRUE = object.TRUE
 var FALSE = object.FALSE
 var NULL = object.NULL
+
+var OUT io.Writer = os.Stdout
 
 func fromNativeBoolean(input bool, l int) *object.Boolean {
 	if input {
@@ -26,7 +30,11 @@ func newError(format string, a ...interface{}) *object.Error {
 	return &object.Error{Message: fmt.Sprintf(format, a...)}
 }
 
-func Eval(node ast.Node, env *object.Environment) object.Object {
+func Eval(node ast.Node, env *object.Environment, out ...io.Writer) object.Object {
+	if len(out) > 0 {
+		OUT = out[0]
+	}
+
 	switch node := node.(type) {
 
 	// Statements
