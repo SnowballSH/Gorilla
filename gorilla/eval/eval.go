@@ -26,7 +26,7 @@ func fromNativeBoolean(input bool, l int) *object.Boolean {
 	return x
 }
 
-func newError(format string, a ...interface{}) *object.Error {
+func NewError(format string, a ...interface{}) *object.Error {
 	return &object.Error{Message: fmt.Sprintf(format, a...)}
 }
 
@@ -150,7 +150,7 @@ func evalGetAttr(node *ast.GetAttr, env *object.Environment) object.Object {
 	attributes := expr.Attributes()
 	obj := attributes[node.Name.String()]
 	if obj == nil {
-		return newError(
+		return NewError(
 			"[Line %d] Type '%s' does not have attribute '%s'",
 			node.Token.Line+1,
 			expr.Type(),
@@ -167,7 +167,7 @@ func CallAttr(expr object.Object, attr string, line int, args ...object.Object) 
 	attributes := expr.Attributes()
 	obj := attributes[attr]
 	if obj == nil {
-		return newError(
+		return NewError(
 			"[Line %d] Type '%s' does not have attribute '%s'",
 			line+1,
 			expr.Type(),
@@ -218,7 +218,7 @@ func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
 		return TRUE
 	}
 	if right.Type() != object.INTEGER {
-		return newError("[Line %d] cannot negate type '%s' (When attempting to run '-%s')",
+		return NewError("[Line %d] cannot negate type '%s' (When attempting to run '-%s')",
 			right.Line()+1, right.Type(), right.Inspect())
 	}
 
@@ -264,7 +264,7 @@ func evalInfixExpression(
 	case operator == "!=":
 		return fromNativeBoolean(left != right, left.Line())
 	case left.Type() != right.Type():
-		return newError("[Line %d] type mismatch: %s %s %s (When attempting to run '%s %s %s')",
+		return NewError("[Line %d] type mismatch: %s %s %s (When attempting to run '%s %s %s')",
 			left.Line()+1, left.Type(), operator, right.Type(), left.Inspect(), operator, right.Inspect())
 	default:
 		return NULL
@@ -348,7 +348,7 @@ func evalStringInfixExpression(
 		break
 	}
 
-	return newError("unknown operator: %s %s %s",
+	return NewError("unknown operator: %s %s %s",
 		left.Type(), operator, right.Type())
 }
 
@@ -378,7 +378,7 @@ func evalIdentifier(
 		return builtin
 	}
 
-	return newError("[Line %d] Variable '%s' is not defined", node.Token.Line+1, node.Value)
+	return NewError("[Line %d] Variable '%s' is not defined", node.Token.Line+1, node.Value)
 }
 
 func evalExpressions(
@@ -421,7 +421,7 @@ func applyFunction(fn object.Object, args []object.Object) object.Object {
 
 	case *object.Function:
 		if len(fn.Parameters) != len(args) {
-			return newError("[Line %d] Argument mismatch (expected %d, got %d)", fn.Line()+1,
+			return NewError("[Line %d] Argument mismatch (expected %d, got %d)", fn.Line()+1,
 				len(fn.Parameters), len(args))
 		}
 		env := extendFunctionEnv(fn, args)
@@ -435,7 +435,7 @@ func applyFunction(fn object.Object, args []object.Object) object.Object {
 		return fn.Fn(fn.Parent(), fn.Line(), args...)
 
 	default:
-		return newError("[Line %d] Type '%s' is not callable", fn.Line()+1, fn.Type())
+		return NewError("[Line %d] Type '%s' is not callable", fn.Line()+1, fn.Type())
 	}
 }
 

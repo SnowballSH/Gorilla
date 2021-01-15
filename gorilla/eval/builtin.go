@@ -23,7 +23,7 @@ var builtins = map[string]*object.Builtin{
 
 func LenFunc(_ object.Object, line int, args ...object.Object) object.Object {
 	if len(args) != 1 {
-		return newError("[Line %d] Argument mismatch (expected %d, got %d)", line,
+		return NewError("[Line %d] Argument mismatch (expected %d, got %d)", line,
 			1, len(args))
 	}
 
@@ -78,7 +78,7 @@ func NewString(value string, line int) *object.String {
 					k := self.(*object.String).Value
 					val, err := strconv.Atoi(k)
 					if err != nil {
-						return newError("[Line %d] Cannot parse to Int: '%s'", line, k)
+						return NewError("[Line %d] Cannot parse to Int: '%s'", line, k)
 					}
 					return NewInt(int64(val), line)
 				},
