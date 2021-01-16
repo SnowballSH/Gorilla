@@ -65,6 +65,13 @@ func (c *Compiler) Compile(node ast.Node) error {
 			return err
 		}
 
+		switch node.Operator {
+		case "+":
+			c.emit(code.Add)
+		default:
+			return fmt.Errorf("[Line %d] unknown operator %s", node.Token.Line, node.Operator)
+		}
+
 	case *ast.IntegerLiteral:
 		integer := eval.NewInt(node.Value, node.Token.Line)
 		c.emit(code.PushConst, c.addConstant(integer))

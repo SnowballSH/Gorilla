@@ -1,6 +1,7 @@
 package code
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -11,6 +12,7 @@ func TestMake(t *testing.T) {
 		expected []byte
 	}{
 		{PushConst, []int{65534}, []byte{byte(PushConst), 0, 0, 255, 254}},
+		{Add, []int{}, []byte{byte(Add)}},
 	}
 
 	for _, tt := range tests {
@@ -32,21 +34,24 @@ func TestMake(t *testing.T) {
 
 func TestInstructionsString(t *testing.T) {
 	instructions := []Instructions{
+		Make(Add),
 		Make(PushConst, 1),
 		Make(PushConst, 2),
 		Make(PushConst, 4294967293),
 	}
 
-	expected := `00000000 PushConst 1
-00000005 PushConst 2
-00000010 PushConst 4294967293
+	expected := `
+00000000 Add
+00000001 PushConst 1
+00000006 PushConst 2
+00000011 PushConst 4294967293
 `
 	concatted := Instructions{}
 	for _, ins := range instructions {
 		concatted = append(concatted, ins...)
 	}
 
-	if concatted.String() != expected {
+	if strings.TrimSpace(concatted.String()) != strings.TrimSpace(expected) {
 		t.Errorf("instructions wrongly formatted.\nwant=%q\ngot=%q",
 			expected, concatted.String())
 	}

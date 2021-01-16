@@ -44,6 +44,8 @@ func (ins Instructions) fmtInstruction(def *Definition, operands []int) string {
 	}
 
 	switch operandCount {
+	case 0:
+		return def.Name
 	case 1:
 		return fmt.Sprintf("%s %d", def.Name, operands[0])
 	}
@@ -108,8 +110,10 @@ func ReadUint32(ins Instructions) uint32 {
 
 var definitions = map[Opcode]*Definition{
 	PushConst: {"PushConst", []int{4}},
+	Add:       {"Add", []int{}},
 }
 
 const (
 	PushConst Opcode = iota
+	Add
 )

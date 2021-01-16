@@ -177,9 +177,7 @@ func CallAttr(expr object.Object, attr string, line int, args ...object.Object) 
 
 	obj.SetParent(expr)
 
-	fn := obj.(*object.Builtin)
-
-	res := fn.Fn(fn.Parent(), fn.Line(), args...)
+	res := applyFunction(obj, args)
 
 	return res
 }
@@ -374,7 +372,7 @@ func evalIdentifier(
 	if val, ok := env.Get(node.Value); ok {
 		return val
 	}
-	if builtin, ok := builtins[node.Value]; ok {
+	if builtin, ok := Builtins[node.Value]; ok {
 		return builtin
 	}
 
