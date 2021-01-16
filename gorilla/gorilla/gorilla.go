@@ -1,28 +1,33 @@
 package gorilla
 
 import (
-	"flag"
-	"io"
-	"io/ioutil"
-	"os"
-
 	"../eval"
 	"../lexer"
 	"../object"
 	"../parser"
 	"../repl"
+	"flag"
+	"io"
+	"io/ioutil"
+	"os"
 )
 
 func RunFile() {
-	fnptr := flag.String("run", "", "Run a file")
+	compile := flag.Bool("c", false, "Use the compiler")
 	flag.Parse()
 
-	fn := *fnptr
-
-	if fn == "" {
-		repl.Start(os.Stdin, os.Stdout)
+	if flag.NArg() < 1 {
+		var fn func(in io.Reader, out io.Writer)
+		if *compile {
+			fn = repl.StartCompile
+		} else {
+			fn = repl.Start
+		}
+		fn(os.Stdin, os.Stdout)
 		os.Exit(0)
 	}
+
+	fn := flag.Arg(0)
 
 	b, err := ioutil.ReadFile(fn) // just pass the file name
 	if err != nil {

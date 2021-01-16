@@ -43,7 +43,7 @@ Write some Gorilla code there
 
 do
 ```batch
-gorilla --run=filename.gor
+gorilla filename.gor
 ```
 to run it
 
