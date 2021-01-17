@@ -53,8 +53,28 @@ func (c *Compiler) Compile(node ast.Node) error {
 		if err != nil {
 			return err
 		}
+		c.emit(code.Pop)
 
 	case *ast.InfixExpression:
+		if node.Operator == "<" || node.Operator == "<=" {
+			err := c.Compile(node.Right)
+			if err != nil {
+				return err
+			}
+
+			err = c.Compile(node.Left)
+			if err != nil {
+				return err
+			}
+			if node.Operator == "<" {
+				c.emit(code.Gt)
+			} else if node.Operator == "<=" {
+				c.emit(code.Gteq)
+			}
+
+			return nil
+		}
+
 		err := c.Compile(node.Left)
 		if err != nil {
 			return err
@@ -68,13 +88,53 @@ func (c *Compiler) Compile(node ast.Node) error {
 		switch node.Operator {
 		case "+":
 			c.emit(code.Add)
+		case "-":
+			c.emit(code.Sub)
+		case "*":
+			c.emit(code.Mul)
+		case "/":
+			c.emit(code.Div)
+
+		case ">":
+			c.emit(code.Gt)
+		case ">=":
+			c.emit(code.Gteq)
+		case "==":
+			c.emit(code.Eq)
+		case "!=":
+			c.emit(code.Neq)
+
 		default:
 			return fmt.Errorf("[Line %d] unknown operator %s", node.Token.Line, node.Operator)
 		}
 
+	case *ast.PrefixExpression:
+		err := c.Compile(node.Right)
+		if err != nil {
+			return err
+		}
+
+		switch node.Operator {
+		case "!":
+			c.emit(code.Not)
+		case "-":
+			c.emit(code.Neg)
+		case "+":
+			c.emit(code.Pos)
+		default:
+			return fmt.Errorf("unknown operator %s", node.Operator)
+		}
+
 	case *ast.IntegerLiteral:
 		integer := eval.NewInt(node.Value, node.Token.Line)
-		c.emit(code.PushConst, c.addConstant(integer))
+		c.emit(code.LoadConst, c.addConstant(integer))
+
+	case *ast.Boolean:
+		if node.Value {
+			c.emit(code.LoadTrue)
+		} else {
+			c.emit(code.LoadFalse)
+		}
 
 	default:
 		return fmt.Errorf("critical error: Not Supported (%T)", node)

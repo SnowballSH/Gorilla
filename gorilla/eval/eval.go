@@ -15,7 +15,7 @@ var NULL = object.NULL
 
 var OUT io.Writer = os.Stdout
 
-func fromNativeBoolean(input bool, l int) *object.Boolean {
+func FromNativeBoolean(input bool, l int) *object.Boolean {
 	if input {
 		x := TRUE
 		x.SLine = l
@@ -49,7 +49,7 @@ func Eval(node ast.Node, env *object.Environment, out ...io.Writer) object.Objec
 		return NewInt(node.Value, node.Token.Line)
 
 	case *ast.Boolean:
-		return fromNativeBoolean(node.Value, node.Token.Line)
+		return FromNativeBoolean(node.Value, node.Token.Line)
 
 	case *ast.PrefixExpression:
 		right := Eval(node.Right, env)
@@ -258,9 +258,9 @@ func evalInfixExpression(
 		return evalStringInfixExpression(operator, left, right)
 
 	case operator == "==":
-		return fromNativeBoolean(left == right, left.Line())
+		return FromNativeBoolean(left == right, left.Line())
 	case operator == "!=":
-		return fromNativeBoolean(left != right, left.Line())
+		return FromNativeBoolean(left != right, left.Line())
 	case left.Type() != right.Type():
 		return NewError("[Line %d] type mismatch: %s %s %s (When attempting to run '%s %s %s')",
 			left.Line()+1, left.Type(), operator, right.Type(), left.Inspect(), operator, right.Inspect())
@@ -286,17 +286,17 @@ func evalIntegerInfixExpression(
 	case "/":
 		return NewInt(leftVal/rightVal, left.Line())
 	case "<":
-		return fromNativeBoolean(leftVal < rightVal, left.Line())
+		return FromNativeBoolean(leftVal < rightVal, left.Line())
 	case ">":
-		return fromNativeBoolean(leftVal > rightVal, left.Line())
+		return FromNativeBoolean(leftVal > rightVal, left.Line())
 	case "<=":
-		return fromNativeBoolean(leftVal <= rightVal, left.Line())
+		return FromNativeBoolean(leftVal <= rightVal, left.Line())
 	case ">=":
-		return fromNativeBoolean(leftVal >= rightVal, left.Line())
+		return FromNativeBoolean(leftVal >= rightVal, left.Line())
 	case "==":
-		return fromNativeBoolean(leftVal == rightVal, left.Line())
+		return FromNativeBoolean(leftVal == rightVal, left.Line())
 	case "!=":
-		return fromNativeBoolean(leftVal != rightVal, left.Line())
+		return FromNativeBoolean(leftVal != rightVal, left.Line())
 	default:
 		return NULL
 	}
@@ -332,7 +332,7 @@ func evalStringInfixExpression(
 		}
 		leftVal := left.(*object.String).Value
 		rightVal := right.(*object.String).Value
-		return fromNativeBoolean(leftVal == rightVal, left.Line())
+		return FromNativeBoolean(leftVal == rightVal, left.Line())
 
 	case "!=":
 		if right.Type() != "String" {
@@ -340,7 +340,7 @@ func evalStringInfixExpression(
 		}
 		leftVal := left.(*object.String).Value
 		rightVal := right.(*object.String).Value
-		return fromNativeBoolean(leftVal != rightVal, left.Line())
+		return FromNativeBoolean(leftVal != rightVal, left.Line())
 
 	default:
 		break

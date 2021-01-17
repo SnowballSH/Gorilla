@@ -79,8 +79,8 @@ func Make(op Opcode, operands ...int) []byte {
 	for i, o := range operands {
 		width := def.OperandWidths[i]
 		switch width {
-		case 4:
-			binary.BigEndian.PutUint32(instruction[offset:], uint32(o))
+		case 2:
+			binary.BigEndian.PutUint16(instruction[offset:], uint16(o))
 		}
 		offset += width
 	}
@@ -94,8 +94,8 @@ func ReadOperands(def *Definition, ins Instructions) ([]int, int) {
 
 	for i, width := range def.OperandWidths {
 		switch width {
-		case 4:
-			operands[i] = int(ReadUint32(ins[offset:]))
+		case 2:
+			operands[i] = int(ReadUint16(ins[offset:]))
 		}
 
 		offset += width
@@ -104,16 +104,50 @@ func ReadOperands(def *Definition, ins Instructions) ([]int, int) {
 	return operands, offset
 }
 
-func ReadUint32(ins Instructions) uint32 {
-	return binary.BigEndian.Uint32(ins)
+func ReadUint16(ins Instructions) uint16 {
+	return binary.BigEndian.Uint16(ins)
 }
 
 var definitions = map[Opcode]*Definition{
-	PushConst: {"PushConst", []int{4}},
-	Add:       {"Add", []int{}},
+	LoadConst: {"LoadConst", []int{2}},
+	Pop:       {"Pop", []int{}},
+
+	Add: {"Add", []int{}},
+	Sub: {"Sub", []int{}},
+	Mul: {"Mul", []int{}},
+	Div: {"Div", []int{}},
+
+	LoadTrue:  {"LoadTrue", []int{}},
+	LoadFalse: {"LoadFalse", []int{}},
+
+	Eq:   {"Eq", []int{}},
+	Neq:  {"Neq", []int{}},
+	Gt:   {"Gt", []int{}},
+	Gteq: {"Gteq", []int{}},
+
+	Neg: {"Neg", []int{}},
+	Not: {"Not", []int{}},
+	Pos: {"Pos", []int{}},
 }
 
 const (
-	PushConst Opcode = iota
+	LoadConst Opcode = iota
+	Pop
+
 	Add
+	Sub
+	Mul
+	Div
+
+	LoadTrue
+	LoadFalse
+
+	Eq
+	Neq
+	Gt
+	Gteq
+
+	Neg
+	Not
+	Pos
 )

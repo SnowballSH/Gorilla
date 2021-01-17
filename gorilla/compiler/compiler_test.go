@@ -124,12 +124,158 @@ func TestIntegerArithmetic(t *testing.T) {
 			input:             "1 + 2",
 			expectedConstants: []interface{}{1, 2},
 			expectedInstructions: []code.Instructions{
-				code.Make(code.PushConst, 0),
-				code.Make(code.PushConst, 1),
+				code.Make(code.LoadConst, 0),
+				code.Make(code.LoadConst, 1),
 				code.Make(code.Add),
+				code.Make(code.Pop),
+			},
+		},
+
+		{
+			input:             "1 - 2",
+			expectedConstants: []interface{}{1, 2},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadConst, 0),
+				code.Make(code.LoadConst, 1),
+				code.Make(code.Sub),
+				code.Make(code.Pop),
+			},
+		},
+		{
+			input:             "1 * 2",
+			expectedConstants: []interface{}{1, 2},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadConst, 0),
+				code.Make(code.LoadConst, 1),
+				code.Make(code.Mul),
+				code.Make(code.Pop),
+			},
+		},
+		{
+			input:             "2 / 1",
+			expectedConstants: []interface{}{2, 1},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadConst, 0),
+				code.Make(code.LoadConst, 1),
+				code.Make(code.Div),
+				code.Make(code.Pop),
+			},
+		},
+
+		{
+			input:             "1; 2",
+			expectedConstants: []interface{}{1, 2},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadConst, 0),
+				code.Make(code.Pop),
+				code.Make(code.LoadConst, 1),
+				code.Make(code.Pop),
 			},
 		},
 	}
 
+	runCompilerTests(t, tests)
+}
+
+func TestBooleanExpressions(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input:             "true",
+			expectedConstants: []interface{}{},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadTrue),
+				code.Make(code.Pop),
+			},
+		},
+		{
+			input:             "false",
+			expectedConstants: []interface{}{},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadFalse),
+				code.Make(code.Pop),
+			},
+		},
+
+		{
+			input:             "1 > 2",
+			expectedConstants: []interface{}{1, 2},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadConst, 0),
+				code.Make(code.LoadConst, 1),
+				code.Make(code.Gt),
+				code.Make(code.Pop),
+			},
+		},
+		{
+			input:             "1 < 2",
+			expectedConstants: []interface{}{2, 1},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadConst, 0),
+				code.Make(code.LoadConst, 1),
+				code.Make(code.Gt),
+				code.Make(code.Pop),
+			},
+		},
+		{
+			input:             "1 >= 2",
+			expectedConstants: []interface{}{1, 2},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadConst, 0),
+				code.Make(code.LoadConst, 1),
+				code.Make(code.Gteq),
+				code.Make(code.Pop),
+			},
+		},
+		{
+			input:             "1 <= 2",
+			expectedConstants: []interface{}{2, 1},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadConst, 0),
+				code.Make(code.LoadConst, 1),
+				code.Make(code.Gteq),
+				code.Make(code.Pop),
+			},
+		},
+		{
+			input:             "1 == 2",
+			expectedConstants: []interface{}{1, 2},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadConst, 0),
+				code.Make(code.LoadConst, 1),
+				code.Make(code.Eq),
+				code.Make(code.Pop),
+			},
+		},
+		{
+			input:             "1 != 2",
+			expectedConstants: []interface{}{1, 2},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadConst, 0),
+				code.Make(code.LoadConst, 1),
+				code.Make(code.Neq),
+				code.Make(code.Pop),
+			},
+		},
+		{
+			input:             "true == false",
+			expectedConstants: []interface{}{},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadTrue),
+				code.Make(code.LoadFalse),
+				code.Make(code.Eq),
+				code.Make(code.Pop),
+			},
+		},
+		{
+			input:             "true != false",
+			expectedConstants: []interface{}{},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadTrue),
+				code.Make(code.LoadFalse),
+				code.Make(code.Neq),
+				code.Make(code.Pop),
+			},
+		},
+	}
 	runCompilerTests(t, tests)
 }

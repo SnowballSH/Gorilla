@@ -144,7 +144,7 @@ func StartCompile(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		stackTop := machine.StackTop()
+		stackTop := machine.LastPopped()
 		_, _ = io.WriteString(out, stackTop.Inspect())
 		_, _ = io.WriteString(out, "\n")
 	}

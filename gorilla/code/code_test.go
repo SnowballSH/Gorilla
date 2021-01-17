@@ -11,7 +11,7 @@ func TestMake(t *testing.T) {
 		operands []int
 		expected []byte
 	}{
-		{PushConst, []int{65534}, []byte{byte(PushConst), 0, 0, 255, 254}},
+		{LoadConst, []int{65534}, []byte{byte(LoadConst), 255, 254}},
 		{Add, []int{}, []byte{byte(Add)}},
 	}
 
@@ -35,16 +35,16 @@ func TestMake(t *testing.T) {
 func TestInstructionsString(t *testing.T) {
 	instructions := []Instructions{
 		Make(Add),
-		Make(PushConst, 1),
-		Make(PushConst, 2),
-		Make(PushConst, 4294967293),
+		Make(LoadConst, 1),
+		Make(LoadConst, 2),
+		Make(LoadConst, 1234),
 	}
 
 	expected := `
 00000000 Add
-00000001 PushConst 1
-00000006 PushConst 2
-00000011 PushConst 4294967293
+00000001 LoadConst 1
+00000004 LoadConst 2
+00000007 LoadConst 1234
 `
 	concatted := Instructions{}
 	for _, ins := range instructions {
@@ -63,7 +63,7 @@ func TestReadOperands(t *testing.T) {
 		operands  []int
 		bytesRead int
 	}{
-		{PushConst, []int{4294967293}, 4},
+		{LoadConst, []int{7293}, 2},
 	}
 
 	for _, tt := range tests {
