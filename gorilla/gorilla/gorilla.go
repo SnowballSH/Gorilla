@@ -1,12 +1,15 @@
 package gorilla
 
 import (
+	"../compiler"
 	"../eval"
 	"../lexer"
 	"../object"
 	"../parser"
 	"../repl"
+	"../vm"
 	"flag"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -36,6 +39,36 @@ func RunFile() {
 	}
 
 	code := string(b)
+
+	if *compile {
+		l := lexer.New(code)
+		p := parser.New(l)
+		program := p.ParseProgram()
+
+		if len(p.Errors()) != 0 {
+			repl.PrintParserErrors(os.Stdout, p.Errors())
+			os.Exit(1)
+		}
+
+		comp := compiler.New()
+		err := comp.Compile(program)
+		if err != nil {
+			_, _ = io.WriteString(os.Stdout, fmt.Sprintf("Compilation failed:\n\t%s\n", err))
+			os.Exit(1)
+		}
+
+		code := comp.Bytecode()
+
+		machine := vm.New(code)
+
+		err = machine.Run()
+		if err != nil {
+			_, _ = io.WriteString(os.Stdout, fmt.Sprintf("Runtime Error:\n\t%s\n", err))
+			os.Exit(1)
+		}
+
+		os.Exit(0)
+	}
 
 	env := object.NewEnvironment().AddBuiltin()
 

@@ -39,7 +39,7 @@ func testInstructions(
 }
 
 func testConstants(
-	t *testing.T,
+	_ *testing.T,
 	expected []interface{},
 	actual []object.Object,
 ) error {
@@ -53,6 +53,18 @@ func testConstants(
 			err := testIntegerObject(int64(constant), actual[i])
 			if err != nil {
 				return fmt.Errorf("constant %d - testIntegerObject failed: %s",
+					i, err)
+			}
+
+		case []code.Instructions:
+			fn, ok := actual[i].(*object.CompiledFunction)
+			if !ok {
+				return fmt.Errorf("constant %d - not a function: %T",
+					i, actual[i])
+			}
+			err := testInstructions(constant, fn.Instructions)
+			if err != nil {
+				return fmt.Errorf("constant %d - testInstructions failed: %s",
 					i, err)
 			}
 		}
@@ -359,6 +371,8 @@ one
 			expectedInstructions: []code.Instructions{
 				code.Make(code.LoadConst, 0),
 				code.Make(code.SetGlobal, 0),
+				code.Make(code.LoadGlobal, 0),
+				code.Make(code.Pop),
 			},
 		},
 		{
@@ -374,6 +388,87 @@ two
 				code.Make(code.LoadGlobal, 0),
 				code.Make(code.SetGlobal, 1),
 				code.Make(code.LoadGlobal, 1),
+				code.Make(code.Pop),
+			},
+		},
+	}
+	runCompilerTests(t, tests)
+}
+
+func TestFunctions(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `fn() { return 5 + 10 }`,
+			expectedConstants: []interface{}{
+				5,
+				10,
+				[]code.Instructions{
+					code.Make(code.LoadConst, 0),
+					code.Make(code.LoadConst, 1),
+					code.Make(code.Add),
+					code.Make(code.Ret),
+				},
+			},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadConst, 2),
+				code.Make(code.Pop),
+			},
+		},
+		{
+			input: `fn() { 5 + 10 }`,
+			expectedConstants: []interface{}{
+				5,
+				10,
+				[]code.Instructions{
+					code.Make(code.LoadConst, 0),
+					code.Make(code.LoadConst, 1),
+					code.Make(code.Add),
+					code.Make(code.Ret),
+				},
+			},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadConst, 2),
+				code.Make(code.Pop),
+			},
+		},
+	}
+	runCompilerTests(t, tests)
+}
+
+func TestFunctionCalls(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `fn() { 24 }();`,
+			expectedConstants: []interface{}{
+				24,
+				[]code.Instructions{
+					code.Make(code.LoadConst, 0),
+					code.Make(code.Ret),
+				},
+			},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadConst, 1), // The compiled function
+				code.Make(code.Call),
+				code.Make(code.Pop),
+			},
+		},
+		{
+			input: `
+let noArg = fn() { 24 }
+noArg()
+`,
+			expectedConstants: []interface{}{
+				24,
+				[]code.Instructions{
+					code.Make(code.LoadConst, 0), // The literal "24"
+					code.Make(code.Ret),
+				},
+			},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadConst, 1), // The compiled function
+				code.Make(code.SetGlobal, 0),
+				code.Make(code.LoadGlobal, 0),
+				code.Make(code.Call),
 				code.Make(code.Pop),
 			},
 		},

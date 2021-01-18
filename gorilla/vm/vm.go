@@ -2,6 +2,7 @@ package vm
 
 import (
 	"fmt"
+	"strings"
 
 	"../code"
 	"../compiler"
@@ -11,33 +12,72 @@ import (
 
 const StackSize = 1 << 14
 const GlobalSize = 1 << 16
+const FrameSize = 1 << 12
 
 type VM struct {
-	constants    []object.Object
-	instructions code.Instructions
+	constants []object.Object
 
 	stack []object.Object
 	sp    int // Always points to the next value
 
 	globals []object.Object
+
+	frames      []*Frame
+	framesIndex int
+}
+
+func (vm *VM) currentFrame() *Frame {
+	return vm.frames[vm.framesIndex-1]
+}
+
+func (vm *VM) pushFrame(f *Frame) {
+	vm.frames[vm.framesIndex] = f
+	vm.framesIndex++
+}
+
+func (vm *VM) popFrame() *Frame {
+	vm.framesIndex--
+	return vm.frames[vm.framesIndex]
 }
 
 func New(bytecode *compiler.Bytecode) *VM {
+	mainFn := &object.CompiledFunction{Instructions: bytecode.Instructions}
+	mainFrame := NewFrame(mainFn)
+
+	frames := make([]*Frame, FrameSize)
+	frames[0] = mainFrame
+
 	return &VM{
-		instructions: bytecode.Instructions,
-		constants:    bytecode.Constants,
+		constants: bytecode.Constants,
 
 		stack: make([]object.Object, StackSize),
 		sp:    0,
 
 		globals: make([]object.Object, GlobalSize),
+
+		frames:      frames,
+		framesIndex: 1,
 	}
 }
 
 func NewWithGlobalsStore(bytecode *compiler.Bytecode, s []object.Object) *VM {
-	vm := New(bytecode)
-	vm.globals = s
-	return vm
+	mainFn := &object.CompiledFunction{Instructions: bytecode.Instructions}
+	mainFrame := NewFrame(mainFn)
+
+	frames := make([]*Frame, FrameSize)
+	frames[0] = mainFrame
+
+	return &VM{
+		constants: bytecode.Constants,
+
+		frames:      frames,
+		framesIndex: 1,
+
+		stack: make([]object.Object, StackSize),
+		sp:    0,
+
+		globals: s,
+	}
 }
 
 func (vm *VM) pop() object.Object {
@@ -62,39 +102,47 @@ func (vm *VM) LastPopped() object.Object {
 }
 
 func (vm *VM) Run() error {
-	for ip := 0; ip < len(vm.instructions); ip++ {
-		op := code.Opcode(vm.instructions[ip])
+	var ip int
+	var ins code.Instructions
+	var op code.Opcode
+
+	for vm.currentFrame().ip < len(vm.currentFrame().Instructions())-1 {
+		vm.currentFrame().ip++
+
+		ip = vm.currentFrame().ip
+		ins = vm.currentFrame().Instructions()
+		op = code.Opcode(ins[ip])
 
 		switch op {
 
 		case code.Jump:
-			pos := int(code.ReadUint16(vm.instructions[ip+1:]))
-			ip = pos - 1
+			pos := int(code.ReadUint16(vm.currentFrame().Instructions()[ip+1:]))
+			vm.currentFrame().ip = pos - 1
 
 		case code.JumpElse:
-			pos := int(code.ReadUint16(vm.instructions[ip+1:]))
-			ip += 2
+			pos := int(code.ReadUint16(vm.currentFrame().Instructions()[ip+1:]))
+			vm.currentFrame().ip += 2
 			condition := vm.pop()
 			if !eval.IsTruthy(condition) {
-				ip = pos - 1
+				vm.currentFrame().ip = pos - 1
 			}
 
 		case code.SetGlobal:
-			globalIndex := code.ReadUint16(vm.instructions[ip+1:])
-			ip += 2
+			globalIndex := code.ReadUint16(vm.currentFrame().Instructions()[ip+1:])
+			vm.currentFrame().ip += 2
 			vm.globals[globalIndex] = vm.pop()
 
 		case code.LoadGlobal:
-			globalIndex := code.ReadUint16(vm.instructions[ip+1:])
-			ip += 2
+			globalIndex := code.ReadUint16(vm.currentFrame().Instructions()[ip+1:])
+			vm.currentFrame().ip += 2
 			err := vm.push(vm.globals[globalIndex])
 			if err != nil {
 				return err
 			}
 
 		case code.LoadConst:
-			constIndex := code.ReadUint16(vm.instructions[ip+1:])
-			ip += 2
+			constIndex := code.ReadUint16(vm.currentFrame().Instructions()[ip+1:])
+			vm.currentFrame().ip += 2
 
 			err := vm.push(vm.constants[constIndex])
 			if err != nil {
@@ -131,6 +179,15 @@ func (vm *VM) Run() error {
 				return err
 			}
 
+		case code.Call:
+			f := vm.stack[vm.sp-1]
+			fn, ok := f.(*object.CompiledFunction)
+			if !ok {
+				return fmt.Errorf("[Line %d] Type '%s' is not callable", f.Line()+1, f.Type())
+			}
+			frame := NewFrame(fn)
+			vm.pushFrame(frame)
+
 		case code.LoadTrue:
 			err := vm.push(object.TRUE)
 			if err != nil {
@@ -144,6 +201,26 @@ func (vm *VM) Run() error {
 			}
 
 		case code.LoadNull:
+			err := vm.push(object.NULL)
+			if err != nil {
+				return err
+			}
+
+		case code.Ret:
+			returnValue := vm.pop()
+
+			vm.popFrame()
+			vm.pop()
+
+			err := vm.push(returnValue)
+			if err != nil {
+				return err
+			}
+
+		case code.RetNull:
+			vm.popFrame()
+			vm.pop()
+
 			err := vm.push(object.NULL)
 			if err != nil {
 				return err
@@ -167,6 +244,12 @@ func (vm *VM) executeBinaryOperation(op code.Opcode) error {
 
 	if leftType == object.INTEGER && rightType == object.INTEGER {
 		return vm.executeBinaryIntegerOperation(op, left, right)
+	}
+	if leftType == object.STRING && rightType == object.STRING && op == code.Add {
+		return vm.executeStringAddOperation(op, left, right)
+	}
+	if leftType == object.STRING && rightType == object.INTEGER && op == code.Mul {
+		return vm.executeStringMulOperation(op, left, right)
 	}
 
 	return fmt.Errorf("[Line %d] Unsupported types for binary operation: %s, %s",
@@ -199,6 +282,20 @@ func (vm *VM) executeBinaryIntegerOperation(
 	}
 
 	return vm.push(eval.NewInt(result, left.(*object.Integer).Line()))
+}
+
+func (vm *VM) executeStringAddOperation(
+	_ code.Opcode,
+	left, right object.Object,
+) error {
+	return vm.push(eval.NewString(left.(*object.String).Value+right.(*object.String).Value, left.Line()))
+}
+
+func (vm *VM) executeStringMulOperation(
+	_ code.Opcode,
+	left, right object.Object,
+) error {
+	return vm.push(eval.NewString(strings.Repeat(left.(*object.String).Value, int(right.(*object.Integer).Value)), left.Line()))
 }
 
 func (vm *VM) executeComparison(op code.Opcode) error {

@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"../ast"
+	"../code"
 )
 
 const (
@@ -33,6 +34,9 @@ const (
 
 	// FUNCTION is the Function object
 	FUNCTION = "FUNCTION"
+
+	// CompiledFunction is the CompiledFunction object
+	COMPILEDFUNCTION = "COMPILEDFUNCTION"
 
 	// BUILTIN is the Builtin object type
 	BUILTIN = "BUILTIN"
@@ -207,6 +211,22 @@ func (f *Function) Line() int                     { return f.SLine }
 func (f *Function) Attributes() map[string]Object { return noAttr }
 func (f *Function) Parent() Object                { return f.SParent }
 func (f *Function) SetParent(x Object)            { f.SParent = x }
+
+type CompiledFunction struct {
+	Instructions code.Instructions
+	SLine        int
+	SParent      Object
+}
+
+func (cf *CompiledFunction) Type() Type { return COMPILEDFUNCTION }
+func (cf *CompiledFunction) Inspect() string {
+	return fmt.Sprintf("Compiled Function [%p]", cf)
+}
+
+func (cf *CompiledFunction) Line() int                     { return cf.SLine }
+func (cf *CompiledFunction) Attributes() map[string]Object { return noAttr }
+func (cf *CompiledFunction) Parent() Object                { return cf.SParent }
+func (cf *CompiledFunction) SetParent(x Object)            { cf.SParent = x }
 
 type Builtin struct {
 	Fn      BuiltinFunction

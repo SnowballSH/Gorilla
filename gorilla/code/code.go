@@ -135,6 +135,13 @@ var definitions = map[Opcode]*Definition{
 
 	SetGlobal:  {"SetGlobal", []int{2}},
 	LoadGlobal: {"LoadGlobal", []int{2}},
+
+	SetLocal:  {"SetLocal", []int{2}},
+	LoadLocal: {"LoadLocal", []int{2}},
+
+	Call:    {"Call", []int{}},
+	Ret:     {"Ret", []int{}},
+	RetNull: {"RetNull", []int{}},
 }
 
 const (
@@ -164,4 +171,11 @@ const (
 
 	SetGlobal
 	LoadGlobal
+
+	SetLocal
+	LoadLocal
+
+	Call
+	Ret
+	RetNull
 )
