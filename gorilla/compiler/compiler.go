@@ -71,6 +71,8 @@ func (c *Compiler) enterScope() {
 	}
 	c.scopes = append(c.scopes, scope)
 	c.scopeIndex++
+
+	c.symbolTable = NewEnclosedSymbolTable(c.symbolTable)
 }
 
 func (c *Compiler) leaveScope() code.Instructions {
@@ -78,6 +80,8 @@ func (c *Compiler) leaveScope() code.Instructions {
 
 	c.scopes = c.scopes[:len(c.scopes)-1]
 	c.scopeIndex--
+
+	c.symbolTable = c.symbolTable.Outer
 
 	return instructions
 }
@@ -178,8 +182,13 @@ func (c *Compiler) Compile(node ast.Node) error {
 		if err != nil {
 			return err
 		}
+
 		symbol := c.symbolTable.Define(node.Name.Value)
-		c.emit(code.SetGlobal, symbol.Index)
+		if symbol.Scope == GlobalScope {
+			c.emit(code.SetGlobal, symbol.Index)
+		} else {
+			c.emit(code.SetLocal, symbol.Index)
+		}
 
 	case *ast.BlockStatement:
 		for _, s := range node.Statements {
@@ -201,7 +210,11 @@ func (c *Compiler) Compile(node ast.Node) error {
 		if !ok {
 			return fmt.Errorf("[Line %d] Variable '%s' is not defined", node.Token.Line+1, node.Value)
 		}
-		c.emit(code.LoadGlobal, symbol.Index)
+		if symbol.Scope == GlobalScope {
+			c.emit(code.LoadGlobal, symbol.Index)
+		} else {
+			c.emit(code.LoadLocal, symbol.Index)
+		}
 
 	case *ast.IfExpression:
 		err := c.Compile(node.Condition)

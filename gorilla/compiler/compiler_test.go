@@ -475,3 +475,77 @@ noArg()
 	}
 	runCompilerTests(t, tests)
 }
+
+func TestLetStatementScopes(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `
+            let num = 55
+            fn() { num }
+            `,
+			expectedConstants: []interface{}{
+				55,
+				[]code.Instructions{
+					code.Make(code.LoadGlobal, 0),
+					code.Make(code.Ret),
+				},
+			},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadConst, 0),
+				code.Make(code.SetGlobal, 0),
+				code.Make(code.LoadConst, 1),
+				code.Make(code.Pop),
+			},
+		},
+		{
+			input: `
+            fn() {
+                let num = 55
+                num
+            }
+            `,
+			expectedConstants: []interface{}{
+				55,
+				[]code.Instructions{
+					code.Make(code.LoadConst, 0),
+					code.Make(code.SetLocal, 0),
+					code.Make(code.LoadLocal, 0),
+					code.Make(code.Ret),
+				},
+			},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadConst, 1),
+				code.Make(code.Pop),
+			},
+		},
+		{
+			input: `
+            fn() {
+                let a = 55
+                let b = 77
+                a + b
+            }
+            `,
+			expectedConstants: []interface{}{
+				55,
+				77,
+				[]code.Instructions{
+					code.Make(code.LoadConst, 0),
+					code.Make(code.SetLocal, 0),
+					code.Make(code.LoadConst, 1),
+					code.Make(code.SetLocal, 1),
+					code.Make(code.LoadLocal, 0),
+					code.Make(code.LoadLocal, 1),
+					code.Make(code.Add),
+					code.Make(code.Ret),
+				},
+			},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadConst, 2),
+				code.Make(code.Pop),
+			},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
