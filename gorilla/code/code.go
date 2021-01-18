@@ -119,6 +119,7 @@ var definitions = map[Opcode]*Definition{
 
 	LoadTrue:  {"LoadTrue", []int{}},
 	LoadFalse: {"LoadFalse", []int{}},
+	LoadNull:  {"LoadNull", []int{}},
 
 	Eq:   {"Eq", []int{}},
 	Neq:  {"Neq", []int{}},
@@ -128,6 +129,12 @@ var definitions = map[Opcode]*Definition{
 	Neg: {"Neg", []int{}},
 	Not: {"Not", []int{}},
 	Pos: {"Pos", []int{}},
+
+	JumpElse: {"JumpElse", []int{2}},
+	Jump:     {"Jump", []int{2}},
+
+	SetGlobal:  {"SetGlobal", []int{2}},
+	LoadGlobal: {"LoadGlobal", []int{2}},
 }
 
 const (
@@ -141,6 +148,7 @@ const (
 
 	LoadTrue
 	LoadFalse
+	LoadNull
 
 	Eq
 	Neq
@@ -150,4 +158,10 @@ const (
 	Neg
 	Not
 	Pos
+
+	JumpElse
+	Jump
+
+	SetGlobal
+	LoadGlobal
 )

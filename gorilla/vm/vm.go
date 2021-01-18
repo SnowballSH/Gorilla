@@ -10,6 +10,7 @@ import (
 )
 
 const StackSize = 1 << 14
+const GlobalSize = 1 << 16
 
 type VM struct {
 	constants    []object.Object
@@ -17,6 +18,8 @@ type VM struct {
 
 	stack []object.Object
 	sp    int // Always points to the next value
+
+	globals []object.Object
 }
 
 func New(bytecode *compiler.Bytecode) *VM {
@@ -26,7 +29,15 @@ func New(bytecode *compiler.Bytecode) *VM {
 
 		stack: make([]object.Object, StackSize),
 		sp:    0,
+
+		globals: make([]object.Object, GlobalSize),
 	}
+}
+
+func NewWithGlobalsStore(bytecode *compiler.Bytecode, s []object.Object) *VM {
+	vm := New(bytecode)
+	vm.globals = s
+	return vm
 }
 
 func (vm *VM) pop() object.Object {
@@ -55,6 +66,31 @@ func (vm *VM) Run() error {
 		op := code.Opcode(vm.instructions[ip])
 
 		switch op {
+
+		case code.Jump:
+			pos := int(code.ReadUint16(vm.instructions[ip+1:]))
+			ip = pos - 1
+
+		case code.JumpElse:
+			pos := int(code.ReadUint16(vm.instructions[ip+1:]))
+			ip += 2
+			condition := vm.pop()
+			if !eval.IsTruthy(condition) {
+				ip = pos - 1
+			}
+
+		case code.SetGlobal:
+			globalIndex := code.ReadUint16(vm.instructions[ip+1:])
+			ip += 2
+			vm.globals[globalIndex] = vm.pop()
+
+		case code.LoadGlobal:
+			globalIndex := code.ReadUint16(vm.instructions[ip+1:])
+			ip += 2
+			err := vm.push(vm.globals[globalIndex])
+			if err != nil {
+				return err
+			}
 
 		case code.LoadConst:
 			constIndex := code.ReadUint16(vm.instructions[ip+1:])
@@ -107,6 +143,12 @@ func (vm *VM) Run() error {
 				return err
 			}
 
+		case code.LoadNull:
+			err := vm.push(object.NULL)
+			if err != nil {
+				return err
+			}
+
 		case code.Pop:
 			vm.pop()
 
@@ -128,7 +170,7 @@ func (vm *VM) executeBinaryOperation(op code.Opcode) error {
 	}
 
 	return fmt.Errorf("[Line %d] Unsupported types for binary operation: %s, %s",
-		left.Line(), leftType, rightType)
+		left.Line()+1, leftType, rightType)
 }
 
 func (vm *VM) executeBinaryIntegerOperation(
@@ -148,9 +190,12 @@ func (vm *VM) executeBinaryIntegerOperation(
 	case code.Mul:
 		result = leftValue * rightValue
 	case code.Div:
+		if rightValue == 0 {
+			return fmt.Errorf("[Line %d] Division by Zero", right.Line()+1)
+		}
 		result = leftValue / rightValue
 	default:
-		return fmt.Errorf("[Line %d] Unknown integer operator: %d", left.(*object.Integer).Line(), op)
+		return fmt.Errorf("[Line %d] Unknown integer operator: %d", left.Line()+1, op)
 	}
 
 	return vm.push(eval.NewInt(result, left.(*object.Integer).Line()))

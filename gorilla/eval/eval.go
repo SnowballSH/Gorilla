@@ -284,6 +284,9 @@ func evalIntegerInfixExpression(
 	case "*":
 		return NewInt(leftVal*rightVal, left.Line())
 	case "/":
+		if rightVal == 0 {
+			return NewError("[Line %d] Division by Zero", right.Line()+1)
+		}
 		return NewInt(leftVal/rightVal, left.Line())
 	case "<":
 		return FromNativeBoolean(leftVal < rightVal, left.Line())
@@ -356,7 +359,7 @@ func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Obje
 		return condition
 	}
 
-	if isTruthy(condition) {
+	if IsTruthy(condition) {
 		return Eval(ie.Consequence, env)
 	} else if ie.Alternative != nil {
 		return Eval(ie.Alternative, env)
@@ -394,7 +397,7 @@ func evalExpressions(
 	return result
 }
 
-func isTruthy(obj object.Object) bool {
+func IsTruthy(obj object.Object) bool {
 	switch obj {
 	case NULL:
 		return false

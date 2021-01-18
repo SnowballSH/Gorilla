@@ -83,6 +83,10 @@ func Start(in io.Reader, out io.Writer) {
 func StartCompile(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 
+	var constants []object.Object
+	globals := make([]object.Object, vm.GlobalSize)
+	symbolTable := compiler.NewSymbolTable()
+
 	_, _ = io.WriteString(out, "Gorilla "+VERSION+"\n")
 	i := 0
 	status := 0
@@ -131,13 +135,18 @@ func StartCompile(in io.Reader, out io.Writer) {
 			continue
 		}
 
-		comp := compiler.New()
+		comp := compiler.NewWithState(symbolTable, constants)
 		err := comp.Compile(program)
 		if err != nil {
 			_, _ = io.WriteString(out, fmt.Sprintf("Compilation failed:\n\t%s\n", err))
 			continue
 		}
-		machine := vm.New(comp.Bytecode())
+
+		code := comp.Bytecode()
+		constants = code.Constants
+
+		machine := vm.NewWithGlobalsStore(code, globals)
+
 		err = machine.Run()
 		if err != nil {
 			_, _ = io.WriteString(out, fmt.Sprintf("Runtime Error:\n\t%s\n", err))

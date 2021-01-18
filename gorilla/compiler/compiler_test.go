@@ -279,3 +279,104 @@ func TestBooleanExpressions(t *testing.T) {
 	}
 	runCompilerTests(t, tests)
 }
+
+func TestConditionals(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `
+            if (true) { 10 }; 3333;
+            `,
+			expectedConstants: []interface{}{10, 3333},
+			expectedInstructions: []code.Instructions{
+				// 0000
+				code.Make(code.LoadTrue),
+				// 0001
+				code.Make(code.JumpElse, 10),
+				// 0004
+				code.Make(code.LoadConst, 0),
+				// 0007
+				code.Make(code.Jump, 11),
+				// 0010
+				code.Make(code.LoadNull),
+				// 0011
+				code.Make(code.Pop),
+				// 0012
+				code.Make(code.LoadConst, 1),
+				// 0015
+				code.Make(code.Pop),
+			},
+		},
+		{
+			input: `
+            if (true) { 10 } else { 20 }; 3333;
+            `,
+			expectedConstants: []interface{}{10, 20, 3333},
+			expectedInstructions: []code.Instructions{
+				// 0000
+				code.Make(code.LoadTrue),
+				// 0001
+				code.Make(code.JumpElse, 10),
+				// 0004
+				code.Make(code.LoadConst, 0),
+				// 0007
+				code.Make(code.Jump, 13),
+				// 0010
+				code.Make(code.LoadConst, 1),
+				// 0013
+				code.Make(code.Pop),
+				// 0014
+				code.Make(code.LoadConst, 2),
+				// 0017
+				code.Make(code.Pop),
+			},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
+
+func TestGlobalLetStatements(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `
+let one = 1
+let two = 2
+`,
+			expectedConstants: []interface{}{1, 2},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadConst, 0),
+				code.Make(code.SetGlobal, 0),
+				code.Make(code.LoadConst, 1),
+				code.Make(code.SetGlobal, 1),
+			},
+		},
+		{
+			input: `
+let one = 1
+one
+`,
+			expectedConstants: []interface{}{1},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadConst, 0),
+				code.Make(code.SetGlobal, 0),
+			},
+		},
+		{
+			input: `
+let one = 1
+let two = one
+two
+`,
+			expectedConstants: []interface{}{1},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadConst, 0),
+				code.Make(code.SetGlobal, 0),
+				code.Make(code.LoadGlobal, 0),
+				code.Make(code.SetGlobal, 1),
+				code.Make(code.LoadGlobal, 1),
+				code.Make(code.Pop),
+			},
+		},
+	}
+	runCompilerTests(t, tests)
+}
