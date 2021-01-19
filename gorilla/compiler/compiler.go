@@ -338,9 +338,13 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.emit(code.RetNull)
 		}
 
+		numLocals := c.symbolTable.numDefinitions
 		instructions := c.leaveScope()
 
-		compiledFn := &object.CompiledFunction{Instructions: instructions}
+		compiledFn := &object.CompiledFunction{
+			Instructions: instructions,
+			NumLocals:    numLocals,
+		}
 		c.emit(code.LoadConst, c.addConstant(compiledFn))
 
 	case *ast.IntegerLiteral:

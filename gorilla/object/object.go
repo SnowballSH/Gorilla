@@ -214,6 +214,7 @@ func (f *Function) SetParent(x Object)            { f.SParent = x }
 
 type CompiledFunction struct {
 	Instructions code.Instructions
+	NumLocals    int
 	SLine        int
 	SParent      Object
 }
