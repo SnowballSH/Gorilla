@@ -159,6 +159,17 @@ func (vm *VM) Run() error {
 				return err
 			}
 
+		case code.LoadBuiltin:
+			builtinIndex := code.ReadUint16(ins[ip+1:])
+			vm.currentFrame().ip += 2
+
+			definition := object.Builtins[builtinIndex]
+
+			err := vm.push(definition.Builtin)
+			if err != nil {
+				return err
+			}
+
 		case code.LoadConst:
 			constIndex := code.ReadUint16(vm.currentFrame().Instructions()[ip+1:])
 			vm.currentFrame().ip += 2
@@ -203,7 +214,8 @@ func (vm *VM) Run() error {
 
 			vm.currentFrame().ip += 2
 
-			err := vm.callFunction(int(numArgs))
+			err := vm.executeCall(int(numArgs))
+
 			if err != nil {
 				return err
 			}
@@ -263,13 +275,19 @@ func (vm *VM) Run() error {
 	return nil
 }
 
-func (vm *VM) callFunction(numArgs int) error {
-	f := vm.stack[vm.sp-1-numArgs]
-	fn, ok := f.(*object.CompiledFunction)
-	if !ok {
-		return fmt.Errorf("[Line %d] Type '%s' is not callable", f.Line()+1, f.Type())
+func (vm *VM) executeCall(numArgs int) error {
+	callee := vm.stack[vm.sp-1-numArgs]
+	switch callee := callee.(type) {
+	case *object.CompiledFunction:
+		return vm.callFunction(callee, numArgs)
+	case *object.Builtin:
+		return vm.callBuiltin(callee, numArgs)
+	default:
+		return fmt.Errorf("[Line %d] Type '%s' is not callable", callee.Line()+1, callee.Type())
 	}
+}
 
+func (vm *VM) callFunction(fn *object.CompiledFunction, numArgs int) error {
 	if fn.NumParameters != numArgs {
 		return fmt.Errorf("[Line %d] Argument mismatch (expected %d, got %d)", fn.Line()+1,
 			fn.NumParameters, numArgs)
@@ -280,6 +298,19 @@ func (vm *VM) callFunction(numArgs int) error {
 	vm.sp = frame.basePointer + fn.NumLocals
 
 	return nil
+}
+
+func (vm *VM) callBuiltin(builtin *object.Builtin, numArgs int) error {
+	args := vm.stack[vm.sp-numArgs : vm.sp]
+
+	result := builtin.Fn(nil, builtin.Line(), args...)
+	vm.sp = vm.sp - numArgs - 1
+
+	if result != nil {
+		return vm.push(result)
+	} else {
+		return vm.push(object.NULL)
+	}
 }
 
 func (vm *VM) executeBinaryOperation(op code.Opcode) error {

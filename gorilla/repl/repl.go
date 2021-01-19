@@ -87,6 +87,10 @@ func StartCompile(in io.Reader, out io.Writer) {
 	globals := make([]object.Object, vm.GlobalSize)
 	symbolTable := compiler.NewSymbolTable()
 
+	for i, v := range object.Builtins {
+		symbolTable.DefineBuiltin(i, v.Name)
+	}
+
 	_, _ = io.WriteString(out, "Gorilla "+VERSION+"\n")
 	i := 0
 	status := 0
