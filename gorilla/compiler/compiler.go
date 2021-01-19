@@ -205,6 +205,42 @@ func (c *Compiler) Compile(node ast.Node) error {
 			}
 		}
 
+	case *ast.FunctionStmt:
+		c.enterScope()
+
+		for _, p := range node.Parameters {
+			c.symbolTable.Define(p.Value)
+		}
+
+		err := c.Compile(node.Body)
+		if err != nil {
+			return err
+		}
+
+		if c.lastInstructionIs(code.Pop) {
+			c.replaceLastPopWithReturn()
+		}
+		if !c.lastInstructionIs(code.Ret) {
+			c.emit(code.RetNull)
+		}
+
+		numLocals := c.symbolTable.numDefinitions
+		instructions := c.leaveScope()
+
+		compiledFn := &object.CompiledFunction{
+			Instructions:  instructions,
+			NumLocals:     numLocals,
+			NumParameters: len(node.Parameters),
+		}
+		c.emit(code.LoadConst, c.addConstant(compiledFn))
+
+		symbol := c.symbolTable.Define(node.Name)
+		if symbol.Scope == GlobalScope {
+			c.emit(code.SetGlobal, symbol.Index)
+		} else {
+			c.emit(code.SetLocal, symbol.Index)
+		}
+
 	case *ast.ExpressionStatement:
 		err := c.Compile(node.Expression)
 		if err != nil {
