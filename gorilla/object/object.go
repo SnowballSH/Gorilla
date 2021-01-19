@@ -213,10 +213,11 @@ func (f *Function) Parent() Object                { return f.SParent }
 func (f *Function) SetParent(x Object)            { f.SParent = x }
 
 type CompiledFunction struct {
-	Instructions code.Instructions
-	NumLocals    int
-	SLine        int
-	SParent      Object
+	Instructions  code.Instructions
+	NumLocals     int
+	NumParameters int
+	SLine         int
+	SParent       Object
 }
 
 func (cf *CompiledFunction) Type() Type { return COMPILEDFUNCTION }

@@ -199,14 +199,14 @@ func (vm *VM) Run() error {
 			}
 
 		case code.Call:
-			f := vm.stack[vm.sp-1]
-			fn, ok := f.(*object.CompiledFunction)
-			if !ok {
-				return fmt.Errorf("[Line %d] Type '%s' is not callable", f.Line()+1, f.Type())
+			numArgs := code.ReadUint16(ins[ip+1:])
+
+			vm.currentFrame().ip += 2
+
+			err := vm.callFunction(int(numArgs))
+			if err != nil {
+				return err
 			}
-			frame := NewFrame(fn, vm.sp)
-			vm.pushFrame(frame)
-			vm.sp = frame.basePointer + fn.NumLocals
 
 		case code.LoadTrue:
 			err := vm.push(object.TRUE)
@@ -255,8 +255,29 @@ func (vm *VM) Run() error {
 		case code.Pop:
 			vm.pop()
 
+		default:
+			return fmt.Errorf("WTF not supported: %d", op)
 		}
 	}
+
+	return nil
+}
+
+func (vm *VM) callFunction(numArgs int) error {
+	f := vm.stack[vm.sp-1-numArgs]
+	fn, ok := f.(*object.CompiledFunction)
+	if !ok {
+		return fmt.Errorf("[Line %d] Type '%s' is not callable", f.Line()+1, f.Type())
+	}
+
+	if fn.NumParameters != numArgs {
+		return fmt.Errorf("[Line %d] Argument mismatch (expected %d, got %d)", fn.Line()+1,
+			fn.NumParameters, numArgs)
+	}
+
+	frame := NewFrame(fn, vm.sp-numArgs)
+	vm.pushFrame(frame)
+	vm.sp = frame.basePointer + fn.NumLocals
 
 	return nil
 }

@@ -139,7 +139,7 @@ var definitions = map[Opcode]*Definition{
 	SetLocal:  {"SetLocal", []int{2}},
 	LoadLocal: {"LoadLocal", []int{2}},
 
-	Call:    {"Call", []int{}},
+	Call:    {"Call", []int{2}},
 	Ret:     {"Ret", []int{}},
 	RetNull: {"RetNull", []int{}},
 }
