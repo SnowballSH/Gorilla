@@ -600,3 +600,22 @@ func TestLetStatementScopes(t *testing.T) {
 
 	runCompilerTests(t, tests)
 }
+
+func TestBuiltins(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `
+            display(1)
+            `,
+			expectedConstants: []interface{}{1},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadBuiltin, 0),
+				code.Make(code.LoadConst, 0),
+				code.Make(code.Call, 1),
+				code.Make(code.Pop),
+			},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}

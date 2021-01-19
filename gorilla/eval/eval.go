@@ -2,18 +2,16 @@ package eval
 
 import (
 	"../ast"
+	"../config"
 	"../object"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 )
 
 var TRUE = object.TRUE
 var FALSE = object.FALSE
 var NULL = object.NULL
-
-var OUT io.Writer = os.Stdout
 
 func FromNativeBoolean(input bool, l int) *object.Boolean {
 	if input {
@@ -32,7 +30,7 @@ func NewError(format string, a ...interface{}) *object.Error {
 
 func Eval(node ast.Node, env *object.Environment, out ...io.Writer) object.Object {
 	if len(out) > 0 {
-		OUT = out[0]
+		config.SetOut(out[0])
 	}
 
 	switch node := node.(type) {
@@ -46,7 +44,7 @@ func Eval(node ast.Node, env *object.Environment, out ...io.Writer) object.Objec
 
 	// Expressions
 	case *ast.IntegerLiteral:
-		return NewInt(node.Value, node.Token.Line)
+		return object.NewInt(node.Value, node.Token.Line)
 
 	case *ast.Boolean:
 		return FromNativeBoolean(node.Value, node.Token.Line)
@@ -89,13 +87,13 @@ func Eval(node ast.Node, env *object.Environment, out ...io.Writer) object.Objec
 	case *ast.FunctionStmt:
 		params := node.Parameters
 		body := node.Body
-		fn := NewFunction(params, body, env, node.Token.Line)
+		fn := object.NewFunction(params, body, env, node.Token.Line)
 		env.Set(node.Name, fn)
 
 	case *ast.FunctionLiteral:
 		params := node.Parameters
 		body := node.Body
-		return NewFunction(params, body, env, node.Token.Line)
+		return object.NewFunction(params, body, env, node.Token.Line)
 
 	case *ast.IfExpression:
 		return evalIfExpression(node, env)
@@ -118,7 +116,7 @@ func Eval(node ast.Node, env *object.Environment, out ...io.Writer) object.Objec
 		return evalGetAttr(node, env)
 
 	case *ast.StringLiteral:
-		return NewString(node.Value, node.Token.Line)
+		return object.NewString(node.Value, node.Token.Line)
 	}
 
 	return nil
@@ -163,25 +161,6 @@ func evalGetAttr(node *ast.GetAttr, env *object.Environment) object.Object {
 	return obj
 }
 
-func CallAttr(expr object.Object, attr string, line int, args ...object.Object) object.Object {
-	attributes := expr.Attributes()
-	obj := attributes[attr]
-	if obj == nil {
-		return NewError(
-			"[Line %d] Type '%s' does not have attribute '%s'",
-			line+1,
-			expr.Type(),
-			attr,
-		)
-	}
-
-	obj.SetParent(expr)
-
-	res := applyFunction(obj, args)
-
-	return res
-}
-
 func evalPrefixExpression(operator string, right object.Object) object.Object {
 	switch operator {
 	case "!":
@@ -221,7 +200,7 @@ func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
 	}
 
 	value := right.(*object.Integer).Value
-	return NewInt(-value, right.Line())
+	return object.NewInt(-value, right.Line())
 }
 
 func evalBlockStatement(block *ast.BlockStatement, env *object.Environment) object.Object {
@@ -278,16 +257,16 @@ func evalIntegerInfixExpression(
 
 	switch operator {
 	case "+":
-		return NewInt(leftVal+rightVal, left.Line())
+		return object.NewInt(leftVal+rightVal, left.Line())
 	case "-":
-		return NewInt(leftVal-rightVal, left.Line())
+		return object.NewInt(leftVal-rightVal, left.Line())
 	case "*":
-		return NewInt(leftVal*rightVal, left.Line())
+		return object.NewInt(leftVal*rightVal, left.Line())
 	case "/":
 		if rightVal == 0 {
 			return NewError("[Line %d] Division by Zero", right.Line()+1)
 		}
-		return NewInt(leftVal/rightVal, left.Line())
+		return object.NewInt(leftVal/rightVal, left.Line())
 	case "<":
 		return FromNativeBoolean(leftVal < rightVal, left.Line())
 	case ">":

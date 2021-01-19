@@ -3,7 +3,6 @@ package compiler
 import (
 	"../ast"
 	"../code"
-	"../eval"
 	"../object"
 	"fmt"
 )
@@ -38,29 +37,26 @@ func New() *Compiler {
 		lastInstruction:     EmittedInstruction{},
 		previousInstruction: EmittedInstruction{},
 	}
+
+	symbolTable := NewSymbolTable()
+
+	for i, v := range object.Builtins {
+		symbolTable.DefineBuiltin(i, v.Name)
+	}
+
 	return &Compiler{
 		constants:   []object.Object{},
-		symbolTable: NewSymbolTable(),
+		symbolTable: symbolTable,
 		scopes:      []CompilationScope{mainScope},
 		scopeIndex:  0,
 	}
 }
 
-func NewWithState(s *SymbolTable, constants []object.Object) *Compiler {
-	mainScope := CompilationScope{
-		instructions:        code.Instructions{},
-		lastInstruction:     EmittedInstruction{},
-		previousInstruction: EmittedInstruction{},
-	}
-
-	return &Compiler{
-		constants: constants,
-
-		scopes:     []CompilationScope{mainScope},
-		scopeIndex: 0,
-
-		symbolTable: s,
-	}
+func NewWithState(symbolTable *SymbolTable, constants []object.Object) *Compiler {
+	c := New()
+	c.symbolTable = symbolTable
+	c.constants = constants
+	return c
 }
 
 func (c *Compiler) enterScope() {
@@ -73,6 +69,17 @@ func (c *Compiler) enterScope() {
 	c.scopeIndex++
 
 	c.symbolTable = NewEnclosedSymbolTable(c.symbolTable)
+}
+
+func (c *Compiler) loadSymbol(s Symbol) {
+	switch s.Scope {
+	case GlobalScope:
+		c.emit(code.LoadGlobal, s.Index)
+	case LocalScope:
+		c.emit(code.LoadLocal, s.Index)
+	case BuiltinScope:
+		c.emit(code.LoadBuiltin, s.Index)
+	}
 }
 
 func (c *Compiler) leaveScope() code.Instructions {
@@ -210,11 +217,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 		if !ok {
 			return fmt.Errorf("[Line %d] Variable '%s' is not defined", node.Token.Line+1, node.Value)
 		}
-		if symbol.Scope == GlobalScope {
-			c.emit(code.LoadGlobal, symbol.Index)
-		} else {
-			c.emit(code.LoadLocal, symbol.Index)
-		}
+		c.loadSymbol(symbol)
 
 	case *ast.IfExpression:
 		err := c.Compile(node.Condition)
@@ -353,11 +356,11 @@ func (c *Compiler) Compile(node ast.Node) error {
 		c.emit(code.LoadConst, c.addConstant(compiledFn))
 
 	case *ast.IntegerLiteral:
-		integer := eval.NewInt(node.Value, node.Token.Line)
+		integer := object.NewInt(node.Value, node.Token.Line)
 		c.emit(code.LoadConst, c.addConstant(integer))
 
 	case *ast.StringLiteral:
-		str := eval.NewString(node.Value, node.Token.Line)
+		str := object.NewString(node.Value, node.Token.Line)
 		c.emit(code.LoadConst, c.addConstant(str))
 
 	case *ast.Boolean:

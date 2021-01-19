@@ -328,21 +328,21 @@ func (vm *VM) executeBinaryIntegerOperation(
 		return fmt.Errorf("[Line %d] Unknown integer operator: %d", left.Line()+1, op)
 	}
 
-	return vm.push(eval.NewInt(result, left.(*object.Integer).Line()))
+	return vm.push(object.NewInt(result, left.(*object.Integer).Line()))
 }
 
 func (vm *VM) executeStringAddOperation(
 	_ code.Opcode,
 	left, right object.Object,
 ) error {
-	return vm.push(eval.NewString(left.(*object.String).Value+right.(*object.String).Value, left.Line()))
+	return vm.push(object.NewString(left.(*object.String).Value+right.(*object.String).Value, left.Line()))
 }
 
 func (vm *VM) executeStringMulOperation(
 	_ code.Opcode,
 	left, right object.Object,
 ) error {
-	return vm.push(eval.NewString(strings.Repeat(left.(*object.String).Value, int(right.(*object.Integer).Value)), left.Line()))
+	return vm.push(object.NewString(strings.Repeat(left.(*object.String).Value, int(right.(*object.Integer).Value)), left.Line()))
 }
 
 func (vm *VM) executeComparison(op code.Opcode) error {
@@ -420,7 +420,7 @@ func (vm *VM) executeNegOperator() error {
 	}
 
 	value := right.(*object.Integer).Value
-	return vm.push(eval.NewInt(-value, right.Line()))
+	return vm.push(object.NewInt(-value, right.Line()))
 }
 
 func (vm *VM) executePosOperator() error {
