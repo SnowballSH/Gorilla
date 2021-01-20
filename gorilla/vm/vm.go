@@ -10,9 +10,9 @@ import (
 	"../object"
 )
 
-const StackSize = 1 << 32
+const StackSize = 1 << 20
 const GlobalSize = 1 << 16
-const FrameSize = 1 << 32
+const FrameSize = 1 << 20
 
 type VM struct {
 	constants []object.Object
