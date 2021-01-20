@@ -410,7 +410,7 @@ func TestFunctions(t *testing.T) {
 				},
 			},
 			expectedInstructions: []code.Instructions{
-				code.Make(code.LoadConst, 2),
+				code.Make(code.Closure, 2, 0),
 				code.Make(code.Pop),
 			},
 		},
@@ -427,7 +427,7 @@ func TestFunctions(t *testing.T) {
 				},
 			},
 			expectedInstructions: []code.Instructions{
-				code.Make(code.LoadConst, 2),
+				code.Make(code.Closure, 2, 0),
 				code.Make(code.Pop),
 			},
 		},
@@ -447,7 +447,7 @@ func TestFunctionCalls(t *testing.T) {
 				},
 			},
 			expectedInstructions: []code.Instructions{
-				code.Make(code.LoadConst, 1), // The compiled function
+				code.Make(code.Closure, 1, 0),
 				code.Make(code.Call, 0),
 				code.Make(code.Pop),
 			},
@@ -465,7 +465,7 @@ noArg()
 				},
 			},
 			expectedInstructions: []code.Instructions{
-				code.Make(code.LoadConst, 1), // The compiled function
+				code.Make(code.Closure, 1, 0),
 				code.Make(code.SetGlobal, 0),
 				code.Make(code.LoadGlobal, 0),
 				code.Make(code.Call, 0),
@@ -486,7 +486,7 @@ noArg()
 				24,
 			},
 			expectedInstructions: []code.Instructions{
-				code.Make(code.LoadConst, 0),
+				code.Make(code.Closure, 0, 0),
 				code.Make(code.SetGlobal, 0),
 				code.Make(code.LoadGlobal, 0),
 				code.Make(code.LoadConst, 1),
@@ -513,7 +513,7 @@ noArg()
 				26,
 			},
 			expectedInstructions: []code.Instructions{
-				code.Make(code.LoadConst, 0),
+				code.Make(code.Closure, 0, 0),
 				code.Make(code.SetGlobal, 0),
 				code.Make(code.LoadGlobal, 0),
 				code.Make(code.LoadConst, 1),
@@ -544,7 +544,7 @@ func TestLetStatementScopes(t *testing.T) {
 			expectedInstructions: []code.Instructions{
 				code.Make(code.LoadConst, 0),
 				code.Make(code.SetGlobal, 0),
-				code.Make(code.LoadConst, 1),
+				code.Make(code.Closure, 1, 0),
 				code.Make(code.Pop),
 			},
 		},
@@ -565,7 +565,7 @@ func TestLetStatementScopes(t *testing.T) {
 				},
 			},
 			expectedInstructions: []code.Instructions{
-				code.Make(code.LoadConst, 1),
+				code.Make(code.Closure, 1, 0),
 				code.Make(code.Pop),
 			},
 		},
@@ -592,7 +592,7 @@ func TestLetStatementScopes(t *testing.T) {
 				},
 			},
 			expectedInstructions: []code.Instructions{
-				code.Make(code.LoadConst, 2),
+				code.Make(code.Closure, 2, 0),
 				code.Make(code.Pop),
 			},
 		},
@@ -612,6 +612,129 @@ func TestBuiltins(t *testing.T) {
 				code.Make(code.LoadBuiltin, 0),
 				code.Make(code.LoadConst, 0),
 				code.Make(code.Call, 1),
+				code.Make(code.Pop),
+			},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
+
+func TestClosures(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `
+            fn(a) {
+                fn(b) {
+                    a + b
+                }
+            }
+            `,
+			expectedConstants: []interface{}{
+				[]code.Instructions{
+					code.Make(code.LoadFree, 0),
+					code.Make(code.LoadLocal, 0),
+					code.Make(code.Add),
+					code.Make(code.Ret),
+				},
+				[]code.Instructions{
+					code.Make(code.LoadLocal, 0),
+					code.Make(code.Closure, 0, 1),
+					code.Make(code.Ret),
+				},
+			},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.Closure, 1, 0),
+				code.Make(code.Pop),
+			},
+		},
+		{
+			input: `
+            fn(a) {
+                fn(b) {
+                    fn(c) {
+                        a + b + c
+                    }
+                }
+            };
+            `,
+			expectedConstants: []interface{}{
+				[]code.Instructions{
+					code.Make(code.LoadFree, 0),
+					code.Make(code.LoadFree, 1),
+					code.Make(code.Add),
+					code.Make(code.LoadLocal, 0),
+					code.Make(code.Add),
+					code.Make(code.Ret),
+				},
+				[]code.Instructions{
+					code.Make(code.LoadFree, 0),
+					code.Make(code.LoadLocal, 0),
+					code.Make(code.Closure, 0, 2),
+					code.Make(code.Ret),
+				},
+				[]code.Instructions{
+					code.Make(code.LoadLocal, 0),
+					code.Make(code.Closure, 1, 1),
+					code.Make(code.Ret),
+				},
+			},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.Closure, 2, 0),
+				code.Make(code.Pop),
+			},
+		},
+		{
+			input: `
+            let global = 55;
+            fn() {
+                let a = 66;
+                fn() {
+                    let b = 77;
+                    fn() {
+                        let c = 88;
+                        global + a + b + c;
+                    }
+                }
+            }
+            `,
+			expectedConstants: []interface{}{
+				55,
+				66,
+				77,
+				88,
+				[]code.Instructions{
+					code.Make(code.LoadConst, 3),
+					code.Make(code.SetLocal, 0),
+					code.Make(code.LoadGlobal, 0),
+					code.Make(code.LoadFree, 0),
+					code.Make(code.Add),
+					code.Make(code.LoadFree, 1),
+					code.Make(code.Add),
+					code.Make(code.LoadLocal, 0),
+					code.Make(code.Add),
+					code.Make(code.Ret),
+				},
+				[]code.Instructions{
+					code.Make(code.LoadConst, 2),
+					code.Make(code.SetLocal, 0),
+					code.Make(code.LoadFree, 0),
+					code.Make(code.LoadLocal, 0),
+					code.Make(code.Closure, 4, 2),
+					code.Make(code.Ret),
+				},
+				[]code.Instructions{
+					code.Make(code.LoadConst, 1),
+					code.Make(code.SetLocal, 0),
+					code.Make(code.LoadLocal, 0),
+					code.Make(code.Closure, 5, 1),
+					code.Make(code.Ret),
+				},
+			},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadConst, 0),
+				code.Make(code.SetGlobal, 0),
+				code.Make(code.Closure, 6, 0),
 				code.Make(code.Pop),
 			},
 		},

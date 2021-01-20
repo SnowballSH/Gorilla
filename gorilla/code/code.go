@@ -48,6 +48,8 @@ func (ins Instructions) fmtInstruction(def *Definition, operands []int) string {
 		return def.Name
 	case 1:
 		return fmt.Sprintf("%s %d", def.Name, operands[0])
+	case 2:
+		return fmt.Sprintf("%s %d %d", def.Name, operands[0], operands[1])
 	}
 
 	return fmt.Sprintf("ERROR: unhandled operandCount for %s\n", def.Name)
@@ -139,11 +141,15 @@ var definitions = map[Opcode]*Definition{
 	SetLocal:  {"SetLocal", []int{2}},
 	LoadLocal: {"LoadLocal", []int{2}},
 
+	LoadFree: {"LoadFree", []int{2}},
+
 	LoadBuiltin: {"LoadBuiltin", []int{2}},
 
 	Call:    {"Call", []int{2}},
 	Ret:     {"Ret", []int{}},
 	RetNull: {"RetNull", []int{}},
+
+	Closure: {"Closure", []int{2, 2}},
 }
 
 const (
@@ -177,9 +183,13 @@ const (
 	SetLocal
 	LoadLocal
 
+	LoadFree
+
 	LoadBuiltin
 
 	Call
 	Ret
 	RetNull
+
+	Closure
 )

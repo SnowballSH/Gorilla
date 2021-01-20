@@ -40,6 +40,9 @@ const (
 
 	// BUILTIN is the Builtin object type
 	BUILTIN = "BUILTIN"
+
+	// CLOSURE
+	CLOSURE = "CLOSURE"
 )
 
 var (
@@ -246,3 +249,21 @@ func (b *Builtin) Line() int                     { return b.SLine }
 func (b *Builtin) Attributes() map[string]Object { return noAttr }
 func (b *Builtin) Parent() Object                { return b.SParent }
 func (b *Builtin) SetParent(x Object)            { b.SParent = x }
+
+type Closure struct {
+	Fn      *CompiledFunction
+	Free    []Object
+	SLine   int
+	SParent Object
+}
+
+func (c *Closure) Type() Type { return CLOSURE }
+
+func (c *Closure) Inspect() string {
+	return fmt.Sprintf("Closure [%p]", c)
+}
+
+func (c *Closure) Line() int                     { return c.SLine }
+func (c *Closure) Attributes() map[string]Object { return noAttr }
+func (c *Closure) Parent() Object                { return c.SParent }
+func (c *Closure) SetParent(x Object)            { c.SParent = x }

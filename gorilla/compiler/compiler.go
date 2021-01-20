@@ -79,6 +79,17 @@ func (c *Compiler) loadSymbol(s Symbol) {
 		c.emit(code.LoadLocal, s.Index)
 	case BuiltinScope:
 		c.emit(code.LoadBuiltin, s.Index)
+	case FreeScope:
+		c.emit(code.LoadFree, s.Index)
+	}
+}
+
+func (c *Compiler) setSymbol(s Symbol) {
+	switch s.Scope {
+	case GlobalScope:
+		c.emit(code.SetGlobal, s.Index)
+	case LocalScope:
+		c.emit(code.SetLocal, s.Index)
 	}
 }
 
@@ -185,17 +196,14 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 	case *ast.LetStatement:
+		symbol := c.symbolTable.Define(node.Name.Value)
+
 		err := c.Compile(node.Value)
 		if err != nil {
 			return err
 		}
 
-		symbol := c.symbolTable.Define(node.Name.Value)
-		if symbol.Scope == GlobalScope {
-			c.emit(code.SetGlobal, symbol.Index)
-		} else {
-			c.emit(code.SetLocal, symbol.Index)
-		}
+		c.setSymbol(symbol)
 
 	case *ast.BlockStatement:
 		for _, s := range node.Statements {
@@ -206,6 +214,8 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 	case *ast.FunctionStmt:
+		symbol := c.symbolTable.Define(node.Name)
+
 		c.enterScope()
 
 		for _, p := range node.Parameters {
@@ -224,22 +234,23 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.emit(code.RetNull)
 		}
 
+		freeSymbols := c.symbolTable.FreeSymbols
 		numLocals := c.symbolTable.numDefinitions
 		instructions := c.leaveScope()
+
+		for _, s := range freeSymbols {
+			c.loadSymbol(s)
+		}
 
 		compiledFn := &object.CompiledFunction{
 			Instructions:  instructions,
 			NumLocals:     numLocals,
 			NumParameters: len(node.Parameters),
 		}
-		c.emit(code.LoadConst, c.addConstant(compiledFn))
+		fnIndex := c.addConstant(compiledFn)
+		c.emit(code.Closure, fnIndex, len(freeSymbols))
 
-		symbol := c.symbolTable.Define(node.Name)
-		if symbol.Scope == GlobalScope {
-			c.emit(code.SetGlobal, symbol.Index)
-		} else {
-			c.emit(code.SetLocal, symbol.Index)
-		}
+		c.setSymbol(symbol)
 
 	case *ast.ExpressionStatement:
 		err := c.Compile(node.Expression)
@@ -381,15 +392,21 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.emit(code.RetNull)
 		}
 
+		freeSymbols := c.symbolTable.FreeSymbols
 		numLocals := c.symbolTable.numDefinitions
 		instructions := c.leaveScope()
+
+		for _, s := range freeSymbols {
+			c.loadSymbol(s)
+		}
 
 		compiledFn := &object.CompiledFunction{
 			Instructions:  instructions,
 			NumLocals:     numLocals,
 			NumParameters: len(node.Parameters),
 		}
-		c.emit(code.LoadConst, c.addConstant(compiledFn))
+		fnIndex := c.addConstant(compiledFn)
+		c.emit(code.Closure, fnIndex, len(freeSymbols))
 
 	case *ast.IntegerLiteral:
 		integer := object.NewInt(node.Value, node.Token.Line)
