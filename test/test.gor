@@ -1,23 +1,17 @@
 func fib(n) {
-    let a = 0
-    let b = 1
-
     if n < 0 {
-        null
-    } else {
-        if n <= 1 {
-            n
-        } else {
-            func rep(k, x, y) {
-                if k == n - 1 {
-                    y
-                } else {
-                    rep(k + 1, y, x + y)
-                }
-            }
-            rep(0, a, b)
-        }
+        return null
     }
+    if n <= 1 {
+        return n
+    }
+    func rep(k, x, y) {
+        if k == n - 1 {
+            return y
+        }
+        rep(k + 1, y, x + y)
+    }
+    rep(0, 0, 1)
 }
 
 display(fib(9))

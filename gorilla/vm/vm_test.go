@@ -171,12 +171,151 @@ func TestCallingFunctionsWithoutArguments(t *testing.T) {
 	tests := []vmTestCase{
 		{
 			input: `
-let fivePlusTen = fn() { 5 + 10 }
-fivePlusTen()
-`,
+        let fivePlusTen = fn() { 5 + 10; };
+        fivePlusTen();
+        `,
 			expected: 15,
 		},
+		{
+			input: `
+        let one = fn() { 1; };
+        let two = fn() { 2; };
+        one() + two()
+        `,
+			expected: 3,
+		},
+		{
+			input: `
+        let a = fn() { 1 };
+        let b = fn() { a() + 1 };
+        let c = fn() { b() + 1 };
+        c();
+        `,
+			expected: 3,
+		},
 	}
+
+	runVmTests(t, tests)
+}
+
+func TestFunctionsWithReturnStatement(t *testing.T) {
+	tests := []vmTestCase{
+		{
+			input: `
+        let earlyExit = fn() { return 99; 100; };
+        earlyExit();
+        `,
+			expected: 99,
+		},
+		{
+			input: `
+        let earlyExit = fn() { return 99; return 100; };
+        earlyExit();
+        `,
+			expected: 99,
+		},
+	}
+
+	runVmTests(t, tests)
+}
+
+func TestFunctionsWithoutReturnValue(t *testing.T) {
+	tests := []vmTestCase{
+		{
+			input: `
+        let noReturn = fn() { };
+        noReturn();
+        `,
+			expected: object.NULL,
+		},
+		{
+			input: `
+        let noReturn = fn() { };
+        let noReturnTwo = fn() { noReturn(); };
+        noReturn();
+        noReturnTwo();
+        `,
+			expected: object.NULL,
+		},
+	}
+
+	runVmTests(t, tests)
+}
+
+func TestFirstClassFunctions(t *testing.T) {
+	tests := []vmTestCase{
+		{
+			input: `
+        let returnsOne = fn() { 1; };
+        let returnsOneReturner = fn() { returnsOne; };
+        returnsOneReturner()();
+        `,
+			expected: 1,
+		},
+		{
+			input: `
+        let returnsOneReturner = fn() {
+            let returnsOne = fn() { 1; };
+            returnsOne;
+        };
+        returnsOneReturner()();
+        `,
+			expected: 1,
+		},
+	}
+
+	runVmTests(t, tests)
+}
+
+func TestCallingFunctionsWithBindings(t *testing.T) {
+	tests := []vmTestCase{
+		{
+			input: `
+        let one = fn() { let one = 1; one };
+        one();
+        `,
+			expected: 1,
+		},
+		{
+			input: `
+        let oneAndTwo = fn() { let one = 1; let two = 2; one + two; };
+        oneAndTwo();
+        `,
+			expected: 3,
+		},
+		{
+			input: `
+        let oneAndTwo = fn() { let one = 1; let two = 2; one + two; };
+        let threeAndFour = fn() { let three = 3; let four = 4; three + four; };
+        oneAndTwo() + threeAndFour();
+        `,
+			expected: 10,
+		},
+		{
+			input: `
+        let firstFoobar = fn() { let foobar = 50; foobar; };
+        let secondFoobar = fn() { let foobar = 100; foobar; };
+        firstFoobar() + secondFoobar();
+        `,
+			expected: 150,
+		},
+		{
+			input: `
+        let globalSeed = 50;
+        let minusOne = fn() {
+            let num = 1;
+            globalSeed - num;
+        }
+        let minusTwo = fn() {
+            let num = 2;
+            globalSeed - num;
+        }
+        minusOne() + minusTwo();
+        `,
+			expected: 97,
+		},
+	}
+
 	runVmTests(t, tests)
 }
 
@@ -251,14 +390,101 @@ func TestClosures(t *testing.T) {
 	tests := []vmTestCase{
 		{
 			input: `
-let newClosure = fn(a) {
-fn() { a; };
-};
-let closure = newClosure(99);
-closure();
-`,
+		let newClosure = fn(a) {
+			fn() { a; };
+		};
+		let closure = newClosure(99);
+		closure();
+		`,
+			expected: 99,
+		},
+		{
+			input: `
+		let newAdder = fn(a, b) {
+			fn(c) { a + b + c };
+		};
+		let adder = newAdder(1, 2);
+		adder(8);
+		`,
+			expected: 11,
+		},
+		{
+			input: `
+		let newAdder = fn(a, b) {
+			let c = a + b;
+			fn(d) { c + d };
+		};
+		let adder = newAdder(1, 2);
+		adder(8);
+		`,
+			expected: 11,
+		},
+		{
+			input: `
+		let newAdderOuter = fn(a, b) {
+			let c = a + b;
+			fn(d) {
+				let e = d + c;
+				fn(f) { e + f; };
+			};
+		};
+		let newAdderInner = newAdderOuter(1, 2)
+		let adder = newAdderInner(3);
+		adder(8);
+		`,
+			expected: 14,
+		},
+		{
+			input: `
+		let a = 1;
+		let newAdderOuter = fn(b) {
+			fn(c) {
+				fn(d) { a + b + c + d };
+			};
+		};
+		let newAdderInner = newAdderOuter(2)
+		let adder = newAdderInner(3);
+		adder(8);
+		`,
+			expected: 14,
+		},
+		{
+			input: `
+		let newClosure = fn(a, b) {
+			let one = fn() { a; };
+			let two = fn() { b; };
+			fn() { one() + two(); };
+		};
+		let closure = newClosure(9, 90);
+		closure();
+		`,
 			expected: 99,
 		},
 	}
+
+	runVmTests(t, tests)
+}
+
+func TestRecursiveFibonacci(t *testing.T) {
+	tests := []vmTestCase{
+		{
+			input: `
+        let fibonacci = fn(x) {
+            if (x == 0) {
+                return 0;
+            } else {
+                if (x == 1) {
+                    return 1;
+                } else {
+                    fibonacci(x - 1) + fibonacci(x - 2);
+                }
+            }
+        };
+        fibonacci(15);
+        `,
+			expected: 610,
+		},
+	}
+
 	runVmTests(t, tests)
 }

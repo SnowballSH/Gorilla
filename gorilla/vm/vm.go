@@ -17,13 +17,13 @@ const FrameSize = 1 << 20
 type VM struct {
 	constants []object.Object
 
-	stack []object.Object
-	sp    int // Always points to the next value
-
-	globals []object.Object
-
 	frames      []*Frame
 	framesIndex int
+
+	stack []object.Object
+	sp    int // Always points to the next value. Top of stack is stack[sp-1]
+
+	globals []object.Object
 }
 
 func (vm *VM) currentFrame() *Frame {
@@ -51,17 +51,17 @@ func New(bytecode *compiler.Bytecode) *VM {
 	return &VM{
 		constants: bytecode.Constants,
 
+		frames:      frames,
+		framesIndex: 1,
+
 		stack: make([]object.Object, StackSize),
 		sp:    0,
 
 		globals: make([]object.Object, GlobalSize),
-
-		frames:      frames,
-		framesIndex: 1,
 	}
 }
 
-func NewWithGlobalsStore(bytecode *compiler.Bytecode, s []object.Object) *VM {
+func NewWithGlobalsStore(bytecode *compiler.Bytecode, globals []object.Object) *VM {
 	mainFn := &object.CompiledFunction{Instructions: bytecode.Instructions}
 	mainClosure := &object.Closure{Fn: mainFn}
 	mainFrame := NewFrame(mainClosure, 0)
@@ -78,7 +78,7 @@ func NewWithGlobalsStore(bytecode *compiler.Bytecode, s []object.Object) *VM {
 		stack: make([]object.Object, StackSize),
 		sp:    0,
 
-		globals: s,
+		globals: globals,
 	}
 }
 
@@ -118,11 +118,11 @@ func (vm *VM) Run() error {
 		switch op {
 
 		case code.Jump:
-			pos := int(code.ReadUint16(vm.currentFrame().Instructions()[ip+1:]))
+			pos := int(code.ReadUint16(ins[ip+1:]))
 			vm.currentFrame().ip = pos - 1
 
 		case code.JumpElse:
-			pos := int(code.ReadUint16(vm.currentFrame().Instructions()[ip+1:]))
+			pos := int(code.ReadUint16(ins[ip+1:]))
 			vm.currentFrame().ip += 2
 			condition := vm.pop()
 			if !eval.IsTruthy(condition) {
@@ -130,13 +130,14 @@ func (vm *VM) Run() error {
 			}
 
 		case code.SetGlobal:
-			globalIndex := code.ReadUint16(vm.currentFrame().Instructions()[ip+1:])
+			globalIndex := code.ReadUint16(ins[ip+1:])
 			vm.currentFrame().ip += 2
 			vm.globals[globalIndex] = vm.pop()
 
 		case code.LoadGlobal:
-			globalIndex := code.ReadUint16(vm.currentFrame().Instructions()[ip+1:])
+			globalIndex := code.ReadUint16(ins[ip+1:])
 			vm.currentFrame().ip += 2
+
 			err := vm.push(vm.globals[globalIndex])
 			if err != nil {
 				return err
@@ -173,7 +174,7 @@ func (vm *VM) Run() error {
 			}
 
 		case code.LoadConst:
-			constIndex := code.ReadUint16(vm.currentFrame().Instructions()[ip+1:])
+			constIndex := code.ReadUint16(ins[ip+1:])
 			vm.currentFrame().ip += 2
 
 			err := vm.push(vm.constants[constIndex])
@@ -299,6 +300,10 @@ func (vm *VM) Run() error {
 
 func (vm *VM) executeCall(numArgs int) error {
 	callee := vm.stack[vm.sp-1-numArgs]
+	if callee == nil {
+		return fmt.Errorf("NIL\n%s\n%s", vm.currentFrame().Instructions(), vm.stack[vm.sp-1-numArgs])
+	}
+
 	switch callee := callee.(type) {
 	case *object.Closure:
 		return vm.callClosure(callee, numArgs)
@@ -313,6 +318,18 @@ func (vm *VM) callClosure(cl *object.Closure, numArgs int) error {
 	if numArgs != cl.Fn.NumParameters {
 		return fmt.Errorf("[Line %d] Argument mismatch (expected %d, got %d)", cl.Fn.Line()+1,
 			cl.Fn.NumParameters, numArgs)
+	}
+
+	if cl.Fn == vm.currentFrame().cl.Fn {
+		nextOp := vm.currentFrame().NextOp()
+		if nextOp == code.RetNull {
+			for p := 0; p < numArgs; p++ {
+				vm.stack[vm.currentFrame().basePointer+p] = vm.stack[vm.sp-numArgs+p]
+			}
+			vm.sp -= numArgs + 1
+			vm.currentFrame().ip = -1 // reset IP to beginning of the frame
+			return nil
+		}
 	}
 
 	frame := NewFrame(cl, vm.sp-numArgs)

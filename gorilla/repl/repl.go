@@ -21,7 +21,7 @@ const VERSION = "0.3"
 
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
-	env := object.NewEnvironment().AddBuiltin()
+	env := object.NewEnvironment()
 
 	_, _ = io.WriteString(out, "Gorilla "+VERSION+"\n")
 	i := 0

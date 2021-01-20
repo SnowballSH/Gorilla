@@ -11,7 +11,7 @@ import (
 
 var Builtins []struct {
 	Name    string
-	Builtin *Builtin
+	Builtin Object
 }
 
 var IntAttrs map[string]Object
@@ -20,9 +20,13 @@ var StrAttrs map[string]Object
 func init() {
 	Builtins = []struct {
 		Name    string
-		Builtin *Builtin
+		Builtin Object
 	}{
-		// 0
+		{
+			"null",
+			NULL,
+		},
+
 		{
 			"display",
 			&Builtin{
@@ -35,7 +39,6 @@ func init() {
 			},
 		},
 
-		// 1
 		{
 			"len",
 			&Builtin{Fn: func(_ Object, line int, args ...Object) Object {
@@ -85,7 +88,7 @@ func NewError(format string, a ...interface{}) *Error {
 	return &Error{Message: fmt.Sprintf(format, a...)}
 }
 
-func LookupBuiltin(name string) *Builtin {
+func LookupBuiltin(name string) Object {
 	for _, def := range Builtins {
 		if def.Name == name {
 			return def.Builtin

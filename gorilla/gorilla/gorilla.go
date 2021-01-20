@@ -34,7 +34,7 @@ func RunFile() {
 
 	b, err := ioutil.ReadFile(fn) // just pass the file name
 	if err != nil {
-		_, _ = io.WriteString(os.Stdout, "Error while reading file:\n"+err.Error())
+		_, _ = io.WriteString(os.Stdout, "Error while reading file:\n"+err.Error()+"\n")
 		os.Exit(1)
 	}
 
@@ -70,7 +70,7 @@ func RunFile() {
 		os.Exit(0)
 	}
 
-	env := object.NewEnvironment().AddBuiltin()
+	env := object.NewEnvironment()
 
 	l := lexer.New(code)
 	p := parser.New(l)

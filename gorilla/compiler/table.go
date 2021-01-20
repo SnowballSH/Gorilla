@@ -3,9 +3,9 @@ package compiler
 type SymbolScope string
 
 const (
-	LocalScope   SymbolScope = "LOCAL"
-	GlobalScope  SymbolScope = "GLOBAL"
 	BuiltinScope SymbolScope = "BUILTIN"
+	GlobalScope  SymbolScope = "GLOBAL"
+	LocalScope   SymbolScope = "LOCAL"
 	FreeScope    SymbolScope = "FREE"
 )
 
@@ -25,18 +25,29 @@ type SymbolTable struct {
 }
 
 func NewSymbolTable() *SymbolTable {
-	s := make(map[string]Symbol)
 	return &SymbolTable{
 		Outer:       nil,
-		store:       s,
+		store:       make(map[string]Symbol),
 		FreeSymbols: []Symbol{},
 	}
 }
 
 func NewEnclosedSymbolTable(outer *SymbolTable) *SymbolTable {
-	s := NewSymbolTable()
-	s.Outer = outer
-	return s
+	return &SymbolTable{
+		Outer:       outer,
+		store:       make(map[string]Symbol),
+		FreeSymbols: []Symbol{},
+	}
+}
+
+func (s *SymbolTable) defineFree(original Symbol) Symbol {
+	s.FreeSymbols = append(s.FreeSymbols, original)
+
+	symbol := Symbol{Name: original.Name, Index: len(s.FreeSymbols) - 1}
+	symbol.Scope = FreeScope
+
+	s.store[original.Name] = symbol
+	return symbol
 }
 
 func (s *SymbolTable) Define(name string) Symbol {
@@ -58,14 +69,6 @@ func (s *SymbolTable) DefineBuiltin(index int, name string) Symbol {
 	return symbol
 }
 
-func (s *SymbolTable) defineFree(original Symbol) Symbol {
-	s.FreeSymbols = append(s.FreeSymbols, original)
-	symbol := Symbol{Name: original.Name, Index: len(s.FreeSymbols) - 1}
-	symbol.Scope = FreeScope
-	s.store[original.Name] = symbol
-	return symbol
-}
-
 func (s *SymbolTable) Resolve(name string) (Symbol, bool) {
 	obj, ok := s.store[name]
 	if !ok && s.Outer != nil {
@@ -73,6 +76,7 @@ func (s *SymbolTable) Resolve(name string) (Symbol, bool) {
 		if !ok {
 			return obj, ok
 		}
+
 		if obj.Scope == GlobalScope || obj.Scope == BuiltinScope {
 			return obj, ok
 		}

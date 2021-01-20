@@ -431,8 +431,109 @@ func TestFunctions(t *testing.T) {
 				code.Make(code.Pop),
 			},
 		},
+		{
+			input: `fn() { 1; 2 }`,
+			expectedConstants: []interface{}{
+				1,
+				2,
+				[]code.Instructions{
+					code.Make(code.LoadConst, 0),
+					code.Make(code.Pop),
+					code.Make(code.LoadConst, 1),
+					code.Make(code.Ret),
+				},
+			},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.Closure, 2, 0),
+				code.Make(code.Pop),
+			},
+		},
 	}
+
 	runCompilerTests(t, tests)
+}
+
+func TestFunctionsWithoutRet(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `fn() { }`,
+			expectedConstants: []interface{}{
+				[]code.Instructions{
+					code.Make(code.RetNull),
+				},
+			},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.Closure, 0, 0),
+				code.Make(code.Pop),
+			},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
+
+func TestCompilerScopes(t *testing.T) {
+	compiler := New()
+	if compiler.scopeIndex != 0 {
+		t.Errorf("scopeIndex wrong. got=%d, want=%d", compiler.scopeIndex, 0)
+	}
+	globalSymbolTable := compiler.symbolTable
+
+	compiler.emit(code.Mul)
+
+	compiler.enterScope()
+	if compiler.scopeIndex != 1 {
+		t.Errorf("scopeIndex wrong. got=%d, want=%d", compiler.scopeIndex, 1)
+	}
+
+	compiler.emit(code.Sub)
+
+	if len(compiler.scopes[compiler.scopeIndex].instructions) != 1 {
+		t.Errorf("instructions length wrong. got=%d",
+			len(compiler.scopes[compiler.scopeIndex].instructions))
+	}
+
+	last := compiler.scopes[compiler.scopeIndex].lastInstruction
+	if last.Opcode != code.Sub {
+		t.Errorf("lastInstruction.Opcode wrong. got=%d, want=%d",
+			last.Opcode, code.Sub)
+	}
+
+	if compiler.symbolTable.Outer != globalSymbolTable {
+		t.Errorf("compiler did not enclose symbolTable")
+	}
+
+	compiler.leaveScope()
+	if compiler.scopeIndex != 0 {
+		t.Errorf("scopeIndex wrong. got=%d, want=%d",
+			compiler.scopeIndex, 0)
+	}
+
+	if compiler.symbolTable != globalSymbolTable {
+		t.Errorf("compiler did not restore global symbol table")
+	}
+	if compiler.symbolTable.Outer != nil {
+		t.Errorf("compiler modified global symbol table incorrectly")
+	}
+
+	compiler.emit(code.Add)
+
+	if len(compiler.scopes[compiler.scopeIndex].instructions) != 2 {
+		t.Errorf("instructions length wrong. got=%d",
+			len(compiler.scopes[compiler.scopeIndex].instructions))
+	}
+
+	last = compiler.scopes[compiler.scopeIndex].lastInstruction
+	if last.Opcode != code.Add {
+		t.Errorf("lastInstruction.Opcode wrong. got=%d, want=%d",
+			last.Opcode, code.Add)
+	}
+
+	previous := compiler.scopes[compiler.scopeIndex].previousInstruction
+	if previous.Opcode != code.Mul {
+		t.Errorf("previousInstruction.Opcode wrong. got=%d, want=%d",
+			previous.Opcode, code.Mul)
+	}
 }
 
 func TestFunctionCalls(t *testing.T) {
@@ -442,21 +543,21 @@ func TestFunctionCalls(t *testing.T) {
 			expectedConstants: []interface{}{
 				24,
 				[]code.Instructions{
-					code.Make(code.LoadConst, 0),
+					code.Make(code.LoadConst, 0), // The literal "24"
 					code.Make(code.Ret),
 				},
 			},
 			expectedInstructions: []code.Instructions{
-				code.Make(code.Closure, 1, 0),
+				code.Make(code.Closure, 1, 0), // The compiled function
 				code.Make(code.Call, 0),
 				code.Make(code.Pop),
 			},
 		},
 		{
 			input: `
-let noArg = fn() { 24 }
-noArg()
-`,
+            let noArg = fn() { 24 };
+            noArg();
+            `,
 			expectedConstants: []interface{}{
 				24,
 				[]code.Instructions{
@@ -465,14 +566,13 @@ noArg()
 				},
 			},
 			expectedInstructions: []code.Instructions{
-				code.Make(code.Closure, 1, 0),
+				code.Make(code.Closure, 1, 0), // The compiled function
 				code.Make(code.SetGlobal, 0),
 				code.Make(code.LoadGlobal, 0),
 				code.Make(code.Call, 0),
 				code.Make(code.Pop),
 			},
 		},
-
 		{
 			input: `
             let oneArg = fn(a) { a };
@@ -524,6 +624,7 @@ noArg()
 			},
 		},
 	}
+
 	runCompilerTests(t, tests)
 }
 
@@ -531,7 +632,7 @@ func TestLetStatementScopes(t *testing.T) {
 	tests := []compilerTestCase{
 		{
 			input: `
-            let num = 55
+            let num = 55;
             fn() { num }
             `,
 			expectedConstants: []interface{}{
@@ -551,7 +652,7 @@ func TestLetStatementScopes(t *testing.T) {
 		{
 			input: `
             fn() {
-                let num = 55
+                let num = 55;
                 num
             }
             `,
@@ -572,8 +673,8 @@ func TestLetStatementScopes(t *testing.T) {
 		{
 			input: `
             fn() {
-                let a = 55
-                let b = 77
+                let a = 55;
+                let b = 77;
                 a + b
             }
             `,
@@ -593,25 +694,6 @@ func TestLetStatementScopes(t *testing.T) {
 			},
 			expectedInstructions: []code.Instructions{
 				code.Make(code.Closure, 2, 0),
-				code.Make(code.Pop),
-			},
-		},
-	}
-
-	runCompilerTests(t, tests)
-}
-
-func TestBuiltins(t *testing.T) {
-	tests := []compilerTestCase{
-		{
-			input: `
-            display(1)
-            `,
-			expectedConstants: []interface{}{1},
-			expectedInstructions: []code.Instructions{
-				code.Make(code.LoadBuiltin, 0),
-				code.Make(code.LoadConst, 0),
-				code.Make(code.Call, 1),
 				code.Make(code.Pop),
 			},
 		},
