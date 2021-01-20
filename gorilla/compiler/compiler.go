@@ -257,7 +257,7 @@ func (c *Compiler) Compile(node ast.Node) error {
 	case *ast.Identifier:
 		symbol, ok := c.symbolTable.Resolve(node.Value)
 		if !ok {
-			return fmt.Errorf("undefined variable %s", node.Value)
+			return fmt.Errorf("[Line %d] Variable '%s' is not defined", node.Token.Line+1, node.Value)
 		}
 
 		c.loadSymbol(symbol)
@@ -467,6 +467,25 @@ func (c *Compiler) Compile(node ast.Node) error {
 		} else {
 			c.emit(code.LoadFalse)
 		}
+
+	case *ast.GetAttr:
+		err := c.Compile(node.Expr)
+		if err != nil {
+			return err
+		}
+		var i int
+		ok := false
+		for j, o := range object.AllAttrs {
+			if o.N == node.Name.String() {
+				i = j
+				ok = true
+				break
+			}
+		}
+		if !ok {
+			return fmt.Errorf("[Line %d] No attribute called '%s' found", node.Token.Line+1, node.Name)
+		}
+		c.emit(code.GetAttr, i)
 	}
 
 	return nil

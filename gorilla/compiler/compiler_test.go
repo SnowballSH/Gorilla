@@ -824,3 +824,23 @@ func TestClosures(t *testing.T) {
 
 	runCompilerTests(t, tests)
 }
+
+func TestAttr(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `
+            "".strip
+            `,
+			expectedConstants: []interface{}{
+				"",
+			},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadConst, 0),
+				code.Make(code.GetAttr, 2),
+				code.Make(code.Pop),
+			},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}

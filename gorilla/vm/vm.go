@@ -243,6 +243,16 @@ func (vm *VM) Run() error {
 				return err
 			}
 
+		case code.GetAttr:
+			i := code.ReadUint16(ins[ip+1:])
+			vm.currentFrame().ip += 2
+
+			err := vm.getAttr(int(i))
+
+			if err != nil {
+				return err
+			}
+
 		case code.LoadTrue:
 			err := vm.push(object.TRUE)
 			if err != nil {
@@ -314,6 +324,50 @@ func (vm *VM) executeCall(numArgs int) error {
 	}
 }
 
+func (vm *VM) getAttr(index int) error {
+	callee := vm.pop()
+	callee = callee.(object.Object)
+
+	methodTypes := object.AllAttrs[index].T
+
+	ok := false
+	for _, t := range methodTypes {
+		if t == string(callee.Type()) {
+			ok = true
+			break
+		}
+	}
+
+	var ele object.Object
+	var err bool
+	if ok {
+		switch callee.Type() {
+		case object.STRING:
+			ele, err = object.StrAttrs[object.AllAttrs[index].N]
+			if !err {
+				ok = false
+			}
+		case object.INTEGER:
+			ele, err = object.IntAttrs[object.AllAttrs[index].N]
+			if !err {
+				ok = false
+			}
+		}
+	}
+
+	if !ok || ele == nil {
+		return fmt.Errorf(
+			"[Line %d] Type '%s' does not have attribute '%s'",
+			callee.Line()+1,
+			callee.Type(),
+			object.AllAttrs[index].N)
+	}
+
+	ele.SetParent(callee)
+
+	return vm.push(ele)
+}
+
 func (vm *VM) callClosure(cl *object.Closure, numArgs int) error {
 	if numArgs != cl.Fn.NumParameters {
 		return fmt.Errorf("[Line %d] Argument mismatch (expected %d, got %d)", cl.Fn.Line()+1,
@@ -360,7 +414,7 @@ func (vm *VM) pushClosure(constIndex, numFree int) error {
 func (vm *VM) callBuiltin(builtin *object.Builtin, numArgs int) error {
 	args := vm.stack[vm.sp-numArgs : vm.sp]
 
-	result := builtin.Fn(nil, builtin.Line(), args...)
+	result := builtin.Fn(builtin.Parent(), builtin.Line(), args...)
 	vm.sp = vm.sp - numArgs - 1
 
 	if result != nil {
@@ -441,6 +495,10 @@ func (vm *VM) executeComparison(op code.Opcode) error {
 		return vm.executeIntegerComparison(op, left, right)
 	}
 
+	if left.Type() == object.STRING && right.Type() == object.STRING {
+		return vm.executeStringComparison(op, left, right)
+	}
+
 	switch op {
 	case code.Eq:
 		return vm.push(eval.FromNativeBoolean(right == left, left.Line()))
@@ -474,7 +532,30 @@ func (vm *VM) executeIntegerComparison(
 	case code.Gteq:
 		return vm.push(eval.FromNativeBoolean(rightValue <= leftValue, left.Line()))
 	default:
-		return fmt.Errorf("unknown operator: %d", op)
+		return fmt.Errorf(
+			"unknown operator: %s %d %s",
+			left.Type(), op, right.Type(),
+		)
+	}
+}
+
+func (vm *VM) executeStringComparison(
+	op code.Opcode,
+	left, right object.Object,
+) error {
+	leftValue := left.(*object.String).Value
+	rightValue := right.(*object.String).Value
+
+	switch op {
+	case code.Eq:
+		return vm.push(eval.FromNativeBoolean(rightValue == leftValue, left.Line()))
+	case code.Neq:
+		return vm.push(eval.FromNativeBoolean(rightValue != leftValue, left.Line()))
+	default:
+		return fmt.Errorf(
+			"unknown operator: %s %d %s",
+			left.Type(), op, right.Type(),
+		)
 	}
 }
 

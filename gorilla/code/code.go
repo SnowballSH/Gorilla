@@ -150,6 +150,8 @@ var definitions = map[Opcode]*Definition{
 	RetNull: {"RetNull", []int{}},
 
 	Closure: {"Closure", []int{2, 2}},
+
+	GetAttr: {"GetAttr", []int{2}},
 }
 
 const (
@@ -192,4 +194,6 @@ const (
 	RetNull
 
 	Closure
+
+	GetAttr
 )
