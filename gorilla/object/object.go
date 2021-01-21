@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"../ast"
+	"../code"
 )
 
 const (
@@ -34,8 +35,17 @@ const (
 	// FUNCTION is the Function object
 	FUNCTION = "FUNCTION"
 
+	// CompiledFunction is the CompiledFunction object
+	COMPILEDFUNCTION = "COMPILEDFUNCTION"
+
 	// BUILTIN is the Builtin object type
 	BUILTIN = "BUILTIN"
+
+	// CLOSURE
+	CLOSURE = "CLOSURE"
+
+	// ARRAY
+	ARRAY = "ARRAY"
 )
 
 var (
@@ -100,6 +110,34 @@ func (s *String) Line() int                     { return s.SLine }
 func (s *String) Attributes() map[string]Object { return s.Attrs }
 func (s *String) Parent() Object                { return s.SParent }
 func (s *String) SetParent(x Object)            { s.SParent = x }
+
+// Array
+type Array struct {
+	Value   []Object
+	SLine   int
+	Attrs   map[string]Object
+	SParent Object
+}
+
+func (a *Array) Type() Type { return ARRAY }
+func (a *Array) Inspect() string {
+	var out bytes.Buffer
+
+	var elements []string
+	for _, e := range a.Value {
+		elements = append(elements, e.Inspect())
+	}
+
+	out.WriteString("[")
+	out.WriteString(strings.Join(elements, ", "))
+	out.WriteString("]")
+
+	return out.String()
+}
+func (a *Array) Line() int                     { return a.SLine }
+func (a *Array) Attributes() map[string]Object { return a.Attrs }
+func (a *Array) Parent() Object                { return a.SParent }
+func (a *Array) SetParent(x Object)            { a.SParent = x }
 
 // Boolean is the boolean type and used to represent boolean literals and holds an interval bool value
 type Boolean struct {
@@ -208,6 +246,24 @@ func (f *Function) Attributes() map[string]Object { return noAttr }
 func (f *Function) Parent() Object                { return f.SParent }
 func (f *Function) SetParent(x Object)            { f.SParent = x }
 
+type CompiledFunction struct {
+	Instructions  code.Instructions
+	NumLocals     int
+	NumParameters int
+	SLine         int
+	SParent       Object
+}
+
+func (cf *CompiledFunction) Type() Type { return COMPILEDFUNCTION }
+func (cf *CompiledFunction) Inspect() string {
+	return fmt.Sprintf("Compiled Function [%p]", cf)
+}
+
+func (cf *CompiledFunction) Line() int                     { return cf.SLine }
+func (cf *CompiledFunction) Attributes() map[string]Object { return noAttr }
+func (cf *CompiledFunction) Parent() Object                { return cf.SParent }
+func (cf *CompiledFunction) SetParent(x Object)            { cf.SParent = x }
+
 type Builtin struct {
 	Fn      BuiltinFunction
 	SLine   int
@@ -224,3 +280,21 @@ func (b *Builtin) Line() int                     { return b.SLine }
 func (b *Builtin) Attributes() map[string]Object { return noAttr }
 func (b *Builtin) Parent() Object                { return b.SParent }
 func (b *Builtin) SetParent(x Object)            { b.SParent = x }
+
+type Closure struct {
+	Fn      *CompiledFunction
+	Free    []Object
+	SLine   int
+	SParent Object
+}
+
+func (c *Closure) Type() Type { return CLOSURE }
+
+func (c *Closure) Inspect() string {
+	return fmt.Sprintf("Closure [%p]", c)
+}
+
+func (c *Closure) Line() int                     { return c.SLine }
+func (c *Closure) Attributes() map[string]Object { return noAttr }
+func (c *Closure) Parent() Object                { return c.SParent }
+func (c *Closure) SetParent(x Object)            { c.SParent = x }

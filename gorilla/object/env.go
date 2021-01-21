@@ -11,11 +11,6 @@ func NewEnvironment() *Environment {
 	return &Environment{store: s, outer: nil}
 }
 
-func (e *Environment) AddBuiltin() *Environment {
-	e.Set("null", NULL)
-	return e
-}
-
 type Environment struct {
 	store map[string]Object
 	outer *Environment

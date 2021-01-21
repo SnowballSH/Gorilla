@@ -24,6 +24,7 @@ const (
 	PREFIX      // -X or !X
 	DOT         // a.b
 	CALL        // myFunction(X)
+	INDEX       // x[y]
 )
 
 var precedences = map[token.TType]int{
@@ -39,6 +40,7 @@ var precedences = map[token.TType]int{
 	token.ASTERISK: PRODUCT,
 	token.LPAREN:   CALL,
 	token.DOT:      DOT,
+	token.LBRACKET: INDEX,
 }
 
 type Parser struct {
@@ -75,6 +77,8 @@ func New(l *lexer.Lexer) *Parser {
 
 	p.registerPrefix(token.LPAREN, p.parseGroupedExpression)
 
+	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)
+
 	p.infixParseFns = make(map[token.TType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
 	p.registerInfix(token.MINUS, p.parseInfixExpression)
@@ -86,6 +90,8 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.GT, p.parseInfixExpression)
 	p.registerInfix(token.LTEQ, p.parseInfixExpression)
 	p.registerInfix(token.GTEQ, p.parseInfixExpression)
+
+	p.registerInfix(token.LBRACKET, p.parseIndexExpression)
 
 	p.registerInfix(token.LPAREN, p.parseCallExpression)
 	p.registerInfix(token.DOT, p.parseGetAttr)
@@ -457,9 +463,21 @@ func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 }
 
 func (p *Parser) parseCallArguments() []ast.Expression {
+	return p.parseList(token.RPAREN)
+}
+
+func (p *Parser) parseArrayLiteral() ast.Expression {
+	array := &ast.ArrayLiteral{Token: p.curToken}
+
+	array.Elements = p.parseList(token.RBRACKET)
+
+	return array
+}
+
+func (p *Parser) parseList(t token.TType) []ast.Expression {
 	var args []ast.Expression
 
-	if p.peekTokenIs(token.RPAREN) {
+	if p.peekTokenIs(t) {
 		p.nextToken()
 		return args
 	}
@@ -473,11 +491,23 @@ func (p *Parser) parseCallArguments() []ast.Expression {
 		args = append(args, p.parseExpression(LOWEST))
 	}
 
-	if !p.expectPeek(token.RPAREN) {
+	if !p.expectPeek(t) {
+		return nil
+	}
+	return args
+}
+
+func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
+	exp := &ast.IndexExpression{Token: p.curToken, Left: left}
+
+	p.nextToken()
+	exp.Index = p.parseExpression(LOWEST)
+
+	if !p.expectPeek(token.RBRACKET) {
 		return nil
 	}
 
-	return args
+	return exp
 }
 
 func (p *Parser) parseGetAttr(expr ast.Expression) ast.Expression {

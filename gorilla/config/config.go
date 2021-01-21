@@ -1,9 +1,17 @@
 package config
 
 import (
+	"io"
+	"os"
 	"runtime"
 	"strings"
 )
+
+var OUT io.Writer = os.Stdout
+
+func SetOut(w io.Writer) {
+	OUT = w
+}
 
 var OSNEWLINES = map[string]string{
 	"windows": "\r\n",
@@ -14,7 +22,8 @@ var OSNEWLINES = map[string]string{
 }
 
 func GetOSNewline(sys string) string {
-	if sys == "" || strings.ToLower(sys) == "default" {
+	sys = strings.ToLower(sys)
+	if sys == "" || sys == "default" {
 		sys = runtime.GOOS
 	}
 

@@ -2,10 +2,10 @@ package eval
 
 import (
 	"../ast"
+	"../config"
 	"../object"
 	"fmt"
 	"io"
-	"os"
 	"strings"
 )
 
@@ -13,9 +13,7 @@ var TRUE = object.TRUE
 var FALSE = object.FALSE
 var NULL = object.NULL
 
-var OUT io.Writer = os.Stdout
-
-func fromNativeBoolean(input bool, l int) *object.Boolean {
+func FromNativeBoolean(input bool, l int) *object.Boolean {
 	if input {
 		x := TRUE
 		x.SLine = l
@@ -26,13 +24,13 @@ func fromNativeBoolean(input bool, l int) *object.Boolean {
 	return x
 }
 
-func newError(format string, a ...interface{}) *object.Error {
+func NewError(format string, a ...interface{}) *object.Error {
 	return &object.Error{Message: fmt.Sprintf(format, a...)}
 }
 
 func Eval(node ast.Node, env *object.Environment, out ...io.Writer) object.Object {
 	if len(out) > 0 {
-		OUT = out[0]
+		config.SetOut(out[0])
 	}
 
 	switch node := node.(type) {
@@ -46,10 +44,10 @@ func Eval(node ast.Node, env *object.Environment, out ...io.Writer) object.Objec
 
 	// Expressions
 	case *ast.IntegerLiteral:
-		return NewInt(node.Value, node.Token.Line)
+		return object.NewInt(node.Value, node.Token.Line)
 
 	case *ast.Boolean:
-		return fromNativeBoolean(node.Value, node.Token.Line)
+		return FromNativeBoolean(node.Value, node.Token.Line)
 
 	case *ast.PrefixExpression:
 		right := Eval(node.Right, env)
@@ -89,13 +87,13 @@ func Eval(node ast.Node, env *object.Environment, out ...io.Writer) object.Objec
 	case *ast.FunctionStmt:
 		params := node.Parameters
 		body := node.Body
-		fn := NewFunction(params, body, env, node.Token.Line)
+		fn := object.NewFunction(params, body, env, node.Token.Line)
 		env.Set(node.Name, fn)
 
 	case *ast.FunctionLiteral:
 		params := node.Parameters
 		body := node.Body
-		return NewFunction(params, body, env, node.Token.Line)
+		return object.NewFunction(params, body, env, node.Token.Line)
 
 	case *ast.IfExpression:
 		return evalIfExpression(node, env)
@@ -118,7 +116,25 @@ func Eval(node ast.Node, env *object.Environment, out ...io.Writer) object.Objec
 		return evalGetAttr(node, env)
 
 	case *ast.StringLiteral:
-		return NewString(node.Value, node.Token.Line)
+		return object.NewString(node.Value, node.Token.Line)
+
+	case *ast.ArrayLiteral:
+		elements := evalExpressions(node.Elements, env)
+		if len(elements) == 1 && isError(elements[0]) {
+			return elements[0]
+		}
+		return object.NewArray(elements, node.Token.Line)
+
+	case *ast.IndexExpression:
+		left := Eval(node.Left, env)
+		if isError(left) {
+			return left
+		}
+		index := Eval(node.Index, env)
+		if isError(index) {
+			return index
+		}
+		return evalIndexExpression(left, index)
 	}
 
 	return nil
@@ -150,7 +166,7 @@ func evalGetAttr(node *ast.GetAttr, env *object.Environment) object.Object {
 	attributes := expr.Attributes()
 	obj := attributes[node.Name.String()]
 	if obj == nil {
-		return newError(
+		return NewError(
 			"[Line %d] Type '%s' does not have attribute '%s'",
 			node.Token.Line+1,
 			expr.Type(),
@@ -161,27 +177,6 @@ func evalGetAttr(node *ast.GetAttr, env *object.Environment) object.Object {
 	obj.SetParent(expr)
 
 	return obj
-}
-
-func CallAttr(expr object.Object, attr string, line int, args ...object.Object) object.Object {
-	attributes := expr.Attributes()
-	obj := attributes[attr]
-	if obj == nil {
-		return newError(
-			"[Line %d] Type '%s' does not have attribute '%s'",
-			line+1,
-			expr.Type(),
-			attr,
-		)
-	}
-
-	obj.SetParent(expr)
-
-	fn := obj.(*object.Builtin)
-
-	res := fn.Fn(fn.Parent(), fn.Line(), args...)
-
-	return res
 }
 
 func evalPrefixExpression(operator string, right object.Object) object.Object {
@@ -218,12 +213,12 @@ func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
 		return TRUE
 	}
 	if right.Type() != object.INTEGER {
-		return newError("[Line %d] cannot negate type '%s' (When attempting to run '-%s')",
+		return NewError("[Line %d] cannot negate type '%s' (When attempting to run '-%s')",
 			right.Line()+1, right.Type(), right.Inspect())
 	}
 
 	value := right.(*object.Integer).Value
-	return NewInt(-value, right.Line())
+	return object.NewInt(-value, right.Line())
 }
 
 func evalBlockStatement(block *ast.BlockStatement, env *object.Environment) object.Object {
@@ -260,11 +255,11 @@ func evalInfixExpression(
 		return evalStringInfixExpression(operator, left, right)
 
 	case operator == "==":
-		return fromNativeBoolean(left == right, left.Line())
+		return FromNativeBoolean(left == right, left.Line())
 	case operator == "!=":
-		return fromNativeBoolean(left != right, left.Line())
+		return FromNativeBoolean(left != right, left.Line())
 	case left.Type() != right.Type():
-		return newError("[Line %d] type mismatch: %s %s %s (When attempting to run '%s %s %s')",
+		return NewError("[Line %d] type mismatch: %s %s %s (When attempting to run '%s %s %s')",
 			left.Line()+1, left.Type(), operator, right.Type(), left.Inspect(), operator, right.Inspect())
 	default:
 		return NULL
@@ -280,25 +275,28 @@ func evalIntegerInfixExpression(
 
 	switch operator {
 	case "+":
-		return NewInt(leftVal+rightVal, left.Line())
+		return object.NewInt(leftVal+rightVal, left.Line())
 	case "-":
-		return NewInt(leftVal-rightVal, left.Line())
+		return object.NewInt(leftVal-rightVal, left.Line())
 	case "*":
-		return NewInt(leftVal*rightVal, left.Line())
+		return object.NewInt(leftVal*rightVal, left.Line())
 	case "/":
-		return NewInt(leftVal/rightVal, left.Line())
+		if rightVal == 0 {
+			return NewError("[Line %d] Division by Zero", right.Line()+1)
+		}
+		return object.NewInt(leftVal/rightVal, left.Line())
 	case "<":
-		return fromNativeBoolean(leftVal < rightVal, left.Line())
+		return FromNativeBoolean(leftVal < rightVal, left.Line())
 	case ">":
-		return fromNativeBoolean(leftVal > rightVal, left.Line())
+		return FromNativeBoolean(leftVal > rightVal, left.Line())
 	case "<=":
-		return fromNativeBoolean(leftVal <= rightVal, left.Line())
+		return FromNativeBoolean(leftVal <= rightVal, left.Line())
 	case ">=":
-		return fromNativeBoolean(leftVal >= rightVal, left.Line())
+		return FromNativeBoolean(leftVal >= rightVal, left.Line())
 	case "==":
-		return fromNativeBoolean(leftVal == rightVal, left.Line())
+		return FromNativeBoolean(leftVal == rightVal, left.Line())
 	case "!=":
-		return fromNativeBoolean(leftVal != rightVal, left.Line())
+		return FromNativeBoolean(leftVal != rightVal, left.Line())
 	default:
 		return NULL
 	}
@@ -334,7 +332,7 @@ func evalStringInfixExpression(
 		}
 		leftVal := left.(*object.String).Value
 		rightVal := right.(*object.String).Value
-		return fromNativeBoolean(leftVal == rightVal, left.Line())
+		return FromNativeBoolean(leftVal == rightVal, left.Line())
 
 	case "!=":
 		if right.Type() != "String" {
@@ -342,14 +340,35 @@ func evalStringInfixExpression(
 		}
 		leftVal := left.(*object.String).Value
 		rightVal := right.(*object.String).Value
-		return fromNativeBoolean(leftVal != rightVal, left.Line())
+		return FromNativeBoolean(leftVal != rightVal, left.Line())
 
 	default:
 		break
 	}
 
-	return newError("unknown operator: %s %s %s",
+	return NewError("unknown operator: %s %s %s",
 		left.Type(), operator, right.Type())
+}
+
+func evalIndexExpression(left, index object.Object) object.Object {
+	switch {
+	case left.Type() == object.ARRAY && index.Type() == object.INTEGER:
+		return evalArrayIndexExpression(left, index)
+	default:
+		return NewError("[Line %d] Cannot perform index operation: %s[%s]", left.Line()+1, left.Type(), index.Type())
+	}
+}
+
+func evalArrayIndexExpression(array, index object.Object) object.Object {
+	arrayObject := array.(*object.Array)
+	idx := index.(*object.Integer).Value
+	max := int64(len(arrayObject.Value) - 1)
+
+	if idx < 0 || idx > max {
+		return NewError("[Line %d] Array index out of range", arrayObject.Line()+1)
+	}
+
+	return arrayObject.Value[idx]
 }
 
 func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Object {
@@ -358,7 +377,7 @@ func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Obje
 		return condition
 	}
 
-	if isTruthy(condition) {
+	if IsTruthy(condition) {
 		return Eval(ie.Consequence, env)
 	} else if ie.Alternative != nil {
 		return Eval(ie.Alternative, env)
@@ -374,11 +393,11 @@ func evalIdentifier(
 	if val, ok := env.Get(node.Value); ok {
 		return val
 	}
-	if builtin, ok := builtins[node.Value]; ok {
+	if builtin, ok := Builtins[node.Value]; ok {
 		return builtin
 	}
 
-	return newError("[Line %d] Variable '%s' is not defined", node.Token.Line+1, node.Value)
+	return NewError("[Line %d] Variable '%s' is not defined", node.Token.Line+1, node.Value)
 }
 
 func evalExpressions(
@@ -396,7 +415,7 @@ func evalExpressions(
 	return result
 }
 
-func isTruthy(obj object.Object) bool {
+func IsTruthy(obj object.Object) bool {
 	switch obj {
 	case NULL:
 		return false
@@ -421,7 +440,7 @@ func applyFunction(fn object.Object, args []object.Object) object.Object {
 
 	case *object.Function:
 		if len(fn.Parameters) != len(args) {
-			return newError("[Line %d] Argument mismatch (expected %d, got %d)", fn.Line()+1,
+			return NewError("[Line %d] Argument mismatch (expected %d, got %d)", fn.Line()+1,
 				len(fn.Parameters), len(args))
 		}
 		env := extendFunctionEnv(fn, args)
@@ -435,7 +454,7 @@ func applyFunction(fn object.Object, args []object.Object) object.Object {
 		return fn.Fn(fn.Parent(), fn.Line(), args...)
 
 	default:
-		return newError("[Line %d] Type '%s' is not callable", fn.Line()+1, fn.Type())
+		return NewError("[Line %d] Type '%s' is not callable", fn.Line()+1, fn.Type())
 	}
 }
 
