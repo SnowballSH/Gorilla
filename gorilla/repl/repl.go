@@ -75,6 +75,9 @@ func Start(in io.Reader, out io.Writer) {
 		}
 		obj := eval.Eval(program, env)
 		if obj != nil {
+			if obj == object.NULL {
+				continue
+			}
 			_, _ = io.WriteString(out, obj.Inspect()+"\n")
 		}
 	}
@@ -158,6 +161,9 @@ func StartCompile(in io.Reader, out io.Writer) {
 		}
 
 		stackTop := machine.LastPopped()
+		if stackTop == object.NULL {
+			continue
+		}
 		_, _ = io.WriteString(out, stackTop.Inspect())
 		_, _ = io.WriteString(out, "\n")
 	}

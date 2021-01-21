@@ -253,6 +253,8 @@ func evalInfixExpression(
 		return evalStringInfixExpression(operator, left, right)
 	case left.Type() == object.STRING && right.Type() == object.INTEGER:
 		return evalStringInfixExpression(operator, left, right)
+	case left.Type() == object.ARRAY && operator == "<-":
+		return left.(*object.Array).Push(right)
 
 	case operator == "==":
 		return FromNativeBoolean(left == right, left.Line())
@@ -313,7 +315,10 @@ func evalStringInfixExpression(
 		}
 		leftVal := left.(*object.String).Value
 		rightVal := right.(*object.String).Value
-		return &object.String{Value: leftVal + rightVal}
+		if len(leftVal)+len(rightVal) >= config.MAXSTRINGSIZE {
+			return NewError("[Line %d] String overflow", left.Line()+1)
+		}
+		return object.NewString(leftVal+rightVal, left.Line())
 
 	case "*":
 		if right.Type() != "INTEGER" {
@@ -324,7 +329,10 @@ func evalStringInfixExpression(
 		if rightVal < 0 {
 			return NULL
 		}
-		return &object.String{Value: strings.Repeat(leftVal, int(rightVal))}
+		if len(leftVal)*int(rightVal) >= config.MAXSTRINGSIZE {
+			return NewError("[Line %d] String overflow", left.Line()+1)
+		}
+		return object.NewString(strings.Repeat(leftVal, int(rightVal)), left.Line())
 
 	case "==":
 		if right.Type() != "STRING" {

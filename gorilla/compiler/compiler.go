@@ -390,6 +390,9 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.emit(code.Eq)
 		case "!=":
 			c.emit(code.Neq)
+
+		case "<-":
+			c.emit(code.LARR)
 		default:
 			return fmt.Errorf("unknown operator %s", node.Operator)
 		}

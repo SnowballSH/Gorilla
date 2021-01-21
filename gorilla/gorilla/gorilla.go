@@ -85,6 +85,7 @@ func RunFile() {
 
 	if obj != nil && obj.Type() == "ERROR" {
 		_, _ = io.WriteString(os.Stdout, obj.Inspect()+"\n")
+		os.Exit(1)
 	}
 
 	os.Exit(0)

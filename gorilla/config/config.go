@@ -35,3 +35,5 @@ func GetOSNewline(sys string) string {
 	}
 	return nl
 }
+
+const MAXSTRINGSIZE = 1 << 12

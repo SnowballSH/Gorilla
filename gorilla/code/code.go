@@ -155,6 +155,8 @@ var definitions = map[Opcode]*Definition{
 
 	Array: {"Array", []int{2, 2}},
 	Index: {"Index", []int{}},
+
+	LARR: {"LARR", []int{}},
 }
 
 const (
@@ -202,4 +204,6 @@ const (
 
 	Array
 	Index
+
+	LARR
 )

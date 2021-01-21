@@ -17,6 +17,7 @@ type (
 const (
 	_ int = iota
 	LOWEST
+	ARR         // <-
 	EQUALS      // ==
 	LESSGREATER // > or < or >= or <=
 	SUM         // +
@@ -28,6 +29,7 @@ const (
 )
 
 var precedences = map[token.TType]int{
+	token.LARR:     ARR,
 	token.EQ:       EQUALS,
 	token.NEQ:      EQUALS,
 	token.LT:       LESSGREATER,
@@ -95,6 +97,8 @@ func New(l *lexer.Lexer) *Parser {
 
 	p.registerInfix(token.LPAREN, p.parseCallExpression)
 	p.registerInfix(token.DOT, p.parseGetAttr)
+
+	p.registerInfix(token.LARR, p.parseInfixExpression)
 
 	// Read two tokens
 	p.nextToken()
@@ -305,7 +309,6 @@ func (p *Parser) parseIdentifierIden() *ast.Identifier {
 }
 
 func (p *Parser) parseIntegerLiteral() ast.Expression {
-	//defer untrace(trace("parseIntegerLiteral"))
 	lit := &ast.IntegerLiteral{Token: p.curToken}
 	value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
 	if err != nil {
@@ -322,7 +325,6 @@ func (p *Parser) parseStringLiteral() ast.Expression {
 }
 
 func (p *Parser) parsePrefixExpression() ast.Expression {
-	//defer untrace(trace("parsePrefixExpression"))
 	expression := &ast.PrefixExpression{
 		Token:    p.curToken,
 		Operator: p.curToken.Literal,
@@ -333,7 +335,6 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 }
 
 func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
-	//defer untrace(trace("parseInfixExpression"))
 	expression := &ast.InfixExpression{
 		Token:    p.curToken,
 		Operator: p.curToken.Literal,

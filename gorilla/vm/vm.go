@@ -7,6 +7,7 @@ import (
 
 	"../code"
 	"../compiler"
+	"../config"
 	"../eval"
 	"../object"
 )
@@ -203,7 +204,7 @@ func (vm *VM) Run() error {
 				return err
 			}
 
-		case code.Add, code.Sub, code.Mul, code.Div:
+		case code.Add, code.Sub, code.Mul, code.Div, code.LARR:
 			err := vm.executeBinaryOperation(op)
 			if err != nil {
 				return err
@@ -454,6 +455,9 @@ func (vm *VM) executeBinaryOperation(op code.Opcode) error {
 	if leftType == object.STRING && rightType == object.INTEGER && op == code.Mul {
 		return vm.executeStringMulOperation(op, left, right)
 	}
+	if leftType == object.ARRAY && op == code.LARR {
+		return vm.push(left.(*object.Array).Push(right))
+	}
 
 	return fmt.Errorf("[Line %d] Unsupported types for binary operation: %s, %s",
 		left.Line()+1, leftType, rightType)
@@ -491,14 +495,24 @@ func (vm *VM) executeStringAddOperation(
 	_ code.Opcode,
 	left, right object.Object,
 ) error {
-	return vm.push(object.NewString(left.(*object.String).Value+right.(*object.String).Value, left.Line()))
+	leftVal := left.(*object.String).Value
+	rightVal := right.(*object.String).Value
+	if len(leftVal)+len(rightVal) >= config.MAXSTRINGSIZE {
+		return fmt.Errorf("[Line %d] String overflow", left.Line()+1)
+	}
+	return vm.push(object.NewString(leftVal+rightVal, left.Line()))
 }
 
 func (vm *VM) executeStringMulOperation(
 	_ code.Opcode,
 	left, right object.Object,
 ) error {
-	return vm.push(object.NewString(strings.Repeat(left.(*object.String).Value, int(right.(*object.Integer).Value)), left.Line()))
+	leftVal := left.(*object.String).Value
+	rightVal := int(right.(*object.Integer).Value)
+	if len(leftVal)*rightVal >= config.MAXSTRINGSIZE {
+		return fmt.Errorf("[Line %d] String overflow", left.Line()+1)
+	}
+	return vm.push(object.NewString(strings.Repeat(leftVal, rightVal), left.Line()))
 }
 
 func (vm *VM) executeComparison(op code.Opcode) error {

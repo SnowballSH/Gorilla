@@ -138,6 +138,7 @@ func (a *Array) Line() int                     { return a.SLine }
 func (a *Array) Attributes() map[string]Object { return a.Attrs }
 func (a *Array) Parent() Object                { return a.SParent }
 func (a *Array) SetParent(x Object)            { a.SParent = x }
+func (a *Array) Push(x Object) Object          { a.Value = append(a.Value, x); return a }
 
 // Boolean is the boolean type and used to represent boolean literals and holds an interval bool value
 type Boolean struct {
