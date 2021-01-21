@@ -844,3 +844,46 @@ func TestAttr(t *testing.T) {
 
 	runCompilerTests(t, tests)
 }
+
+func TestArrayLiterals(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input:             "[]",
+			expectedConstants: []interface{}{},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.Array, 0),
+				code.Make(code.Pop),
+			},
+		},
+		{
+			input:             "[1, 2, 3]",
+			expectedConstants: []interface{}{1, 2, 3},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadConst, 0),
+				code.Make(code.LoadConst, 1),
+				code.Make(code.LoadConst, 2),
+				code.Make(code.Array, 3),
+				code.Make(code.Pop),
+			},
+		},
+		{
+			input:             "[1 + 2, 3 - 4, 5 * 6]",
+			expectedConstants: []interface{}{1, 2, 3, 4, 5, 6},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadConst, 0),
+				code.Make(code.LoadConst, 1),
+				code.Make(code.Add),
+				code.Make(code.LoadConst, 2),
+				code.Make(code.LoadConst, 3),
+				code.Make(code.Sub),
+				code.Make(code.LoadConst, 4),
+				code.Make(code.LoadConst, 5),
+				code.Make(code.Mul),
+				code.Make(code.Array, 3),
+				code.Make(code.Pop),
+			},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}

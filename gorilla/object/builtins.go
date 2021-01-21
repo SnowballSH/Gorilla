@@ -16,10 +16,6 @@ var Builtins []struct {
 
 var IntAttrs map[string]Object
 var StrAttrs map[string]Object
-var AllAttrs []struct {
-	N string
-	T []string
-}
 
 func init() {
 	Builtins = []struct {
@@ -54,6 +50,8 @@ func init() {
 				switch arg := args[0].(type) {
 				case *String:
 					return NewInt(int64(utf8.RuneCountInString(arg.Value)), arg.Line())
+				case *Array:
+					return NewInt(int64(len(arg.Value)), arg.Line())
 				default:
 					return NewError("[Line %d] Cannot get length of type '%s'", line, arg.Type())
 				}
@@ -86,17 +84,6 @@ func init() {
 			},
 		},
 	}
-
-	AllAttrs = []struct {
-		N string
-		T []string
-	}{
-		{"toStr", []string{INTEGER}},
-
-		{"toInt", []string{STRING}},
-
-		{"strip", []string{STRING}},
-	}
 }
 
 func NewError(format string, a ...interface{}) *Error {
@@ -113,6 +100,14 @@ func NewInt(value int64, line int) *Integer {
 
 func NewString(value string, line int) *String {
 	return &String{
+		Value: value,
+		SLine: line,
+		Attrs: StrAttrs,
+	}
+}
+
+func NewArray(value []Object, line int) *Array {
+	return &Array{
 		Value: value,
 		SLine: line,
 		Attrs: StrAttrs,

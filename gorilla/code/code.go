@@ -151,7 +151,10 @@ var definitions = map[Opcode]*Definition{
 
 	Closure: {"Closure", []int{2, 2}},
 
-	GetAttr: {"GetAttr", []int{2}},
+	GetAttr: {"GetAttr", []int{}},
+
+	Array: {"Array", []int{2, 2}},
+	Index: {"Index", []int{}},
 }
 
 const (
@@ -196,4 +199,7 @@ const (
 	Closure
 
 	GetAttr
+
+	Array
+	Index
 )

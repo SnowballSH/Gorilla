@@ -117,6 +117,24 @@ func Eval(node ast.Node, env *object.Environment, out ...io.Writer) object.Objec
 
 	case *ast.StringLiteral:
 		return object.NewString(node.Value, node.Token.Line)
+
+	case *ast.ArrayLiteral:
+		elements := evalExpressions(node.Elements, env)
+		if len(elements) == 1 && isError(elements[0]) {
+			return elements[0]
+		}
+		return object.NewArray(elements, node.Token.Line)
+
+	case *ast.IndexExpression:
+		left := Eval(node.Left, env)
+		if isError(left) {
+			return left
+		}
+		index := Eval(node.Index, env)
+		if isError(index) {
+			return index
+		}
+		return evalIndexExpression(left, index)
 	}
 
 	return nil
@@ -330,6 +348,27 @@ func evalStringInfixExpression(
 
 	return NewError("unknown operator: %s %s %s",
 		left.Type(), operator, right.Type())
+}
+
+func evalIndexExpression(left, index object.Object) object.Object {
+	switch {
+	case left.Type() == object.ARRAY && index.Type() == object.INTEGER:
+		return evalArrayIndexExpression(left, index)
+	default:
+		return NewError("[Line %d] Cannot perform index operation: %s[%s]", left.Line()+1, left.Type(), index.Type())
+	}
+}
+
+func evalArrayIndexExpression(array, index object.Object) object.Object {
+	arrayObject := array.(*object.Array)
+	idx := index.(*object.Integer).Value
+	max := int64(len(arrayObject.Value) - 1)
+
+	if idx < 0 || idx > max {
+		return NewError("[Line %d] Array index out of range", arrayObject.Line()+1)
+	}
+
+	return arrayObject.Value[idx]
 }
 
 func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Object {

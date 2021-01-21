@@ -3,6 +3,7 @@ package vm
 import (
 	"fmt"
 	"strings"
+	"unicode/utf8"
 
 	"../code"
 	"../compiler"
@@ -244,11 +245,30 @@ func (vm *VM) Run() error {
 			}
 
 		case code.GetAttr:
-			i := code.ReadUint16(ins[ip+1:])
-			vm.currentFrame().ip += 2
+			err := vm.getAttr()
 
-			err := vm.getAttr(int(i))
+			if err != nil {
+				return err
+			}
 
+		case code.Array:
+			numElements := int(code.ReadUint16(ins[ip+1:]))
+			line := int(code.ReadUint16(ins[ip+3:]))
+			vm.currentFrame().ip += 4
+
+			array := vm.buildArray(vm.sp-numElements, vm.sp, line)
+			vm.sp = vm.sp - numElements
+
+			err := vm.push(array)
+			if err != nil {
+				return err
+			}
+
+		case code.Index:
+			index := vm.pop()
+			left := vm.pop()
+
+			err := vm.executeIndexExpression(left, index)
 			if err != nil {
 				return err
 			}
@@ -324,34 +344,28 @@ func (vm *VM) executeCall(numArgs int) error {
 	}
 }
 
-func (vm *VM) getAttr(index int) error {
+func (vm *VM) buildArray(startIndex, endIndex, line int) object.Object {
+	elements := make([]object.Object, endIndex-startIndex)
+
+	for i := startIndex; i < endIndex; i++ {
+		elements[i-startIndex] = vm.stack[i]
+	}
+
+	return object.NewArray(elements, line)
+}
+
+func (vm *VM) getAttr() error {
+	name := vm.pop().(*object.String).Value
 	callee := vm.pop()
 	callee = callee.(object.Object)
 
-	methodTypes := object.AllAttrs[index].T
-
 	ok := false
-	for _, t := range methodTypes {
-		if t == string(callee.Type()) {
-			ok = true
-			break
-		}
-	}
-
 	var ele object.Object
-	var err bool
-	if ok {
-		switch callee.Type() {
-		case object.STRING:
-			ele, err = object.StrAttrs[object.AllAttrs[index].N]
-			if !err {
-				ok = false
-			}
-		case object.INTEGER:
-			ele, err = object.IntAttrs[object.AllAttrs[index].N]
-			if !err {
-				ok = false
-			}
+	for n, v := range callee.Attributes() {
+		if n == name {
+			ok = true
+			ele = v
+			break
 		}
 	}
 
@@ -360,7 +374,7 @@ func (vm *VM) getAttr(index int) error {
 			"[Line %d] Type '%s' does not have attribute '%s'",
 			callee.Line()+1,
 			callee.Type(),
-			object.AllAttrs[index].N)
+			name)
 	}
 
 	ele.SetParent(callee)
@@ -596,4 +610,39 @@ func (vm *VM) executePosOperator() error {
 	operand := vm.pop()
 
 	return vm.push(operand)
+}
+
+func (vm *VM) executeIndexExpression(left, index object.Object) error {
+	switch {
+	case left.Type() == object.ARRAY && index.Type() == object.INTEGER:
+		return vm.executeArrayIndex(left, index)
+	case left.Type() == object.STRING && index.Type() == object.INTEGER:
+		return vm.executeStringIndex(left, index)
+	default:
+		return fmt.Errorf("[Line %d] Cannot perform index operation: %s[%s]", left.Line()+1, left.Type(), index.Type())
+	}
+}
+
+func (vm *VM) executeArrayIndex(array, index object.Object) error {
+	arrayObject := array.(*object.Array)
+	i := index.(*object.Integer).Value
+	max := int64(len(arrayObject.Value) - 1)
+
+	if i < 0 || i > max {
+		return fmt.Errorf("[Line %d] Array index out of range", arrayObject.Line()+1)
+	}
+
+	return vm.push(arrayObject.Value[i])
+}
+
+func (vm *VM) executeStringIndex(stri, index object.Object) error {
+	str := stri.(*object.String)
+	i := index.(*object.Integer).Value
+	max := int64(utf8.RuneCountInString(str.Value) - 1)
+
+	if i < 0 || i > max {
+		return fmt.Errorf("[Line %d] String index out of range", str.Line()+1)
+	}
+
+	return vm.push(object.NewString(string([]rune(str.Value)[i]), str.Line()))
 }

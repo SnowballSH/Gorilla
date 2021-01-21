@@ -395,11 +395,11 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 	case *ast.StringLiteral:
-		str := &object.String{Value: node.Value}
+		str := object.NewString(node.Value, node.Token.Line)
 		c.emit(code.LoadConst, c.addConstant(str))
 
 	case *ast.IntegerLiteral:
-		integer := &object.Integer{Value: node.Value}
+		integer := object.NewInt(node.Value, node.Token.Line)
 		c.emit(code.LoadConst, c.addConstant(integer))
 
 	case *ast.FunctionLiteral:
@@ -468,24 +468,38 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.emit(code.LoadFalse)
 		}
 
+	case *ast.ArrayLiteral:
+		for _, el := range node.Elements {
+			err := c.Compile(el)
+			if err != nil {
+				return err
+			}
+		}
+
+		c.emit(code.Array, len(node.Elements), node.Token.Line)
+
+	case *ast.IndexExpression:
+		err := c.Compile(node.Left)
+		if err != nil {
+			return err
+		}
+
+		err = c.Compile(node.Index)
+		if err != nil {
+			return err
+		}
+
+		c.emit(code.Index)
+
 	case *ast.GetAttr:
 		err := c.Compile(node.Expr)
 		if err != nil {
 			return err
 		}
-		var i int
-		ok := false
-		for j, o := range object.AllAttrs {
-			if o.N == node.Name.String() {
-				i = j
-				ok = true
-				break
-			}
-		}
-		if !ok {
-			return fmt.Errorf("[Line %d] No attribute called '%s' found", node.Token.Line+1, node.Name)
-		}
-		c.emit(code.GetAttr, i)
+
+		c.emit(code.LoadConst, c.addConstant(object.NewString(node.Name.String(), node.Token.Line)))
+
+		c.emit(code.GetAttr)
 	}
 
 	return nil
