@@ -204,7 +204,7 @@ func (vm *VM) Run() error {
 				return err
 			}
 
-		case code.Add, code.Sub, code.Mul, code.Div, code.LARR:
+		case code.Add, code.Sub, code.Mul, code.Div, code.Mod, code.LARR:
 			err := vm.executeBinaryOperation(op)
 			if err != nil {
 				return err
@@ -484,6 +484,11 @@ func (vm *VM) executeBinaryIntegerOperation(
 			return fmt.Errorf("[Line %d] Division by Zero", right.Line()+1)
 		}
 		result = leftValue / rightValue
+	case code.Mod:
+		if rightValue == 0 {
+			return fmt.Errorf("[Line %d] Modulo by Zero", right.Line()+1)
+		}
+		result = leftValue % rightValue
 	default:
 		return fmt.Errorf("[Line %d] Unknown integer operator: %d", left.Line()+1, op)
 	}

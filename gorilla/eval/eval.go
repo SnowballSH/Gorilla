@@ -287,6 +287,11 @@ func evalIntegerInfixExpression(
 			return NewError("[Line %d] Division by Zero", right.Line()+1)
 		}
 		return object.NewInt(leftVal/rightVal, left.Line())
+	case "%":
+		if rightVal == 0 {
+			return NewError("[Line %d] Modulo by Zero", right.Line()+1)
+		}
+		return object.NewInt(leftVal%rightVal, left.Line())
 	case "<":
 		return FromNativeBoolean(leftVal < rightVal, left.Line())
 	case ">":
