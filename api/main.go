@@ -28,7 +28,7 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 
 	code := u
 
-	env := object.NewEnvironment().AddBuiltin()
+	env := object.NewEnvironment()
 
 	l := lexer.New(code)
 	p := parser.New(l)
