@@ -1,1 +1,1 @@
-Sitemap: /sitemap.xml
+Sitemap: /Gorilla/sitemap.xml
