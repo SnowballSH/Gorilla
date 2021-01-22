@@ -8,6 +8,7 @@
     "predeploy": "bundle exec jekyll build",
     "deploy": "gh-pages -d _site"
   },
+  "keywords": [],
   "author": "",
   "license": "ISC"
 }

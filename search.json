@@ -1,0 +1,61 @@
+[
+
+  
+    
+    
+    {
+      "title": "Welcome",
+      "url": "/docs/home/"
+    },
+  
+    
+    
+    {
+      "title": "Themes",
+      "url": "/docs/themes/"
+    },
+  
+    
+    
+    {
+      "title": "Customization",
+      "url": "/docs/customization/"
+    },
+  
+
+  
+    
+    
+    {
+      "title": "Markdown Cheatsheet",
+      "url": "/docs/cheatsheet/"
+    },
+  
+    
+    
+    {
+      "title": "Font Awesome Icon List",
+      "url": "/docs/font-awesome/"
+    },
+  
+    
+    
+    {
+      "title": "Bootstrap Features",
+      "url": "/docs/bootstrap/"
+    },
+  
+
+
+  
+  {
+  "title": "Jekyll Doc Theme is published!",
+  "url": "/blog/2017/05/03/jekyll-doc-theme/"
+  },
+  
+  {
+  "title": "Welcome to Jekyll!",
+  "url": "/blog/2017/02/01/welcome-to-jekyll/"
+  }
+  
+]
