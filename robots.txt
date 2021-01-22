@@ -1,1 +1,1 @@
-Sitemap: /Gorilla/sitemap.xml
+Sitemap: https://snowballsh.me/Gorilla/sitemap.xml
