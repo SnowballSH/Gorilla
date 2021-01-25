@@ -833,10 +833,12 @@ func TestAttr(t *testing.T) {
             `,
 			expectedConstants: []interface{}{
 				"",
+				"strip",
 			},
 			expectedInstructions: []code.Instructions{
 				code.Make(code.LoadConst, 0),
-				code.Make(code.GetAttr, 2),
+				code.Make(code.LoadConst, 1),
+				code.Make(code.GetAttr),
 				code.Make(code.Pop),
 			},
 		},

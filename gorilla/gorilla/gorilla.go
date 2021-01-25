@@ -63,7 +63,7 @@ func RunFile() {
 
 		err = machine.Run()
 		if err != nil {
-			_, _ = io.WriteString(os.Stdout, fmt.Sprintf("Runtime Error:\n\t%s\n", err))
+			_, _ = io.WriteString(os.Stdout, fmt.Sprintf(" Runtime Error:\n\t%s\n", err))
 			os.Exit(1)
 		}
 

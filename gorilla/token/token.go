@@ -51,6 +51,7 @@ const (
 	TRUE         = "TRUE"
 	FALSE        = "FALSE"
 	IF           = "IF"
+	ELSIF        = "ELSIF"
 	ELSE         = "ELSE"
 	RETURN       = "RETURN"
 )
@@ -68,6 +69,7 @@ var keywords = map[string]TType{
 	"true":   TRUE,
 	"false":  FALSE,
 	"if":     IF,
+	"elsif":  ELSIF,
 	"else":   ELSE,
 	"return": RETURN,
 }

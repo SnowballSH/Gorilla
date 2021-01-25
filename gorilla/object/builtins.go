@@ -16,6 +16,7 @@ var Builtins []struct {
 
 var IntAttrs map[string]Object
 var StrAttrs map[string]Object
+var ArrayAttrs map[string]Object
 
 func init() {
 	Builtins = []struct {
@@ -43,7 +44,7 @@ func init() {
 			"len",
 			&Builtin{Fn: func(_ Object, line int, args ...Object) Object {
 				if len(args) != 1 {
-					return NewError("[Line %d] Argument mismatch (expected %d, got %d)", line,
+					return NewError("[Line %d] Argument mismatch (expected %d, got %d)", line+1,
 						1, len(args))
 				}
 
@@ -53,7 +54,7 @@ func init() {
 				case *Array:
 					return NewInt(int64(len(arg.Value)), arg.Line())
 				default:
-					return NewError("[Line %d] Cannot get length of type '%s'", line, arg.Type())
+					return NewError("[Line %d] Cannot get length of type '%s'", line+1, arg.Type())
 				}
 			},
 			},
@@ -63,14 +64,14 @@ func init() {
 	IntAttrs = map[string]Object{
 		"toStr": &Builtin{
 			Fn: func(self Object, line int, args ...Object) Object {
-				return NewString(strconv.Itoa(int(self.(*Integer).Value)), line)
+				return NewString(strconv.Itoa(int(self.(*Integer).Value)), line+1)
 			},
 		}}
 
 	StrAttrs = map[string]Object{
 		"strip": &Builtin{
 			Fn: func(self Object, line int, args ...Object) Object {
-				return NewString(strings.TrimSpace(self.(*String).Value), line)
+				return NewString(strings.TrimSpace(self.(*String).Value), line+1)
 			},
 		},
 		"toInt": &Builtin{
@@ -78,9 +79,34 @@ func init() {
 				k := self.(*String).Value
 				val, err := strconv.Atoi(k)
 				if err != nil {
-					return NewError("[Line %d] Cannot parse to Int: '%s'", line, k)
+					return NewError("[Line %d] Cannot parse to Int: '%s'", line+1, k)
 				}
 				return NewInt(int64(val), line)
+			},
+		},
+	}
+
+	ArrayAttrs = map[string]Object{
+		"push": &Builtin{
+			Fn: func(self Object, line int, args ...Object) Object {
+				arr := self.(*Array)
+				return arr.PushAll(args)
+			},
+		},
+		"pop": &Builtin{
+			Fn: func(self Object, line int, args ...Object) Object {
+				if len(self.(*Array).Value) < 1 {
+					return NewError("[Line %d] Cannot pop empty array", line+1)
+				}
+				return self.(*Array).PopLast()
+			},
+		},
+		"shift": &Builtin{
+			Fn: func(self Object, line int, args ...Object) Object {
+				if len(self.(*Array).Value) < 1 {
+					return NewError("[Line %d] Cannot shift empty array", line+1)
+				}
+				return self.(*Array).PopFirst()
 			},
 		},
 	}
@@ -110,7 +136,7 @@ func NewArray(value []Object, line int) *Array {
 	return &Array{
 		Value: value,
 		SLine: line,
-		Attrs: StrAttrs,
+		Attrs: ArrayAttrs,
 	}
 }
 

@@ -156,7 +156,7 @@ func StartCompile(in io.Reader, out io.Writer) {
 
 		err = machine.Run()
 		if err != nil {
-			_, _ = io.WriteString(out, fmt.Sprintf("Runtime Error:\n\t%s\n", err))
+			_, _ = io.WriteString(out, fmt.Sprintf(" Runtime Error:\n\t%s\n", err))
 			continue
 		}
 
