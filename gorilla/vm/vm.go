@@ -327,6 +327,8 @@ func (vm *VM) Run() error {
 		case code.Pop:
 			vm.pop()
 
+		case code.NoOp:
+
 		default:
 			return fmt.Errorf("WTF not supported: %d", op)
 		}
@@ -342,6 +344,7 @@ func (vm *VM) executeCall(numArgs int) error {
 	}
 
 	if currentRec >= config.RecursionLimit {
+		currentRec = 0
 		return fmt.Errorf("[Line %d] Max recursion limit hit", callee.Line()+1)
 	}
 

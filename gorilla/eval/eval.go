@@ -86,6 +86,9 @@ func Eval(node ast.Node, env *object.Environment, out ...io.Writer) object.Objec
 		}
 		env.Set(node.Name.Value, val)
 
+	case *ast.WhileExpression:
+		return evalWhileExpression(node, env)
+
 	case *ast.FunctionStmt:
 		params := node.Parameters
 		body := node.Body
@@ -179,6 +182,29 @@ func evalGetAttr(node *ast.GetAttr, env *object.Environment) object.Object {
 	obj.SetParent(expr)
 
 	return obj
+}
+
+func evalWhileExpression(we *ast.WhileExpression, env *object.Environment) object.Object {
+	var result object.Object
+
+	for {
+		condition := Eval(we.Condition, env)
+		if isError(condition) {
+			return condition
+		}
+
+		if IsTruthy(condition) {
+			result = Eval(we.Consequence, env)
+		} else {
+			break
+		}
+	}
+
+	if result != nil {
+		return result
+	} else {
+		return NULL
+	}
 }
 
 func evalPrefixExpression(operator string, right object.Object) object.Object {
@@ -459,6 +485,7 @@ func applyFunction(fn object.Object, args []object.Object) object.Object {
 				len(fn.Parameters), len(args))
 		}
 		if currentRec >= config.RecursionLimit {
+			currentRec = 0
 			return NewError("[Line %d] Max recursion limit hit", fn.Line()+1)
 		}
 		currentRec++

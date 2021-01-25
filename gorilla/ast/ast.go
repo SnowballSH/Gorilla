@@ -274,8 +274,7 @@ func (ie *InfixExpression) String() string {
 	return out.String()
 }
 
-// IfExpression represents an `if` expression and holds the condition,
-// consequence and alternative expressions
+// IfExpression
 type IfExpression struct {
 	Token       token.Token // The 'if' token
 	Condition   Expression
@@ -305,8 +304,32 @@ func (ie *IfExpression) String() string {
 	return out.String()
 }
 
-// FunctionLiteral represents a literal functions and holds the function's
-// formal parameters and boy of the function as a block statement
+// IfExpression
+type WhileExpression struct {
+	Token       token.Token // The 'while' token
+	Condition   Expression
+	Consequence *BlockStatement
+	Alternative *BlockStatement
+}
+
+func (we *WhileExpression) expressionNode() {}
+
+// TokenLiteral
+func (we *WhileExpression) TokenLiteral() string { return we.Token.Literal }
+
+// String returns a stringified version of the AST for debugging
+func (we *WhileExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("while")
+	out.WriteString(we.Condition.String())
+	out.WriteString(" ")
+	out.WriteString(we.Consequence.String())
+
+	return out.String()
+}
+
+// FunctionLiteral
 type FunctionLiteral struct {
 	Token      token.Token // The 'fn' token
 	Parameters []*Identifier

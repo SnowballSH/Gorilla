@@ -267,7 +267,10 @@ func (c *Compiler) Compile(node ast.Node) error {
 		if err != nil {
 			return err
 		}
-		c.emit(code.Pop)
+
+		if !c.lastInstructionIs(code.NoOp) {
+			c.emit(code.Pop)
+		}
 
 	case *ast.BlockStatement:
 		for _, s := range node.Statements {
@@ -316,6 +319,26 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 		afterAlternativePos := len(c.currentInstructions())
 		c.changeOperand(jumpPos, afterAlternativePos)
+
+	case *ast.WhileExpression:
+		jumpConditionPos := len(c.currentInstructions())
+
+		err := c.Compile(node.Condition)
+		if err != nil {
+			return err
+		}
+
+		jumpElsePos := c.emit(code.JumpElse, 0xFFFF)
+
+		err = c.Compile(node.Consequence)
+		if err != nil {
+			return err
+		}
+
+		c.emit(code.Jump, jumpConditionPos)
+
+		afterConsequencePos := c.emit(code.NoOp)
+		c.changeOperand(jumpElsePos, afterConsequencePos)
 
 	case *ast.PrefixExpression:
 		err := c.Compile(node.Right)

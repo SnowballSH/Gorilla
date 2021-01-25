@@ -847,6 +847,29 @@ func TestAttr(t *testing.T) {
 	runCompilerTests(t, tests)
 }
 
+func TestIteration(t *testing.T) {
+	tests := []compilerTestCase{
+		{
+			input: `
+			while true 10
+            `,
+			expectedConstants: []interface{}{
+				10,
+			},
+			expectedInstructions: []code.Instructions{
+				code.Make(code.LoadTrue),
+				code.Make(code.JumpElse, 11),
+				code.Make(code.LoadConst, 0),
+				code.Make(code.Pop),
+				code.Make(code.Jump, 0),
+				code.Make(code.NoOp),
+			},
+		},
+	}
+
+	runCompilerTests(t, tests)
+}
+
 func TestArrayLiterals(t *testing.T) {
 	tests := []compilerTestCase{
 		{

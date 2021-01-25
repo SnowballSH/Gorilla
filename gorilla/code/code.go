@@ -113,6 +113,7 @@ func ReadUint16(ins Instructions) uint16 {
 var definitions = map[Opcode]*Definition{
 	LoadConst: {"LoadConst", []int{2}},
 	Pop:       {"Pop", []int{}},
+	NoOp:      {"NoOp", []int{}},
 
 	Add: {"Add", []int{}},
 	Sub: {"Sub", []int{}},
@@ -163,6 +164,7 @@ var definitions = map[Opcode]*Definition{
 const (
 	LoadConst Opcode = iota
 	Pop
+	NoOp
 
 	Add
 	Sub

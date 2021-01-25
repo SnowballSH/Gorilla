@@ -78,6 +78,8 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.IF, p.parseIfExpression)
 	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)
 
+	p.registerPrefix(token.WHILE, p.parseWhileExpression)
+
 	p.registerPrefix(token.LPAREN, p.parseGroupedExpression)
 
 	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)
@@ -238,6 +240,23 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	stmt.Value = p.parseExpression(LOWEST)
 
 	return stmt
+}
+
+func (p *Parser) parseWhileExpression() ast.Expression {
+	expression := &ast.WhileExpression{Token: p.curToken}
+
+	p.nextToken()
+	expression.Condition = p.parseExpression(LOWEST)
+
+	p.nextToken()
+	res := p.parseBlockStatement()
+	if res != nil {
+		expression.Consequence = res
+	} else {
+		return nil
+	}
+
+	return expression
 }
 
 func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
