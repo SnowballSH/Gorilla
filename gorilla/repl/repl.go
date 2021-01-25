@@ -161,7 +161,7 @@ func StartCompile(in io.Reader, out io.Writer) {
 		}
 
 		stackTop := machine.LastPopped()
-		if stackTop == object.NULL {
+		if stackTop == object.NULL || stackTop == nil {
 			continue
 		}
 		_, _ = io.WriteString(out, stackTop.Inspect())

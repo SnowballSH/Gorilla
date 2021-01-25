@@ -23,6 +23,12 @@ func (l *Lexer) NextToken() token.Token {
 	l.skipWhitespace()
 
 	switch l.ch {
+	case '#':
+		for l.peekChar() != '\n' && l.peekChar() != '\r' && l.peekChar() != 0 {
+			l.readChar()
+		}
+		l.readChar()
+		return l.NextToken()
 	case '=':
 		if l.peekChar() == '=' {
 			ch := l.ch
