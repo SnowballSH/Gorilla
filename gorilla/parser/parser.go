@@ -265,24 +265,24 @@ func (p *Parser) parseFunctionStatement() *ast.FunctionStmt {
 
 	lit.Parameters = p.parseFunctionParameters()
 
-	if !p.expectPeek(token.LBRACE) {
+	p.nextToken()
+	res := p.parseBlockStatement()
+	if res != nil {
+		lit.Body = res
+	} else {
 		return nil
 	}
-
-	lit.Body = p.parseBlockStatement()
 
 	return lit
 }
 
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
-	//defer untrace(trace("parseExpressionStatement"))
 	stmt := &ast.ExpressionStatement{Token: p.curToken}
 	stmt.Expression = p.parseExpression(LOWEST)
 	return stmt
 }
 
 func (p *Parser) parseExpression(precedence int) ast.Expression {
-	//defer untrace(trace("parseExpression"))
 	prefix := p.prefixParseFns[p.curToken.Type]
 	if prefix == nil {
 		p.noPrefixParseFnError(p.curToken.Type)
@@ -302,7 +302,6 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 }
 
 func (p *Parser) parseIdentifier() ast.Expression {
-	//defer untrace(trace("parseIdentifier"))
 	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 }
 
@@ -370,35 +369,28 @@ func (p *Parser) parseIfExpression() ast.Expression {
 	p.nextToken()
 	expression.Condition = p.parseExpression(LOWEST)
 
-	if !p.expectPeek(token.LBRACE) {
+	p.nextToken()
+	res := p.parseBlockStatement()
+	if res != nil {
+		expression.Consequence = res
+	} else {
 		return nil
 	}
 
-	expression.Consequence = p.parseBlockStatement()
-
-	var elifcond []ast.Expression
-	var elif []*ast.BlockStatement
-
-	for p.peekTokenIs(token.ELSIF) {
+	for p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
-		p.nextToken()
-		elifcond = append(elifcond, p.parseExpression(LOWEST))
-		if !p.expectPeek(token.LBRACE) {
-			return nil
-		}
-		elif = append(elif, p.parseBlockStatement())
 	}
-	expression.Elif = elif
-	expression.ElifCond = elifcond
 
 	if p.peekTokenIs(token.ELSE) {
 		p.nextToken()
 
-		if !p.expectPeek(token.LBRACE) {
+		p.nextToken()
+		res = p.parseBlockStatement()
+		if res != nil {
+			expression.Alternative = res
+		} else {
 			return nil
 		}
-
-		expression.Alternative = p.parseBlockStatement()
 	}
 
 	return expression
@@ -407,6 +399,15 @@ func (p *Parser) parseIfExpression() ast.Expression {
 func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	block := &ast.BlockStatement{Token: p.curToken}
 	block.Statements = []ast.Statement{}
+
+	if !p.curTokenIs(token.LBRACE) {
+		res := p.parseStatement()
+		if res == nil {
+			return nil
+		}
+		block.Statements = append(block.Statements, res)
+		return block
+	}
 
 	p.nextToken()
 
@@ -438,11 +439,13 @@ func (p *Parser) parseFunctionLiteral() ast.Expression {
 
 	lit.Parameters = p.parseFunctionParameters()
 
-	if !p.expectPeek(token.LBRACE) {
+	p.nextToken()
+	res := p.parseBlockStatement()
+	if res != nil {
+		lit.Body = res
+	} else {
 		return nil
 	}
-
-	lit.Body = p.parseBlockStatement()
 
 	return lit
 }
