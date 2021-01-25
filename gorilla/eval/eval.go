@@ -13,6 +13,8 @@ var TRUE = object.TRUE
 var FALSE = object.FALSE
 var NULL = object.NULL
 
+var currentRec = 0
+
 func FromNativeBoolean(input bool, l int) *object.Boolean {
 	if input {
 		x := TRUE
@@ -456,11 +458,16 @@ func applyFunction(fn object.Object, args []object.Object) object.Object {
 			return NewError("[Line %d] Argument mismatch (expected %d, got %d)", fn.Line()+1,
 				len(fn.Parameters), len(args))
 		}
+		if currentRec >= config.RecursionLimit {
+			return NewError("[Line %d] Max recursion limit hit", fn.Line()+1)
+		}
+		currentRec++
 		env := extendFunctionEnv(fn, args)
 		res := Eval(fn.Body, env)
 		if res == nil {
 			res = NULL
 		}
+		currentRec--
 		return unwrapReturnValue(res)
 
 	case *object.Builtin:

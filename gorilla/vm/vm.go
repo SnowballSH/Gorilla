@@ -16,6 +16,8 @@ const StackSize = 1 << 20
 const GlobalSize = 1 << 16
 const FrameSize = 1 << 20
 
+var currentRec = 0
+
 type VM struct {
 	constants []object.Object
 
@@ -301,6 +303,8 @@ func (vm *VM) Run() error {
 				return fmt.Errorf("[Line %d] Return outside of a function", returnValue.Line())
 			}
 
+			currentRec--
+
 			err := vm.push(returnValue)
 			if err != nil {
 				return err
@@ -312,6 +316,8 @@ func (vm *VM) Run() error {
 			if vm.sp < 0 {
 				return fmt.Errorf("[Line Unknown] Return outside of a function")
 			}
+
+			currentRec--
 
 			err := vm.push(object.NULL)
 			if err != nil {
@@ -334,6 +340,12 @@ func (vm *VM) executeCall(numArgs int) error {
 	if callee == nil {
 		return fmt.Errorf("NIL\n%s\n%s", vm.currentFrame().Instructions(), vm.stack[vm.sp-1-numArgs])
 	}
+
+	if currentRec >= config.RecursionLimit {
+		return fmt.Errorf("[Line %d] Max recursion limit hit", callee.Line()+1)
+	}
+
+	currentRec++
 
 	switch callee := callee.(type) {
 	case *object.Closure:

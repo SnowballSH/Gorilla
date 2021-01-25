@@ -1,6 +1,6 @@
 # Example: Fibonacci
 
-func fib(x) {
+func fib(x) {  # x is positive
   if x == 0
     return 0
   else if x == 1
@@ -9,4 +9,4 @@ func fib(x) {
     return fib(x-1) + fib(x-2)
 }
 
-display(fib(9))
+display(fib(30))
