@@ -420,7 +420,7 @@ func evalStringIndexExpression(str, index object.Object) object.Object {
 	max := int64(len(stringObject.Value) - 1)
 
 	if idx < 0 || idx > max {
-		return NewError("[Line %d] Array index out of range", stringObject.Line()+1)
+		return NewError("[Line %d] String index out of range", stringObject.Line()+1)
 	}
 
 	retString := object.NewString(string(stringObject.Value[idx]), stringObject.Line())
