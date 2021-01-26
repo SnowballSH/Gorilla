@@ -395,6 +395,8 @@ func evalIndexExpression(left, index object.Object) object.Object {
 	switch {
 	case left.Type() == object.ARRAY && index.Type() == object.INTEGER:
 		return evalArrayIndexExpression(left, index)
+	case left.Type() == object.STRING && index.Type() == object.INTEGER:
+		return evalStringIndexExpression(left, index)
 	default:
 		return NewError("[Line %d] Cannot perform index operation: %s[%s]", left.Line()+1, left.Type(), index.Type())
 	}
@@ -410,6 +412,19 @@ func evalArrayIndexExpression(array, index object.Object) object.Object {
 	}
 
 	return arrayObject.Value[idx]
+}
+
+func evalStringIndexExpression(str, index object.Object) object.Object {
+	stringObject := str.(*object.String)
+	idx := index.(*object.Integer).Value
+	max := int64(len(stringObject.Value) - 1)
+
+	if idx < 0 || idx > max {
+		return NewError("[Line %d] Array index out of range", stringObject.Line()+1)
+	}
+
+	retString := object.NewString(string(stringObject.Value[idx]), stringObject.Line())
+	return retString // stringObject.Value[idx]
 }
 
 func evalIfExpression(ie *ast.IfExpression, env *object.Environment) object.Object {

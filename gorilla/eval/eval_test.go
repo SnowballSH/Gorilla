@@ -193,6 +193,22 @@ addTwo(2);`
 	testIntegerObject(t, testEval(input), 4)
 }
 
+func TestStringIndexing(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{`"Hello"[1]`, "e"},
+		{`"Wowzers"[5]`, "r"},
+		{`let str = "Lorem ipsum dolor sit amet."; let str = "padding" + str + "padding"; str[19]`, "d"},
+	}
+
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testStringObject(t, evaluated, tt.expected)
+	}
+}
+
 func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
 	result, ok := obj.(*object.Boolean)
 	if !ok {
@@ -224,6 +240,19 @@ func testIntegerObject(t *testing.T, obj object.Object, expected int64) bool {
 func testNullObject(t *testing.T, obj object.Object) bool {
 	if obj != NULL {
 		t.Errorf("object is not NULL. got=%T (%+v)", obj, obj)
+		return false
+	}
+	return true
+}
+
+func testStringObject(t *testing.T, obj object.Object, expected string) bool {
+	result, ok := obj.(*object.String)
+	if !ok {
+		t.Errorf("object is not String. got=%t (%+v)", obj, obj)
+		return false
+	}
+	if result.Value != expected {
+		t.Errorf("object has wrong value. got=%s, expected %s", result.Value, expected)
 		return false
 	}
 	return true
