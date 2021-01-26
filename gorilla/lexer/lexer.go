@@ -33,7 +33,7 @@ func (l *Lexer) NextToken() token.Token {
 		if l.peekChar() == '=' {
 			ch := l.ch
 			l.readChar()
-			tok = token.Token{Type: token.EQ, Literal: string(ch) + string(l.ch)}
+			tok = token.Token{Type: token.EQ, Literal: string(ch) + string(l.ch), Line: l.lineCount}
 		} else {
 			tok = l.newToken(token.ASSIGN, l.ch)
 		}
@@ -44,7 +44,7 @@ func (l *Lexer) NextToken() token.Token {
 		if l.peekChar() == '>' {
 			ch := l.ch
 			l.readChar()
-			tok = token.Token{Type: token.RARR, Literal: string(ch) + string(l.ch)}
+			tok = token.Token{Type: token.RARR, Literal: string(ch) + string(l.ch), Line: l.lineCount}
 		} else {
 			tok = l.newToken(token.MINUS, l.ch)
 		}
@@ -63,7 +63,7 @@ func (l *Lexer) NextToken() token.Token {
 		if l.peekChar() == '=' {
 			ch := l.ch
 			l.readChar()
-			tok = token.Token{Type: token.NEQ, Literal: string(ch) + string(l.ch)}
+			tok = token.Token{Type: token.NEQ, Literal: string(ch) + string(l.ch), Line: l.lineCount}
 		} else {
 			tok = l.newToken(token.BANG, l.ch)
 		}
@@ -72,11 +72,11 @@ func (l *Lexer) NextToken() token.Token {
 		if l.peekChar() == '=' {
 			ch := l.ch
 			l.readChar()
-			tok = token.Token{Type: token.LTEQ, Literal: string(ch) + string(l.ch)}
+			tok = token.Token{Type: token.LTEQ, Literal: string(ch) + string(l.ch), Line: l.lineCount}
 		} else if l.peekChar() == '-' {
 			ch := l.ch
 			l.readChar()
-			tok = token.Token{Type: token.LARR, Literal: string(ch) + string(l.ch)}
+			tok = token.Token{Type: token.LARR, Literal: string(ch) + string(l.ch), Line: l.lineCount}
 		} else {
 			tok = l.newToken(token.LT, l.ch)
 		}
@@ -84,7 +84,7 @@ func (l *Lexer) NextToken() token.Token {
 		if l.peekChar() == '=' {
 			ch := l.ch
 			l.readChar()
-			tok = token.Token{Type: token.GTEQ, Literal: string(ch) + string(l.ch)}
+			tok = token.Token{Type: token.GTEQ, Literal: string(ch) + string(l.ch), Line: l.lineCount}
 		} else {
 			tok = l.newToken(token.GT, l.ch)
 		}
@@ -110,7 +110,7 @@ func (l *Lexer) NextToken() token.Token {
 		if l.peekChar() == '\n' {
 			ch := l.ch
 			l.readChar()
-			tok = token.Token{Type: token.SEMICOLON, Literal: string(ch) + string(l.ch)}
+			tok = token.Token{Type: token.SEMICOLON, Literal: string(ch) + string(l.ch), Line: l.lineCount}
 		} else {
 			tok = l.newToken(token.SEMICOLON, l.ch)
 		}
