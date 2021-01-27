@@ -202,6 +202,30 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.emit(code.SetLocal, symbol.Index)
 		}
 
+	case *ast.AssignmentExpression:
+		var (
+			ok     bool
+			symbol Symbol
+		)
+
+		symbol, ok = c.symbolTable.Resolve(node.Name.Value)
+		if !ok {
+			symbol = c.symbolTable.Define(node.Name.Value)
+		}
+
+		err := c.Compile(node.Value)
+		if err != nil {
+			return err
+		}
+
+		if symbol.Scope == GlobalScope {
+			c.emit(code.SetGlobal, symbol.Index)
+			c.emit(code.LoadGlobal, symbol.Index)
+		} else {
+			c.emit(code.SetLocal, symbol.Index)
+			c.emit(code.LoadLocal, symbol.Index)
+		}
+
 	case *ast.FunctionStmt:
 		var (
 			ok     bool

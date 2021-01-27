@@ -87,6 +87,14 @@ func Eval(node ast.Node, env *object.Environment, out ...io.Writer) object.Objec
 		}
 		env.Set(node.Name.Value, val)
 
+	case *ast.AssignmentExpression:
+		val := Eval(node.Value, env)
+		if isError(val) {
+			return val
+		}
+		env.Set(node.Name.Value, val)
+		return val
+
 	case *ast.WhileExpression:
 		return evalWhileExpression(node, env)
 

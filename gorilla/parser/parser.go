@@ -321,6 +321,19 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 }
 
 func (p *Parser) parseIdentifier() ast.Expression {
+	if p.peekTokenIs(token.ASSIGN) {
+		stmt := &ast.AssignmentExpression{Token: p.curToken}
+
+		stmt.Name = &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+
+		p.nextToken()
+
+		p.nextToken()
+
+		stmt.Value = p.parseExpression(LOWEST)
+
+		return stmt
+	}
 	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 }
 

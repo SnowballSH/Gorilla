@@ -304,7 +304,7 @@ func (ie *IfExpression) String() string {
 	return out.String()
 }
 
-// IfExpression
+// WhileExpression
 type WhileExpression struct {
 	Token       token.Token // The 'while' token
 	Condition   Expression
@@ -325,6 +325,34 @@ func (we *WhileExpression) String() string {
 	out.WriteString(we.Condition.String())
 	out.WriteString(" ")
 	out.WriteString(we.Consequence.String())
+
+	return out.String()
+}
+
+// AssignmentExpression
+type AssignmentExpression struct {
+	Token token.Token // The ident token
+	Name  *Identifier
+	Value Expression
+}
+
+func (ae *AssignmentExpression) expressionNode() {}
+
+// TokenLiteral
+func (ae *AssignmentExpression) TokenLiteral() string { return ae.Token.Literal }
+
+// String returns a stringified version of the AST for debugging
+func (ae *AssignmentExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(ae.Name.String())
+	out.WriteString(" = ")
+
+	if ae.Value != nil {
+		out.WriteString(ae.Value.String())
+	} else {
+		out.WriteString("null")
+	}
 
 	return out.String()
 }
