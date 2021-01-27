@@ -64,7 +64,8 @@ func init() {
 	IntAttrs = map[string]Object{
 		"toStr": &Builtin{
 			Fn: func(self Object, line int, args ...Object) Object {
-				return NewString(strconv.Itoa(int(self.(*Integer).Value)), line+1)
+				// return NewString(strconv.Itoa(int(self.(*Integer).Value)), line+1)
+				return NewString(self.(*Integer).Inspect(), line + 1)
 			},
 		}}
 
@@ -82,6 +83,11 @@ func init() {
 					return NewError("[Line %d] Cannot parse to Int: '%s'", line+1, k)
 				}
 				return NewInt(int64(val), line)
+			},
+		},
+		"toStr": &Builtin{
+			Fn: func(self Object, line int, args ...Object) Object {
+				return NewString(self.(*String).Inspect(), line + 1)
 			},
 		},
 	}
@@ -107,6 +113,11 @@ func init() {
 					return NewError("[Line %d] Cannot shift empty array", line+1)
 				}
 				return self.(*Array).PopFirst()
+			},
+		},
+		"toStr": &Builtin{
+			Fn: func(self Object, line int, args ...Object) Object {
+				return NewString(self.(*Array).Inspect(), line + 1)
 			},
 		},
 	}
