@@ -199,6 +199,13 @@ func evalWhileExpression(we *ast.WhileExpression, env *object.Environment) objec
 		} else {
 			break
 		}
+
+		if isError(result) {
+			return result
+		}
+		if isReturn(result) {
+			return result
+		}
 	}
 
 	if result != nil {
@@ -488,6 +495,13 @@ func IsTruthy(obj object.Object) bool {
 func isError(obj object.Object) bool {
 	if obj != nil {
 		return obj.Type() == object.ERROR
+	}
+	return false
+}
+
+func isReturn(obj object.Object) bool {
+	if obj != nil {
+		return obj.Type() == object.RETURN
 	}
 	return false
 }
