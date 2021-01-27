@@ -3,7 +3,10 @@ package object
 import (
 	"../ast"
 	"../config"
+	"bufio"
 	"fmt"
+	"io"
+	"os"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -17,6 +20,11 @@ var Builtins []struct {
 var IntAttrs map[string]Object
 var StrAttrs map[string]Object
 var ArrayAttrs map[string]Object
+var BoolAttrs map[string]Object
+
+var TRUE *Boolean
+var FALSE *Boolean
+var NULL *Null
 
 func init() {
 	Builtins = []struct {
@@ -29,13 +37,27 @@ func init() {
 		},
 
 		{
-			"display",
+			"print",
 			&Builtin{
 				Fn: func(self Object, line int, args ...Object) Object {
 					for _, arg := range args {
 						_, _ = fmt.Fprintf(config.OUT, arg.Inspect()+"\n")
 					}
 					return NULL
+				},
+			},
+		},
+		{
+			"input",
+			&Builtin{
+				Fn: func(self Object, line int, args ...Object) Object {
+					buffer := bufio.NewReader(os.Stdin)
+
+					lineC, _, err := buffer.ReadLine()
+					if err != nil && err != io.EOF {
+						return NewError("[Line %d] EOF When getting input", line+1)
+					}
+					return NewString(string(lineC), line)
 				},
 			},
 		},
@@ -65,7 +87,7 @@ func init() {
 		"toStr": &Builtin{
 			Fn: func(self Object, line int, args ...Object) Object {
 				// return NewString(strconv.Itoa(int(self.(*Integer).Value)), line+1)
-				return NewString(self.(*Integer).Inspect(), line + 1)
+				return NewString(self.(*Integer).Inspect(), line+1)
 			},
 		}}
 
@@ -87,7 +109,7 @@ func init() {
 		},
 		"toStr": &Builtin{
 			Fn: func(self Object, line int, args ...Object) Object {
-				return NewString(self.(*String).Inspect(), line + 1)
+				return NewString(self.(*String).Inspect(), line+1)
 			},
 		},
 	}
@@ -117,10 +139,24 @@ func init() {
 		},
 		"toStr": &Builtin{
 			Fn: func(self Object, line int, args ...Object) Object {
-				return NewString(self.(*Array).Inspect(), line + 1)
+				return NewString(self.(*Array).Inspect(), line+1)
 			},
 		},
 	}
+
+	BoolAttrs = map[string]Object{
+		"toStr": &Builtin{
+			Fn: func(self Object, line int, args ...Object) Object {
+				return NewString(self.(*Boolean).Inspect(), line+1)
+			},
+		},
+	}
+
+	TRUE = NewBool(true, 0)
+
+	FALSE = NewBool(false, 0)
+
+	NULL = &Null{}
 }
 
 func NewError(format string, a ...interface{}) *Error {
@@ -148,6 +184,14 @@ func NewArray(value []Object, line int) *Array {
 		Value: value,
 		SLine: line,
 		Attrs: ArrayAttrs,
+	}
+}
+
+func NewBool(value bool, line int) *Boolean {
+	return &Boolean{
+		Value: value,
+		SLine: line,
+		Attrs: BoolAttrs,
 	}
 }
 

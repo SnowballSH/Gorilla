@@ -48,14 +48,6 @@ const (
 	ARRAY = "ARRAY"
 )
 
-var (
-	TRUE = &Boolean{Value: true}
-
-	FALSE = &Boolean{Value: false}
-
-	NULL = &Null{}
-)
-
 var noAttr = map[string]Object{}
 
 // BuiltinFunction represents the builtin function type
@@ -162,6 +154,7 @@ type Boolean struct {
 	Value   bool
 	SLine   int
 	SParent Object
+	Attrs   map[string]Object
 }
 
 // Type returns the type of the object
@@ -171,7 +164,7 @@ func (b *Boolean) Type() Type { return BOOLEAN }
 func (b *Boolean) Inspect() string { return fmt.Sprintf("%t", b.Value) }
 
 func (b *Boolean) Line() int                     { return b.SLine }
-func (b *Boolean) Attributes() map[string]Object { return noAttr }
+func (b *Boolean) Attributes() map[string]Object { return b.Attrs }
 func (b *Boolean) Parent() Object                { return b.SParent }
 func (b *Boolean) SetParent(x Object)            { b.SParent = x }
 
