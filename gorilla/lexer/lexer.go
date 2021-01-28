@@ -195,15 +195,43 @@ func (l *Lexer) readNumber() string {
 }
 
 func (l *Lexer) readString() (string, bool) {
-	position := l.position + 1
+	res := ""
 	for {
 		l.readChar()
+
+		if l.ch == '\\' {
+			l.readChar()
+			switch l.ch {
+			case 'n':
+				res += "\n"
+			case 'r':
+				res += "\r"
+			case 't':
+				res += "\t"
+			case '\\':
+				res += "\\"
+			case '"':
+				res += "\""
+			case '\'':
+				res += "'"
+			case 'v':
+				res += "\v"
+			case 'a':
+				res += "\a"
+			case 'b':
+				res += "\b"
+			default:
+				res += string(l.ch)
+			}
+			continue
+		}
 		if l.ch == '"' {
-			return l.input[position:l.position], true
+			return res, true
 		}
 		if l.ch == byte(0) {
 			return "", false
 		}
+		res += string(l.ch)
 	}
 }
 

@@ -41,7 +41,7 @@ func init() {
 			&Builtin{
 				Fn: func(self Object, line int, args ...Object) Object {
 					for _, arg := range args {
-						_, _ = fmt.Fprintf(config.OUT, arg.Inspect()+"\n")
+						_, _ = fmt.Fprint(config.OUT, arg.Inspect()+"\n")
 					}
 					return NULL
 				},
