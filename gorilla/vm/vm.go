@@ -277,6 +277,33 @@ func (vm *VM) Run() error {
 				return err
 			}
 
+		case code.SetArrayIndex:
+			value := vm.pop()
+			index := vm.pop()
+			receiver := vm.pop()
+
+			switch {
+			case receiver.Type() == object.ARRAY && index.Type() == object.INTEGER:
+				break
+			default:
+				return fmt.Errorf("[Line %d] Cannot perform index operation: %s[%s]",
+					receiver.Line()+1, receiver.Type(), index.Type())
+			}
+
+			arrayObject := receiver.(*object.Array)
+
+			idx := index.(*object.Integer).Value
+			max := int64(len(arrayObject.Value) - 1)
+
+			if idx < 0 || idx > max {
+				return fmt.Errorf("[Line %d] Array index out of range", arrayObject.Line()+1)
+			}
+
+			err := vm.push(arrayObject.SetIndex(int(idx), value))
+			if err != nil {
+				return err
+			}
+
 		case code.LoadTrue:
 			err := vm.push(object.TRUE)
 			if err != nil {

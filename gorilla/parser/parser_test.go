@@ -741,6 +741,44 @@ func TestParsingArrayLiterals(t *testing.T) {
 	testInfixExpression(t, array.Elements[2], 3, "+", 3)
 }
 
+func TestIndexExpression(t *testing.T) {
+	tests := []struct {
+		input string
+		res   string
+	}{
+		{
+			input: "a[1] = 3",
+			res:   "a[1] = 3",
+		},
+		{
+			input: "a[1 + 1] = 3 ** 2 * 1",
+			res:   "a[(1 + 1)] = ((3 ** 2) * 1)",
+		},
+		{
+			input: "a[b] = a[b] + 1",
+			res:   "a[b] = ((a[b]) + 1)",
+		},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		stmt := program.Statements[0].(*ast.ExpressionStatement)
+		exp, ok := stmt.Expression.(*ast.IndexAssignmentExpression)
+		if !ok {
+			t.Fatalf("stmt.Expression is not Index Assignment. got=%T",
+				stmt.Expression)
+		}
+
+		if exp.String() != tt.res {
+			t.Fatalf("Wrong string value, expected %s, not %s", tt.res, exp.String())
+		}
+	}
+}
+
 func testLetStatement(t *testing.T, s ast.Statement, name string) bool {
 	if s.TokenLiteral() != "let" {
 		t.Errorf("s.TokenLiteral not 'let'. got=%q", s.TokenLiteral())

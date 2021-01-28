@@ -598,6 +598,13 @@ func (p *Parser) parseIndexExpression(left ast.Expression) ast.Expression {
 		return nil
 	}
 
+	if p.peekTokenIs(token.ASSIGN) {
+		p.nextToken()
+		p.nextToken()
+		value := p.parseExpression(LOWEST)
+		return &ast.IndexAssignmentExpression{Token: exp.Token, Receiver: left, Index: exp.Index, Value: value}
+	}
+
 	return exp
 }
 

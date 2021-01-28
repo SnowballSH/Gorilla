@@ -357,6 +357,37 @@ func (ae *AssignmentExpression) String() string {
 	return out.String()
 }
 
+// IndexAssignmentExpression
+type IndexAssignmentExpression struct {
+	Token    token.Token // The ident token
+	Receiver Expression
+	Index    Expression
+	Value    Expression
+}
+
+func (ae *IndexAssignmentExpression) expressionNode() {}
+
+// TokenLiteral
+func (ae *IndexAssignmentExpression) TokenLiteral() string { return ae.Token.Literal }
+
+// String returns a stringified version of the AST for debugging
+func (ae *IndexAssignmentExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(ae.Receiver.String())
+	out.WriteString("[")
+	out.WriteString(ae.Index.String())
+	out.WriteString("] = ")
+
+	if ae.Value != nil {
+		out.WriteString(ae.Value.String())
+	} else {
+		out.WriteString("null")
+	}
+
+	return out.String()
+}
+
 // FunctionLiteral
 type FunctionLiteral struct {
 	Token      token.Token // The 'fn' token

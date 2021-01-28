@@ -164,6 +164,11 @@ func (a *Array) PopFirst() Object {
 	return k
 }
 
+func (a *Array) SetIndex(i int, v Object) Object {
+	a.Value[i] = v
+	return a
+}
+
 // Boolean is the boolean type and used to represent boolean literals and holds an interval bool value
 type Boolean struct {
 	Value   bool

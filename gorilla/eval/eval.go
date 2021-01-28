@@ -132,6 +132,41 @@ func Eval(node ast.Node, env *object.Environment, out ...io.Writer) object.Objec
 		env.Set(node.Name.Value, val)
 		return val
 
+	case *ast.IndexAssignmentExpression:
+		receiver := Eval(node.Receiver, env)
+		if isError(receiver) {
+			return receiver
+		}
+
+		index := Eval(node.Index, env)
+		if isError(index) {
+			return index
+		}
+
+		switch {
+		case receiver.Type() == object.ARRAY && index.Type() == object.INTEGER:
+			break
+		default:
+			return NewError("[Line %d] Cannot perform index operation: %s[%s]",
+				receiver.Line()+1, receiver.Type(), index.Type())
+		}
+
+		arrayObject := receiver.(*object.Array)
+
+		idx := index.(*object.Integer).Value
+		max := int64(len(arrayObject.Value) - 1)
+
+		if idx < 0 || idx > max {
+			return NewError("[Line %d] Array index out of range", arrayObject.Line()+1)
+		}
+
+		val := Eval(node.Value, env)
+		if isError(val) {
+			return val
+		}
+
+		return arrayObject.SetIndex(int(idx), val)
+
 	case *ast.WhileExpression:
 		return evalWhileExpression(node, env)
 

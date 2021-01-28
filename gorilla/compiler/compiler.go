@@ -552,6 +552,22 @@ func (c *Compiler) Compile(node ast.Node) error {
 
 		c.emit(code.Index)
 
+	case *ast.IndexAssignmentExpression:
+		err := c.Compile(node.Receiver)
+		if err != nil {
+			return err
+		}
+		err = c.Compile(node.Index)
+		if err != nil {
+			return err
+		}
+		err = c.Compile(node.Value)
+		if err != nil {
+			return err
+		}
+
+		c.emit(code.SetArrayIndex)
+
 	case *ast.GetAttr:
 		err := c.Compile(node.Expr)
 		if err != nil {
