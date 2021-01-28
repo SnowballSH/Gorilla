@@ -330,9 +330,7 @@ func evalInfixExpression(
 	switch {
 	case left.Type() == object.INTEGER && right.Type() == object.INTEGER:
 		return evalIntegerInfixExpression(operator, left, right)
-	case left.Type() == object.STRING && right.Type() == object.STRING:
-		return evalStringInfixExpression(operator, left, right)
-	case left.Type() == object.STRING && right.Type() == object.INTEGER:
+	case left.Type() == object.STRING:
 		return evalStringInfixExpression(operator, left, right)
 	case left.Type() == object.ARRAY && operator == "<-":
 		return left.(*object.Array).Push(right)
@@ -404,11 +402,8 @@ func evalStringInfixExpression(
 ) object.Object {
 	switch operator {
 	case "+":
-		if right.Type() != "STRING" {
-			break
-		}
 		leftVal := left.(*object.String).Value
-		rightVal := right.(*object.String).Value
+		rightVal := right.Inspect()
 		if len(leftVal)+len(rightVal) >= config.MAXSTRINGSIZE {
 			return NewError("[Line %d] String overflow", left.Line()+1)
 		}
@@ -429,27 +424,21 @@ func evalStringInfixExpression(
 		return object.NewString(strings.Repeat(leftVal, int(rightVal)), left.Line())
 
 	case "==":
-		if right.Type() != "STRING" {
-			return FALSE
-		}
 		leftVal := left.(*object.String).Value
-		rightVal := right.(*object.String).Value
+		rightVal := right.Inspect()
 		return FromNativeBoolean(leftVal == rightVal, left.Line())
 
 	case "!=":
-		if right.Type() != "String" {
-			return TRUE
-		}
 		leftVal := left.(*object.String).Value
-		rightVal := right.(*object.String).Value
+		rightVal := right.Inspect()
 		return FromNativeBoolean(leftVal != rightVal, left.Line())
 
 	default:
 		break
 	}
 
-	return NewError("unknown operator: %s %s %s",
-		left.Type(), operator, right.Type())
+	return NewError("[Line %d] Cannot perform operation: %s %s %s",
+		left.Line(), left.Type(), operator, right.Type())
 }
 
 func evalIndexExpression(left, index object.Object) object.Object {

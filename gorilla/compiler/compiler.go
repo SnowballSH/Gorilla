@@ -431,6 +431,15 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.emit(code.Div)
 		case "%":
 			c.emit(code.Mod)
+
+		case "**":
+			c.emit(code.Pow)
+
+		case "&&":
+			c.emit(code.And)
+		case "||":
+			c.emit(code.Or)
+
 		case ">":
 			c.emit(code.Gt)
 		case ">=":

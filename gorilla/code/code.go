@@ -121,6 +121,10 @@ var definitions = map[Opcode]*Definition{
 	Div: {"Div", []int{}},
 	Mod: {"Mod", []int{}},
 
+	Pow: {"Pow", []int{}},
+	And: {"And", []int{}},
+	Or:  {"Or", []int{}},
+
 	LoadTrue:  {"LoadTrue", []int{}},
 	LoadFalse: {"LoadFalse", []int{}},
 	LoadNull:  {"LoadNull", []int{}},
@@ -171,6 +175,10 @@ const (
 	Mul
 	Div
 	Mod
+
+	Pow
+	And
+	Or
 
 	LoadTrue
 	LoadFalse

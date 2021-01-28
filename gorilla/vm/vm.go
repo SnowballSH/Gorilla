@@ -2,6 +2,7 @@ package vm
 
 import (
 	"fmt"
+	"math"
 	"strings"
 	"unicode/utf8"
 
@@ -206,7 +207,7 @@ func (vm *VM) Run() error {
 				return err
 			}
 
-		case code.Add, code.Sub, code.Mul, code.Div, code.Mod, code.LARR:
+		case code.Add, code.Sub, code.Mul, code.Div, code.Mod, code.LARR, code.Pow, code.And, code.Or:
 			err := vm.executeBinaryOperation(op)
 			if err != nil {
 				return err
@@ -461,10 +462,16 @@ func (vm *VM) executeBinaryOperation(op code.Opcode) error {
 	leftType := left.Type()
 	rightType := right.Type()
 
+	if op == code.Or {
+		return vm.push(eval.FromNativeBoolean(eval.IsTruthy(left) || eval.IsTruthy(right), left.Line()))
+	} else if op == code.And {
+		return vm.push(eval.FromNativeBoolean(eval.IsTruthy(left) && eval.IsTruthy(right), left.Line()))
+	}
+
 	if leftType == object.INTEGER && rightType == object.INTEGER {
 		return vm.executeBinaryIntegerOperation(op, left, right)
 	}
-	if leftType == object.STRING && rightType == object.STRING && op == code.Add {
+	if leftType == object.STRING && op == code.Add {
 		return vm.executeStringAddOperation(op, left, right)
 	}
 	if leftType == object.STRING && rightType == object.INTEGER && op == code.Mul {
@@ -504,6 +511,9 @@ func (vm *VM) executeBinaryIntegerOperation(
 			return fmt.Errorf("[Line %d] Modulo by Zero", right.Line()+1)
 		}
 		result = leftValue % rightValue
+	case code.Pow:
+		// TODO: To Float
+		result = int64(math.Pow(float64(leftValue), float64(rightValue)))
 	default:
 		return fmt.Errorf("[Line %d] Unknown integer operator: %d", left.Line()+1, op)
 	}
@@ -516,7 +526,7 @@ func (vm *VM) executeStringAddOperation(
 	left, right object.Object,
 ) error {
 	leftVal := left.(*object.String).Value
-	rightVal := right.(*object.String).Value
+	rightVal := right.Inspect()
 	if len(leftVal)+len(rightVal) >= config.MAXSTRINGSIZE {
 		return fmt.Errorf("[Line %d] String overflow", left.Line()+1)
 	}
