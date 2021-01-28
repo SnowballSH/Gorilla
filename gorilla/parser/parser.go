@@ -545,12 +545,27 @@ func (p *Parser) parseList(t token.TType) []ast.Expression {
 	}
 
 	p.nextToken()
+
+	for p.curTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
 	args = append(args, p.parseExpression(LOWEST))
 
 	for p.peekTokenIs(token.COMMA) {
 		p.nextToken()
 		p.nextToken()
+		for p.curTokenIs(token.SEMICOLON) {
+			p.nextToken()
+		}
 		args = append(args, p.parseExpression(LOWEST))
+		for p.peekTokenIs(token.SEMICOLON) {
+			p.nextToken()
+		}
+	}
+
+	for p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
 	}
 
 	if !p.expectPeek(t) {
