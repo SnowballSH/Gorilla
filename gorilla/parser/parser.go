@@ -338,6 +338,9 @@ func (p *Parser) parseIdentifier() ast.Expression {
 }
 
 func (p *Parser) parseIdentifierIden() *ast.Identifier {
+	if p.curToken.Type != token.IDENT {
+		return nil
+	}
 	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
 }
 
@@ -493,12 +496,18 @@ func (p *Parser) parseFunctionParameters() []*ast.Identifier {
 	p.nextToken()
 
 	ident := p.parseIdentifierIden()
+	if ident == nil {
+		return nil
+	}
 	identifiers = append(identifiers, ident)
 
 	for p.peekTokenIs(token.COMMA) {
 		p.nextToken()
 		p.nextToken()
-		ident := p.parseIdentifierIden()
+		ident = p.parseIdentifierIden()
+		if ident == nil {
+			return nil
+		}
 		identifiers = append(identifiers, ident)
 	}
 

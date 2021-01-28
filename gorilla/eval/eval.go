@@ -16,6 +16,42 @@ var NULL = object.NULL
 
 var currentRec = 0
 
+// Create init
+func init() {
+	// Create eval-only builtins
+
+	object.ArrayAttrs["map"] = &object.Builtin{
+		Fn: func(self object.Object, line int, args ...object.Object) object.Object {
+			if len(args) < 1 {
+				return NewError("[Line %d] Cannot Map without function", line+1)
+			}
+			if f, ok := args[0].(*object.Function); ok {
+				arr := object.NewArray([]object.Object{}, 0)
+				for i, obj := range self.(*object.Array).Value {
+					switch len(f.Parameters) {
+					case 0:
+						arr.Push(ApplyFunction(f, []object.Object{}))
+					case 1:
+						arr.Push(ApplyFunction(f, []object.Object{obj}))
+					default:
+						arr.Push(ApplyFunction(f, []object.Object{object.NewInt(int64(i), f.Line()), obj}))
+					}
+				}
+				return arr
+			} else if _, ok = args[0].(*object.CompiledFunction); ok {
+				return NewError("[Line %d] Array Map method not available with Compiler", line+1)
+			} else if f, ok := args[0].(*object.Builtin); ok {
+				arr := object.NewArray([]object.Object{}, 0)
+				for i, obj := range self.(*object.Array).Value {
+					arr.Push(ApplyFunction(f, []object.Object{object.NewInt(int64(i), f.Line()), obj}))
+				}
+				return arr
+			}
+			return NewError("[Line %d] Array Map argument is not Function", line+1)
+		},
+	}
+}
+
 func FromNativeBoolean(input bool, l int) *object.Boolean {
 	if input {
 		x := TRUE
@@ -124,7 +160,7 @@ func Eval(node ast.Node, env *object.Environment, out ...io.Writer) object.Objec
 		if len(args) == 1 && isError(args[0]) {
 			return args[0]
 		}
-		return applyFunction(function, args)
+		return ApplyFunction(function, args)
 
 	case *ast.GetAttr:
 		return evalGetAttr(node, env)
@@ -514,7 +550,7 @@ func isReturn(obj object.Object) bool {
 	return false
 }
 
-func applyFunction(fn object.Object, args []object.Object) object.Object {
+func ApplyFunction(fn object.Object, args []object.Object) object.Object {
 	switch fn := fn.(type) {
 
 	case *object.Function:

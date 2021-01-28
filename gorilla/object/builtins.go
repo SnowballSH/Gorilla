@@ -86,10 +86,21 @@ func init() {
 	IntAttrs = map[string]Object{
 		"toStr": &Builtin{
 			Fn: func(self Object, line int, args ...Object) Object {
-				// return NewString(strconv.Itoa(int(self.(*Integer).Value)), line+1)
-				return NewString(self.(*Integer).Inspect(), line+1)
+				return NewString(self.(*Integer).Inspect(), line)
 			},
-		}}
+		},
+		"range": &Builtin{
+			Fn: func(self Object, line int, args ...Object) Object {
+				if len(args) < 1 {
+					return NewError("[Line %d] Missing required argument 'end'", line)
+				}
+				if _, ok := args[0].(*Integer); !ok {
+					return NewError("[Line %d] Range End is not Integer", line)
+				}
+				return NewArray(makeRange(int(self.(*Integer).Value), int(args[0].(*Integer).Value), line), line)
+			},
+		},
+	}
 
 	StrAttrs = map[string]Object{
 		"strip": &Builtin{
@@ -150,6 +161,18 @@ func init() {
 				return NewString(self.(*Boolean).Inspect(), line+1)
 			},
 		},
+		"toInt": &Builtin{
+			Fn: func(self Object, line int, args ...Object) Object {
+				var v int64
+				switch self.(*Boolean).Value {
+				case true:
+					v = 1
+				default:
+					v = 0
+				}
+				return NewInt(v, line+1)
+			},
+		},
 	}
 
 	TRUE = NewBool(true, 0)
@@ -207,4 +230,15 @@ func NewFunction(
 		Env:        env,
 		SLine:      line,
 	}
+}
+
+func makeRange(min, max, line int) []Object {
+	if max <= min {
+		return []Object{}
+	}
+	a := make([]Object, max-min+1)
+	for i := range a {
+		a[i] = NewInt(int64(min+i), line)
+	}
+	return a
 }

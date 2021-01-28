@@ -103,6 +103,10 @@ func (s *String) Attributes() map[string]Object { return s.Attrs }
 func (s *String) Parent() Object                { return s.SParent }
 func (s *String) SetParent(x Object)            { s.SParent = x }
 
+func init() {
+
+}
+
 // Array
 type Array struct {
 	Value   []Object
@@ -117,7 +121,14 @@ func (a *Array) Inspect() string {
 
 	var elements []string
 	for _, e := range a.Value {
-		elements = append(elements, e.Inspect())
+		var v string
+		switch e.(type) {
+		case *String:
+			v = "\"" + e.Inspect() + "\""
+		default:
+			v = e.Inspect()
+		}
+		elements = append(elements, v)
 	}
 
 	out.WriteString("[")
@@ -130,19 +141,23 @@ func (a *Array) Line() int                     { return a.SLine }
 func (a *Array) Attributes() map[string]Object { return a.Attrs }
 func (a *Array) Parent() Object                { return a.SParent }
 func (a *Array) SetParent(x Object)            { a.SParent = x }
+
 func (a *Array) Push(x Object) Object {
 	a.Value = append(a.Value, x)
 	return a
 }
+
 func (a *Array) PushAll(x []Object) Object {
 	a.Value = append(a.Value, x...)
 	return a
 }
+
 func (a *Array) PopLast() Object {
 	k := a.Value[len(a.Value)-1]
 	a.Value = a.Value[:len(a.Value)-1]
 	return k
 }
+
 func (a *Array) PopFirst() Object {
 	k := a.Value[0]
 	a.Value = a.Value[1:]
