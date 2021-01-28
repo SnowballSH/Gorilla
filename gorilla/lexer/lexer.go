@@ -3,15 +3,15 @@ package lexer
 import "../token"
 
 type Lexer struct {
-	input        string
+	input        []rune
 	position     int  // current position in input (points to current char)
 	readPosition int  // current reading position in input (after current char)
-	ch           byte // current char under examination
+	ch           rune // current char under examination
 	lineCount    int  // current # of line
 }
 
 func New(input string) *Lexer {
-	l := &Lexer{input: input, lineCount: 0}
+	l := &Lexer{input: []rune(input), lineCount: 0}
 	l.readChar()
 	return l
 }
@@ -133,12 +133,12 @@ func (l *Lexer) NextToken() token.Token {
 		tok.Type = token.EOF
 	default:
 		if isLetter(l.ch) {
-			tok.Literal = l.readIdentifier()
+			tok.Literal = string(l.readIdentifier())
 			tok.Type = token.LookupIdent(tok.Literal)
 			return tok
 		} else if isDigit(l.ch) {
 			tok.Type = token.INT
-			tok.Literal = l.readNumber()
+			tok.Literal = string(l.readNumber())
 			return tok
 		} else {
 			tok = l.newToken(token.ILLEGAL, l.ch)
@@ -149,7 +149,7 @@ func (l *Lexer) NextToken() token.Token {
 	return tok
 }
 
-func (l *Lexer) newToken(tokenType token.TType, ch byte) token.Token {
+func (l *Lexer) newToken(tokenType token.TType, ch rune) token.Token {
 	return token.Token{Type: tokenType, Literal: string(ch), Line: l.lineCount}
 }
 
@@ -169,7 +169,7 @@ func (l *Lexer) readChar() {
 	l.readPosition++
 }
 
-func (l *Lexer) peekChar() byte {
+func (l *Lexer) peekChar() rune {
 	if l.readPosition >= len(l.input) {
 		return 0
 	} else {
@@ -177,7 +177,7 @@ func (l *Lexer) peekChar() byte {
 	}
 }
 
-func (l *Lexer) readIdentifier() string {
+func (l *Lexer) readIdentifier() []rune {
 	position := l.position
 	l.readChar()
 	for isAlnum(l.ch) {
@@ -186,7 +186,7 @@ func (l *Lexer) readIdentifier() string {
 	return l.input[position:l.position]
 }
 
-func (l *Lexer) readNumber() string {
+func (l *Lexer) readNumber() []rune {
 	position := l.position
 	for isDigit(l.ch) {
 		l.readChar()
@@ -195,7 +195,7 @@ func (l *Lexer) readNumber() string {
 }
 
 func (l *Lexer) readString() (string, bool) {
-	res := ""
+	var res []rune
 	for {
 		l.readChar()
 
@@ -203,46 +203,46 @@ func (l *Lexer) readString() (string, bool) {
 			l.readChar()
 			switch l.ch {
 			case 'n':
-				res += "\n"
+				res = append(res, '\n')
 			case 'r':
-				res += "\r"
+				res = append(res, '\r')
 			case 't':
-				res += "\t"
+				res = append(res, '\t')
 			case '\\':
-				res += "\\"
+				res = append(res, '\\')
 			case '"':
-				res += "\""
+				res = append(res, '"')
 			case '\'':
-				res += "'"
+				res = append(res, '\'')
 			case 'v':
-				res += "\v"
+				res = append(res, '\v')
 			case 'a':
-				res += "\a"
+				res = append(res, '\a')
 			case 'b':
-				res += "\b"
+				res = append(res, '\b')
 			default:
-				res += string(l.ch)
+				res = append(res, l.ch)
 			}
 			continue
 		}
 		if l.ch == '"' {
-			return res, true
+			return string(res), true
 		}
-		if l.ch == byte(0) {
+		if l.ch == rune(0) {
 			return "", false
 		}
-		res += string(l.ch)
+		res = append(res, l.ch)
 	}
 }
 
-func isLetter(ch byte) bool {
+func isLetter(ch rune) bool {
 	return 'a' <= ch && ch <= 'z' || 'A' <= ch && ch <= 'Z' || ch == '_'
 }
 
-func isAlnum(ch byte) bool {
+func isAlnum(ch rune) bool {
 	return isLetter(ch) || isDigit(ch)
 }
 
-func isDigit(ch byte) bool {
+func isDigit(ch rune) bool {
 	return '0' <= ch && ch <= '9'
 }
