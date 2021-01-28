@@ -10,8 +10,6 @@
 
 #### Download the [latest release](https://github.com/SnowballSH/Gorilla/releases)
 
-#### View the [Get Started](https://github.com/SnowballSH/Gorilla/blob/master/docs/start.md)
-
 #### Play it [Online](https://snowballsh.me/Gorilla-Playground/)
 
 ---
