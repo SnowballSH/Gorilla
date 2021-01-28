@@ -20,6 +20,15 @@ const (
 	SLASH    = "/"
 	MOD      = "%"
 
+	POW = "**"
+
+	OR  = "||"
+	AND = "&&"
+
+	BOR  = "|"
+	XOR  = "^"
+	BAND = "&"
+
 	LT   = "<"
 	GT   = ">"
 	LTEQ = "<="

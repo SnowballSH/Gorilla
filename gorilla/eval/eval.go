@@ -6,6 +6,7 @@ import (
 	"../object"
 	"fmt"
 	"io"
+	"math"
 	"strings"
 	"unicode/utf8"
 )
@@ -336,6 +337,11 @@ func evalInfixExpression(
 	case left.Type() == object.ARRAY && operator == "<-":
 		return left.(*object.Array).Push(right)
 
+	case operator == "||":
+		return FromNativeBoolean(IsTruthy(left) || IsTruthy(right), left.Line())
+	case operator == "&&":
+		return FromNativeBoolean(IsTruthy(left) && IsTruthy(right), left.Line())
+
 	case operator == "==":
 		return FromNativeBoolean(left == right, left.Line())
 	case operator == "!=":
@@ -372,6 +378,9 @@ func evalIntegerInfixExpression(
 			return NewError("[Line %d] Modulo by Zero", right.Line()+1)
 		}
 		return object.NewInt(leftVal%rightVal, left.Line())
+	case "**":
+		// TODO Change to Float
+		return object.NewInt(int64(math.Pow(float64(leftVal), float64(rightVal))), left.Line())
 	case "<":
 		return FromNativeBoolean(leftVal < rightVal, left.Line())
 	case ">":

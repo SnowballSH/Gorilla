@@ -17,11 +17,14 @@ type (
 const (
 	_ int = iota
 	LOWEST
-	ARR         // <-
+	ARR // <-
+	OR
+	AND
 	EQUALS      // ==
 	LESSGREATER // > or < or >= or <=
 	SUM         // +
 	PRODUCT     // *
+	POWER       // **
 	PREFIX      // -X or !X
 	DOT         // a.b
 	CALL        // myFunction(X)
@@ -41,6 +44,12 @@ var precedences = map[token.TType]int{
 	token.SLASH:    PRODUCT,
 	token.ASTERISK: PRODUCT,
 	token.MOD:      PRODUCT,
+
+	token.POW: POWER,
+
+	token.OR:  OR,
+	token.AND: AND,
+
 	token.LPAREN:   CALL,
 	token.DOT:      DOT,
 	token.LBRACKET: INDEX,
@@ -90,6 +99,11 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.SLASH, p.parseInfixExpression)
 	p.registerInfix(token.ASTERISK, p.parseInfixExpression)
 	p.registerInfix(token.MOD, p.parseInfixExpression)
+	p.registerInfix(token.POW, p.parseInfixExpression)
+
+	p.registerInfix(token.AND, p.parseInfixExpression)
+	p.registerInfix(token.OR, p.parseInfixExpression)
+
 	p.registerInfix(token.EQ, p.parseInfixExpression)
 	p.registerInfix(token.NEQ, p.parseInfixExpression)
 	p.registerInfix(token.LT, p.parseInfixExpression)

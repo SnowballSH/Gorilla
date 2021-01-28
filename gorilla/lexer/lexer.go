@@ -52,9 +52,36 @@ func (l *Lexer) NextToken() token.Token {
 	case '/':
 		tok = l.newToken(token.SLASH, l.ch)
 	case '*':
-		tok = l.newToken(token.ASTERISK, l.ch)
+		if l.peekChar() == '*' {
+			ch := l.ch
+			l.readChar()
+			tok = token.Token{Type: token.POW, Literal: string(ch) + string(l.ch), Line: l.lineCount}
+		} else {
+			tok = l.newToken(token.ASTERISK, l.ch)
+		}
 	case '%':
 		tok = l.newToken(token.MOD, l.ch)
+
+	case '|':
+		if l.peekChar() == '|' {
+			ch := l.ch
+			l.readChar()
+			tok = token.Token{Type: token.OR, Literal: string(ch) + string(l.ch), Line: l.lineCount}
+		} else {
+			tok = l.newToken(token.BOR, l.ch)
+		}
+
+	case '&':
+		if l.peekChar() == '&' {
+			ch := l.ch
+			l.readChar()
+			tok = token.Token{Type: token.AND, Literal: string(ch) + string(l.ch), Line: l.lineCount}
+		} else {
+			tok = l.newToken(token.BAND, l.ch)
+		}
+
+	case '^':
+		tok = l.newToken(token.XOR, l.ch)
 
 	case '.':
 		tok = l.newToken(token.DOT, l.ch)
