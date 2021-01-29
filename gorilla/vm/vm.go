@@ -500,27 +500,73 @@ func (vm *VM) executeBinaryOperation(op code.Opcode) error {
 	leftType := left.Type()
 	rightType := right.Type()
 
-	if op == code.Or {
+	switch {
+	case op == code.Or:
 		return vm.push(eval.FromNativeBoolean(eval.IsTruthy(left) || eval.IsTruthy(right), left.Line()))
-	} else if op == code.And {
+	case op == code.And:
 		return vm.push(eval.FromNativeBoolean(eval.IsTruthy(left) && eval.IsTruthy(right), left.Line()))
-	}
 
-	if leftType == object.INTEGER && rightType == object.INTEGER {
+	case leftType == object.INTEGER && rightType == object.INTEGER:
 		return vm.executeBinaryIntegerOperation(op, left, right)
-	}
-	if leftType == object.STRING && op == code.Add {
+
+	case left.Type() == object.FLOAT && right.Type() == object.FLOAT,
+		left.Type() == object.FLOAT && right.Type() == object.INTEGER,
+		left.Type() == object.INTEGER && right.Type() == object.FLOAT:
+		return vm.executeNumericInfixOperation(op, left, right)
+
+	case leftType == object.STRING && op == code.Add:
 		return vm.executeStringAddOperation(op, left, right)
-	}
-	if leftType == object.STRING && rightType == object.INTEGER && op == code.Mul {
+	case leftType == object.STRING && rightType == object.INTEGER && op == code.Mul:
 		return vm.executeStringMulOperation(op, left, right)
-	}
-	if leftType == object.ARRAY && op == code.LARR {
+	case leftType == object.ARRAY && op == code.LARR:
 		return vm.push(left.(*object.Array).Push(right))
 	}
 
 	return fmt.Errorf("[Line %d] Unsupported types for binary operation: %s, %s",
 		left.Line()+1, leftType, rightType)
+}
+
+func (vm *VM) executeNumericInfixOperation(
+	op code.Opcode,
+	left, right object.Object,
+) error {
+	var leftVal, rightVal float64
+	if left.Type() == object.FLOAT {
+		leftVal = left.(*object.Float).Value
+	} else {
+		leftVal = float64(left.(*object.Integer).Value)
+	}
+	if right.Type() == object.FLOAT {
+		rightVal = right.(*object.Float).Value
+	} else {
+		rightVal = float64(right.(*object.Integer).Value)
+	}
+
+	switch op {
+	case code.Add:
+		return vm.push(object.NewFloat(leftVal+rightVal, left.Line()))
+	case code.Sub:
+		return vm.push(object.NewFloat(leftVal-rightVal, left.Line()))
+	case code.Mul:
+		return vm.push(object.NewFloat(leftVal*rightVal, left.Line()))
+	case code.Div:
+		if rightVal == 0 {
+			return fmt.Errorf("[Line %d] Division by Zero", right.Line()+1)
+		}
+		return vm.push(object.NewFloat(leftVal/rightVal, left.Line()))
+	case code.Pow:
+		return vm.push(object.NewFloat(math.Pow(leftVal, rightVal), left.Line()))
+	case code.Gt:
+		return vm.push(eval.FromNativeBoolean(leftVal > rightVal, left.Line()))
+	case code.Gteq:
+		return vm.push(eval.FromNativeBoolean(leftVal >= rightVal, left.Line()))
+	case code.Eq:
+		return vm.push(eval.FromNativeBoolean(leftVal == rightVal, left.Line()))
+	case code.Neq:
+		return vm.push(eval.FromNativeBoolean(leftVal != rightVal, left.Line()))
+	default:
+		return fmt.Errorf("[Line %d] Unknown numeric operator: %d", left.Line()+1, op)
+	}
 }
 
 func (vm *VM) executeBinaryIntegerOperation(
@@ -550,7 +596,6 @@ func (vm *VM) executeBinaryIntegerOperation(
 		}
 		result = leftValue % rightValue
 	case code.Pow:
-		// TODO: To Float
 		result = int64(math.Pow(float64(leftValue), float64(rightValue)))
 	default:
 		return fmt.Errorf("[Line %d] Unknown integer operator: %d", left.Line()+1, op)
@@ -591,6 +636,12 @@ func (vm *VM) executeComparison(op code.Opcode) error {
 		return vm.executeIntegerComparison(op, left, right)
 	}
 
+	if left.Type() == object.FLOAT && right.Type() == object.FLOAT ||
+		left.Type() == object.FLOAT && right.Type() == object.INTEGER ||
+		left.Type() == object.INTEGER && right.Type() == object.FLOAT {
+		return vm.executeNumericInfixOperation(op, left, right)
+	}
+
 	if left.Type() == object.STRING && right.Type() == object.STRING {
 		return vm.executeStringComparison(op, left, right)
 	}
@@ -603,7 +654,7 @@ func (vm *VM) executeComparison(op code.Opcode) error {
 
 	default:
 		if left.Type() != right.Type() {
-			return fmt.Errorf("[Line %d] type mismatch: %s, %s (When attempting to run operation one %s and %s)",
+			return fmt.Errorf("[Line %d] type mismatch: %s, %s (When attempting to run operation on %s and %s)",
 				left.Line()+1, left.Type(), right.Type(), left.Inspect(), right.Inspect())
 		}
 

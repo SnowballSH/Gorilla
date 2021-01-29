@@ -383,6 +383,10 @@ func evalInfixExpression(
 	switch {
 	case left.Type() == object.INTEGER && right.Type() == object.INTEGER:
 		return evalIntegerInfixExpression(operator, left, right)
+	case left.Type() == object.FLOAT && right.Type() == object.FLOAT,
+		left.Type() == object.FLOAT && right.Type() == object.INTEGER,
+		left.Type() == object.INTEGER && right.Type() == object.FLOAT:
+		return evalNumericInfixExpression(operator, left, right)
 	case left.Type() == object.STRING:
 		return evalStringInfixExpression(operator, left, right)
 	case left.Type() == object.ARRAY && operator == "<-":
@@ -397,11 +401,9 @@ func evalInfixExpression(
 		return FromNativeBoolean(left == right, left.Line())
 	case operator == "!=":
 		return FromNativeBoolean(left != right, left.Line())
-	case left.Type() != right.Type():
+	default:
 		return NewError("[Line %d] type mismatch: %s %s %s (When attempting to run '%s %s %s')",
 			left.Line()+1, left.Type(), operator, right.Type(), left.Inspect(), operator, right.Inspect())
-	default:
-		return NULL
 	}
 }
 
@@ -430,7 +432,6 @@ func evalIntegerInfixExpression(
 		}
 		return object.NewInt(leftVal%rightVal, left.Line())
 	case "**":
-		// TODO Change to Float
 		return object.NewInt(int64(math.Pow(float64(leftVal), float64(rightVal))), left.Line())
 	case "<":
 		return FromNativeBoolean(leftVal < rightVal, left.Line())
@@ -446,6 +447,53 @@ func evalIntegerInfixExpression(
 		return FromNativeBoolean(leftVal != rightVal, left.Line())
 	default:
 		return NULL
+	}
+}
+
+func evalNumericInfixExpression(
+	operator string,
+	left, right object.Object,
+) object.Object {
+	var leftVal, rightVal float64
+	if left.Type() == object.FLOAT {
+		leftVal = left.(*object.Float).Value
+	} else {
+		leftVal = float64(left.(*object.Integer).Value)
+	}
+	if right.Type() == object.FLOAT {
+		rightVal = right.(*object.Float).Value
+	} else {
+		rightVal = float64(right.(*object.Integer).Value)
+	}
+
+	switch operator {
+	case "+":
+		return object.NewFloat(leftVal+rightVal, left.Line())
+	case "-":
+		return object.NewFloat(leftVal-rightVal, left.Line())
+	case "*":
+		return object.NewFloat(leftVal*rightVal, left.Line())
+	case "/":
+		if rightVal == 0 {
+			return NewError("[Line %d] Division by Zero", right.Line()+1)
+		}
+		return object.NewFloat(leftVal/rightVal, left.Line())
+	case "**":
+		return object.NewFloat(math.Pow(leftVal, rightVal), left.Line())
+	case "<":
+		return FromNativeBoolean(leftVal < rightVal, left.Line())
+	case ">":
+		return FromNativeBoolean(leftVal > rightVal, left.Line())
+	case "<=":
+		return FromNativeBoolean(leftVal <= rightVal, left.Line())
+	case ">=":
+		return FromNativeBoolean(leftVal >= rightVal, left.Line())
+	case "==":
+		return FromNativeBoolean(leftVal == rightVal, left.Line())
+	case "!=":
+		return FromNativeBoolean(leftVal != rightVal, left.Line())
+	default:
+		return NewError("[Line %d] Unknown numeric operator: %d", left.Line()+1, operator)
 	}
 }
 
