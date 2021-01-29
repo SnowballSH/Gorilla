@@ -66,21 +66,66 @@ func init() {
 
 		{
 			"len",
-			&Builtin{Fn: func(_ Object, line int, args ...Object) Object {
-				if len(args) != 1 {
-					return NewError("[Line %d] Argument mismatch (expected %d, got %d)", line+1,
-						1, len(args))
-				}
+			&Builtin{
+				Fn: func(_ Object, line int, args ...Object) Object {
+					if len(args) != 1 {
+						return NewError("[Line %d] Argument mismatch (expected %d, got %d)", line+1,
+							1, len(args))
+					}
 
-				switch arg := args[0].(type) {
-				case *String:
-					return NewInt(int64(utf8.RuneCountInString(arg.Value)), arg.Line())
-				case *Array:
-					return NewInt(int64(len(arg.Value)), arg.Line())
-				default:
-					return NewError("[Line %d] Cannot get length of type '%s'", line+1, arg.Type())
-				}
+					switch arg := args[0].(type) {
+					case *String:
+						return NewInt(int64(utf8.RuneCountInString(arg.Value)), arg.Line())
+					case *Array:
+						return NewInt(int64(len(arg.Value)), arg.Line())
+					default:
+						return NewError("[Line %d] Cannot get length of type '%s'", line+1, arg.Type())
+					}
+				},
 			},
+		},
+
+		{
+			"typeof",
+			&Builtin{
+				Fn: func(_ Object, line int, args ...Object) Object {
+					if len(args) != 1 {
+						return NewError("[Line %d] Argument mismatch (expected %d, got %d)", line+1,
+							1, len(args))
+					}
+					return NewString(string(args[0].Type()), line)
+				},
+			},
+		},
+
+		{
+			"isTruthy",
+			&Builtin{
+				Fn: func(_ Object, line int, args ...Object) Object {
+					if len(args) != 1 {
+						return NewError("[Line %d] Argument mismatch (expected %d, got %d)", line+1,
+							1, len(args))
+					}
+					return NewBool(IsTruthy(args[0]), line)
+				},
+			},
+		},
+
+		{
+			"exit",
+			&Builtin{
+				Fn: func(_ Object, line int, args ...Object) Object {
+					if len(args) != 1 {
+						return NewError("[Line %d] Argument mismatch (expected %d, got %d)", line+1,
+							1, len(args))
+					}
+					if _, ok := args[0].(*Integer); !ok {
+						return NewError("[Line %d] Expected Integer, got %s", line+1,
+							args[0].Type())
+					}
+					os.Exit(int(args[0].(*Integer).Value))
+					return NULL
+				},
 			},
 		},
 	}
@@ -100,6 +145,21 @@ func init() {
 					return NewError("[Line %d] Range End is not Integer", line)
 				}
 				return NewArray(makeRange(int(self.(*Integer).Value), int(args[0].(*Integer).Value), line), line)
+			},
+		},
+		"nonz": &Builtin{
+			Fn: func(self Object, line int, args ...Object) Object {
+				return NewBool(self.(*Integer).Value != 0, line)
+			},
+		},
+		"positive": &Builtin{
+			Fn: func(self Object, line int, args ...Object) Object {
+				return NewBool(self.(*Integer).Value > 0, line)
+			},
+		},
+		"negative": &Builtin{
+			Fn: func(self Object, line int, args ...Object) Object {
+				return NewBool(self.(*Integer).Value < 0, line)
 			},
 		},
 	}
@@ -123,6 +183,16 @@ func init() {
 		"toStr": &Builtin{
 			Fn: func(self Object, line int, args ...Object) Object {
 				return NewString(self.(*String).Inspect(), line+1)
+			},
+		},
+		"ord": &Builtin{
+			Fn: func(self Object, line int, args ...Object) Object {
+				r := []rune(self.(*String).Value)
+				rr := make([]Object, len(r))
+				for i, v := range r {
+					rr[i] = NewInt(int64(v), line)
+				}
+				return NewArray(rr, line)
 			},
 		},
 	}
@@ -291,4 +361,17 @@ func CopyMap(m map[string]Object) map[string]Object {
 	}
 
 	return cp
+}
+
+func IsTruthy(obj Object) bool {
+	switch obj {
+	case NULL:
+		return false
+	case TRUE:
+		return true
+	case FALSE:
+		return false
+	default:
+		return true
+	}
 }
