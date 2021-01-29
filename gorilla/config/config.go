@@ -7,6 +7,8 @@ import (
 	"strings"
 )
 
+const VERSION = "0.3"
+
 var OUT io.Writer = os.Stdout
 
 func SetOut(w io.Writer) {
@@ -43,3 +45,5 @@ func GetOSNewline(sys string) string {
 }
 
 const MAXSTRINGSIZE = 1 << 12
+
+type Void struct{}

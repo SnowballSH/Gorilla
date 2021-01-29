@@ -6,6 +6,7 @@ import (
 	"io"
 
 	"../compiler"
+	"../config"
 	"../eval"
 	"../lexer"
 	"../object"
@@ -17,13 +18,11 @@ import (
 const PROMPT = "» "
 const PROMPT2 = "* "
 
-const VERSION = "0.3"
-
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 	env := object.NewEnvironment()
 
-	_, _ = io.WriteString(out, "Gorilla "+VERSION+"\n")
+	_, _ = io.WriteString(out, "Gorilla "+config.VERSION+"\n")
 	i := 0
 	status := 0
 	txt := ""
@@ -94,7 +93,7 @@ func StartCompile(in io.Reader, out io.Writer) {
 		symbolTable.DefineBuiltin(i, v.Name)
 	}
 
-	_, _ = io.WriteString(out, "Gorilla "+VERSION+"\n")
+	_, _ = io.WriteString(out, "Gorilla "+config.VERSION+"\n")
 	i := 0
 	status := 0
 	txt := ""

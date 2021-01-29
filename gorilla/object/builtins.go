@@ -42,6 +42,11 @@ func init() {
 		},
 
 		{
+			"VERSION",
+			NewString(config.VERSION, 0),
+		},
+
+		{
 			"print",
 			&Builtin{
 				Fn: func(self Object, line int, args ...Object) Object {
@@ -233,7 +238,7 @@ func init() {
 		},
 		"toStr": &Builtin{
 			Fn: func(self Object, line int, args ...Object) Object {
-				return NewString(self.(*String).Inspect(), line+1)
+				return self
 			},
 		},
 		"ord": &Builtin{
@@ -244,6 +249,15 @@ func init() {
 					rr[i] = NewInt(int64(v), line)
 				}
 				return NewArray(rr, line)
+			},
+		},
+		"chars": &Builtin{
+			Fn: func(self Object, line int, args ...Object) Object {
+				var arr = NewArray([]Object{}, line)
+				for _, v := range self.(*String).Value {
+					arr.Push(NewString(string(v), line))
+				}
+				return arr
 			},
 		},
 	}
@@ -274,6 +288,39 @@ func init() {
 		"toStr": &Builtin{
 			Fn: func(self Object, line int, args ...Object) Object {
 				return NewString(self.(*Array).Inspect(), line+1)
+			},
+		},
+		"copy": &Builtin{
+			Fn: func(self Object, line int, args ...Object) Object {
+				var arr = NewArray([]Object{}, line)
+				for _, v := range self.(*Array).Value {
+					arr.Push(v)
+				}
+				return arr
+			},
+		},
+		"unique": &Builtin{
+			Fn: func(self Object, line int, args ...Object) Object {
+				var set = map[interface{}]Object{}
+				for _, v := range self.(*Array).Value {
+					var k interface{}
+					switch v.(type) {
+					case *Integer:
+						k = v.(*Integer).Value
+					case *Float:
+						k = v.(*Float).Value
+					case *String:
+						k = v.(*String).Value
+					default:
+						k = v
+					}
+					set[k] = v
+				}
+				var arr = NewArray([]Object{}, line)
+				for _, v := range set {
+					arr.Push(v)
+				}
+				return arr
 			},
 		},
 	}
