@@ -86,6 +86,9 @@ func Eval(node ast.Node, env *object.Environment, out ...io.Writer) object.Objec
 	case *ast.IntegerLiteral:
 		return object.NewInt(node.Value, node.Token.Line)
 
+	case *ast.FloatLiteral:
+		return object.NewFloat(node.Value, node.Token.Line)
+
 	case *ast.Boolean:
 		return FromNativeBoolean(node.Value, node.Token.Line)
 

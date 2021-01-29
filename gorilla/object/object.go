@@ -17,6 +17,9 @@ const (
 	// INTEGER is the Integer object type
 	INTEGER = "INTEGER"
 
+	// FLOAT is the Float object type
+	FLOAT = "FLOAT"
+
 	// STRING is the String object type
 	STRING = "STRING"
 
@@ -92,6 +95,30 @@ func (i *Integer) SetAttribute(name string, value Object) Object {
 }
 func (i *Integer) Parent() Object     { return i.SParent }
 func (i *Integer) SetParent(x Object) { i.SParent = x }
+
+// Float. float64
+type Float struct {
+	Value   float64
+	SLine   int
+	SParent Object
+	Attrs   map[string]Object
+}
+
+// Type returns the type of the object
+func (f *Float) Type() Type { return FLOAT }
+
+// Inspect returns a stringified version of the object for debugging
+func (f *Float) Inspect() string { return fmt.Sprintf("%f", f.Value) }
+
+func (f *Float) Line() int { return f.SLine }
+
+func (f *Float) Attributes() map[string]Object { return f.Attrs }
+func (f *Float) SetAttribute(name string, value Object) Object {
+	f.Attrs[name] = value
+	return f
+}
+func (f *Float) Parent() Object     { return f.SParent }
+func (f *Float) SetParent(x Object) { f.SParent = x }
 
 // String
 type String struct {

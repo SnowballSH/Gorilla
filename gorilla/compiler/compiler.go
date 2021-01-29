@@ -464,6 +464,10 @@ func (c *Compiler) Compile(node ast.Node) error {
 		integer := object.NewInt(node.Value, node.Token.Line)
 		c.emit(code.LoadConst, c.addConstant(integer))
 
+	case *ast.FloatLiteral:
+		float := object.NewFloat(node.Value, node.Token.Line)
+		c.emit(code.LoadConst, c.addConstant(float))
+
 	case *ast.FunctionLiteral:
 		c.enterScope()
 

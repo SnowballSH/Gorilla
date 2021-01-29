@@ -18,11 +18,14 @@ var Builtins []struct {
 	Builtin Object
 }
 
-var IntAttrs map[string]Object
-var StrAttrs map[string]Object
-var ArrayAttrs map[string]Object
-var BoolAttrs map[string]Object
-var FunctionClosureAttrs map[string]Object
+var (
+	IntAttrs             map[string]Object
+	FloatAttrs           map[string]Object
+	StrAttrs             map[string]Object
+	ArrayAttrs           map[string]Object
+	BoolAttrs            map[string]Object
+	FunctionClosureAttrs map[string]Object
+)
 
 var TRUE *Boolean
 var FALSE *Boolean
@@ -136,6 +139,16 @@ func init() {
 				return NewString(self.(*Integer).Inspect(), line)
 			},
 		},
+		"toInt": &Builtin{
+			Fn: func(self Object, line int, args ...Object) Object {
+				return self
+			},
+		},
+		"toFloat": &Builtin{
+			Fn: func(self Object, line int, args ...Object) Object {
+				return NewFloat(float64(self.(*Integer).Value), line)
+			},
+		},
 		"range": &Builtin{
 			Fn: func(self Object, line int, args ...Object) Object {
 				if len(args) < 1 {
@@ -160,6 +173,44 @@ func init() {
 		"negative": &Builtin{
 			Fn: func(self Object, line int, args ...Object) Object {
 				return NewBool(self.(*Integer).Value < 0, line)
+			},
+		},
+		"chr": &Builtin{
+			Fn: func(self Object, line int, args ...Object) Object {
+				return NewString(string(rune(self.(*Integer).Value)), line)
+			},
+		},
+	}
+
+	FloatAttrs = map[string]Object{
+		"toStr": &Builtin{
+			Fn: func(self Object, line int, args ...Object) Object {
+				return NewString(self.(*Float).Inspect(), line)
+			},
+		},
+		"toInt": &Builtin{
+			Fn: func(self Object, line int, args ...Object) Object {
+				return NewInt(int64(self.(*Float).Value), line)
+			},
+		},
+		"toFloat": &Builtin{
+			Fn: func(self Object, line int, args ...Object) Object {
+				return self
+			},
+		},
+		"nonz": &Builtin{
+			Fn: func(self Object, line int, args ...Object) Object {
+				return NewBool(self.(*Float).Value != 0.0, line)
+			},
+		},
+		"positive": &Builtin{
+			Fn: func(self Object, line int, args ...Object) Object {
+				return NewBool(self.(*Float).Value > 0.0, line)
+			},
+		},
+		"negative": &Builtin{
+			Fn: func(self Object, line int, args ...Object) Object {
+				return NewBool(self.(*Float).Value < 0.0, line)
 			},
 		},
 	}
@@ -245,6 +296,18 @@ func init() {
 				return NewInt(v, line+1)
 			},
 		},
+		"toFloat": &Builtin{
+			Fn: func(self Object, line int, args ...Object) Object {
+				var v int64
+				switch self.(*Boolean).Value {
+				case true:
+					v = 1
+				default:
+					v = 0
+				}
+				return NewFloat(float64(v), line+1)
+			},
+		},
 	}
 
 	FunctionClosureAttrs = map[string]Object{
@@ -275,6 +338,14 @@ func NewInt(value int64, line int) *Integer {
 		Value: value,
 		SLine: line,
 		Attrs: CopyMap(IntAttrs),
+	}
+}
+
+func NewFloat(value float64, line int) *Float {
+	return &Float{
+		Value: value,
+		SLine: line,
+		Attrs: CopyMap(FloatAttrs),
 	}
 }
 

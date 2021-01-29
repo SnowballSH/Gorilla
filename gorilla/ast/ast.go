@@ -222,6 +222,20 @@ func (il *IntegerLiteral) TokenLiteral() string { return il.Token.Literal }
 // String returns a stringified version of the AST for debugging
 func (il *IntegerLiteral) String() string { return il.Token.Literal }
 
+// FloatLiteral
+type FloatLiteral struct {
+	Token token.Token
+	Value float64
+}
+
+func (fl *FloatLiteral) expressionNode() {}
+
+// TokenLiteral prints the literal value of the token associated with this node
+func (fl *FloatLiteral) TokenLiteral() string { return fl.Token.Literal }
+
+// String returns a stringified version of the AST for debugging
+func (fl *FloatLiteral) String() string { return fl.Token.Literal }
+
 // PrefixExpression represents a prefix expression and holds the operator
 // as well as the right-hand side expression
 type PrefixExpression struct {
