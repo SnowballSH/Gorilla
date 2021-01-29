@@ -2,6 +2,7 @@ package object
 
 import (
 	"../ast"
+	"../code"
 	"../config"
 	"bufio"
 	"fmt"
@@ -21,6 +22,7 @@ var IntAttrs map[string]Object
 var StrAttrs map[string]Object
 var ArrayAttrs map[string]Object
 var BoolAttrs map[string]Object
+var FunctionClosureAttrs map[string]Object
 
 var TRUE *Boolean
 var FALSE *Boolean
@@ -175,22 +177,34 @@ func init() {
 		},
 	}
 
+	FunctionClosureAttrs = map[string]Object{
+		"toStr": &Builtin{
+			Fn: func(self Object, line int, args ...Object) Object {
+				return NewString(self.Inspect(), line+1)
+			},
+		},
+	}
+
 	TRUE = NewBool(true, 0)
 
 	FALSE = NewBool(false, 0)
 
-	NULL = &Null{}
+	NULL = NewNull()
 }
 
 func NewError(format string, a ...interface{}) *Error {
 	return &Error{Message: fmt.Sprintf(format, a...)}
 }
 
+func NewNull() *Null {
+	return &Null{Attrs: CopyMap(FunctionClosureAttrs)}
+}
+
 func NewInt(value int64, line int) *Integer {
 	return &Integer{
 		Value: value,
 		SLine: line,
-		Attrs: IntAttrs,
+		Attrs: CopyMap(IntAttrs),
 	}
 }
 
@@ -198,7 +212,7 @@ func NewString(value string, line int) *String {
 	return &String{
 		Value: value,
 		SLine: line,
-		Attrs: StrAttrs,
+		Attrs: CopyMap(StrAttrs),
 	}
 }
 
@@ -206,7 +220,7 @@ func NewArray(value []Object, line int) *Array {
 	return &Array{
 		Value: value,
 		SLine: line,
-		Attrs: ArrayAttrs,
+		Attrs: CopyMap(ArrayAttrs),
 	}
 }
 
@@ -214,7 +228,7 @@ func NewBool(value bool, line int) *Boolean {
 	return &Boolean{
 		Value: value,
 		SLine: line,
-		Attrs: BoolAttrs,
+		Attrs: CopyMap(BoolAttrs),
 	}
 }
 
@@ -229,6 +243,33 @@ func NewFunction(
 		Body:       body,
 		Env:        env,
 		SLine:      line,
+		Attrs:      CopyMap(FunctionClosureAttrs),
+	}
+}
+
+func NewCompiledFunction(
+	ins code.Instructions,
+	line, locals, params int,
+) *CompiledFunction {
+	return &CompiledFunction{
+		Instructions:  ins,
+		NumLocals:     locals,
+		NumParameters: params,
+		SLine:         line,
+		Attrs:         CopyMap(FunctionClosureAttrs),
+	}
+}
+
+func NewClosure(
+	Fn *CompiledFunction,
+	Free []Object,
+	SLine int,
+) *Closure {
+	return &Closure{
+		Fn:    Fn,
+		Free:  Free,
+		SLine: SLine,
+		Attrs: CopyMap(FunctionClosureAttrs),
 	}
 }
 
@@ -241,4 +282,13 @@ func makeRange(min, max, line int) []Object {
 		a[i] = NewInt(int64(min+i), line)
 	}
 	return a
+}
+
+func CopyMap(m map[string]Object) map[string]Object {
+	cp := make(map[string]Object)
+	for k, v := range m {
+		cp[k] = v
+	}
+
+	return cp
 }

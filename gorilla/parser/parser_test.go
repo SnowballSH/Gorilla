@@ -741,7 +741,7 @@ func TestParsingArrayLiterals(t *testing.T) {
 	testInfixExpression(t, array.Elements[2], 3, "+", 3)
 }
 
-func TestIndexExpression(t *testing.T) {
+func TestIndexAssignExpression(t *testing.T) {
 	tests := []struct {
 		input string
 		res   string
@@ -770,6 +770,44 @@ func TestIndexExpression(t *testing.T) {
 		exp, ok := stmt.Expression.(*ast.IndexAssignmentExpression)
 		if !ok {
 			t.Fatalf("stmt.Expression is not Index Assignment. got=%T",
+				stmt.Expression)
+		}
+
+		if exp.String() != tt.res {
+			t.Fatalf("Wrong string value, expected %s, not %s", tt.res, exp.String())
+		}
+	}
+}
+
+func TestAttrAssignExpression(t *testing.T) {
+	tests := []struct {
+		input string
+		res   string
+	}{
+		{
+			input: "a.b = 3",
+			res:   "a.b = 3",
+		},
+		{
+			input: "a.abc = 3 ** 2 * 1",
+			res:   "a.abc = ((3 ** 2) * 1)",
+		},
+		{
+			input: "aa.bb = aa.bb + 1",
+			res:   "aa.bb = (aa.bb + 1)",
+		},
+	}
+
+	for _, tt := range tests {
+		l := lexer.New(tt.input)
+		p := New(l)
+		program := p.ParseProgram()
+		checkParserErrors(t, p)
+
+		stmt := program.Statements[0].(*ast.ExpressionStatement)
+		exp, ok := stmt.Expression.(*ast.AttrAssignmentExpression)
+		if !ok {
+			t.Fatalf("stmt.Expression is not Attr Assignment. got=%T",
 				stmt.Expression)
 		}
 

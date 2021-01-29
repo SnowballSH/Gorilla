@@ -162,6 +162,7 @@ var definitions = map[Opcode]*Definition{
 	Array:         {"Array", []int{2, 2}},
 	Index:         {"Index", []int{}},
 	SetArrayIndex: {"SetArrayIndex", []int{}},
+	SetAttr:       {"SetAttr", []int{}},
 
 	LARR: {"LARR", []int{}},
 }
@@ -218,6 +219,8 @@ const (
 	Array
 	Index
 	SetArrayIndex
+
+	SetAttr
 
 	LARR
 )

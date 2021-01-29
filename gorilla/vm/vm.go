@@ -46,8 +46,8 @@ func (vm *VM) popFrame() *Frame {
 }
 
 func New(bytecode *compiler.Bytecode) *VM {
-	mainFn := &object.CompiledFunction{Instructions: bytecode.Instructions}
-	mainClosure := &object.Closure{Fn: mainFn}
+	mainFn := object.NewCompiledFunction(bytecode.Instructions, 0, 0, 0)
+	mainClosure := object.NewClosure(mainFn, []object.Object{}, 0)
 	mainFrame := NewFrame(mainClosure, 0)
 
 	frames := make([]*Frame, FrameSize)
@@ -67,8 +67,8 @@ func New(bytecode *compiler.Bytecode) *VM {
 }
 
 func NewWithGlobalsStore(bytecode *compiler.Bytecode, globals []object.Object) *VM {
-	mainFn := &object.CompiledFunction{Instructions: bytecode.Instructions}
-	mainClosure := &object.Closure{Fn: mainFn}
+	mainFn := object.NewCompiledFunction(bytecode.Instructions, 0, 0, 0)
+	mainClosure := object.NewClosure(mainFn, []object.Object{}, 0)
 	mainFrame := NewFrame(mainClosure, 0)
 
 	frames := make([]*Frame, FrameSize)
@@ -304,6 +304,17 @@ func (vm *VM) Run() error {
 				return err
 			}
 
+		case code.SetAttr:
+			value := vm.pop()
+			name := vm.pop()
+			receiver := vm.pop()
+
+			receiver.SetAttribute(name.Inspect(), value)
+			err := vm.push(value)
+			if err != nil {
+				return err
+			}
+
 		case code.LoadTrue:
 			err := vm.push(object.TRUE)
 			if err != nil {
@@ -465,7 +476,7 @@ func (vm *VM) pushClosure(constIndex, numFree int) error {
 	}
 
 	vm.sp = vm.sp - numFree
-	closure := &object.Closure{Fn: function, Free: free}
+	closure := object.NewClosure(function, free, function.SLine)
 	return vm.push(closure)
 }
 

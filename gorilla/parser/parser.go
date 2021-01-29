@@ -616,6 +616,18 @@ func (p *Parser) parseGetAttr(expr ast.Expression) ast.Expression {
 	crr := p.curToken
 	iden := p.parseIdentifierIden()
 
+	if p.peekTokenIs(token.ASSIGN) {
+		p.nextToken()
+		p.nextToken()
+		value := p.parseExpression(LOWEST)
+		return &ast.AttrAssignmentExpression{
+			Token:    crr,
+			Receiver: expr,
+			Name:     iden.String(),
+			Value:    value,
+		}
+	}
+
 	return &ast.GetAttr{
 		Token: crr,
 		Expr:  expr,

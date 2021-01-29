@@ -263,11 +263,12 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.loadSymbol(s)
 		}
 
-		compiledFn := &object.CompiledFunction{
-			Instructions:  instructions,
-			NumLocals:     numLocals,
-			NumParameters: len(node.Parameters),
-		}
+		compiledFn := object.NewCompiledFunction(
+			instructions,
+			node.Token.Line,
+			numLocals,
+			len(node.Parameters),
+		)
 
 		fnIndex := c.addConstant(compiledFn)
 		c.emit(code.Closure, fnIndex, len(freeSymbols))
@@ -490,11 +491,12 @@ func (c *Compiler) Compile(node ast.Node) error {
 			c.loadSymbol(s)
 		}
 
-		compiledFn := &object.CompiledFunction{
-			Instructions:  instructions,
-			NumLocals:     numLocals,
-			NumParameters: len(node.Parameters),
-		}
+		compiledFn := object.NewCompiledFunction(
+			instructions,
+			node.Token.Line,
+			numLocals,
+			len(node.Parameters),
+		)
 
 		fnIndex := c.addConstant(compiledFn)
 		c.emit(code.Closure, fnIndex, len(freeSymbols))
@@ -567,6 +569,21 @@ func (c *Compiler) Compile(node ast.Node) error {
 		}
 
 		c.emit(code.SetArrayIndex)
+
+	case *ast.AttrAssignmentExpression:
+		err := c.Compile(node.Receiver)
+		if err != nil {
+			return err
+		}
+
+		c.emit(code.LoadConst, c.addConstant(object.NewString(node.Name, node.Token.Line)))
+
+		err = c.Compile(node.Value)
+		if err != nil {
+			return err
+		}
+
+		c.emit(code.SetAttr)
 
 	case *ast.GetAttr:
 		err := c.Compile(node.Expr)

@@ -167,6 +167,21 @@ func Eval(node ast.Node, env *object.Environment, out ...io.Writer) object.Objec
 
 		return arrayObject.SetIndex(int(idx), val)
 
+	case *ast.AttrAssignmentExpression:
+		receiver := Eval(node.Receiver, env)
+		if isError(receiver) {
+			return receiver
+		}
+
+		val := Eval(node.Value, env)
+		if isError(val) {
+			return val
+		}
+
+		receiver.SetAttribute(node.Name, val)
+
+		return val
+
 	case *ast.WhileExpression:
 		return evalWhileExpression(node, env)
 

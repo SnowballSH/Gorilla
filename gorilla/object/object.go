@@ -63,6 +63,7 @@ type Object interface {
 	Inspect() string
 	Line() int
 	Attributes() map[string]Object
+	SetAttribute(name string, value Object) Object
 	Parent() Object
 	SetParent(x Object)
 }
@@ -85,8 +86,12 @@ func (i *Integer) Inspect() string { return fmt.Sprintf("%d", i.Value) }
 func (i *Integer) Line() int { return i.SLine }
 
 func (i *Integer) Attributes() map[string]Object { return i.Attrs }
-func (i *Integer) Parent() Object                { return i.SParent }
-func (i *Integer) SetParent(x Object)            { i.SParent = x }
+func (i *Integer) SetAttribute(name string, value Object) Object {
+	i.Attrs[name] = value
+	return i
+}
+func (i *Integer) Parent() Object     { return i.SParent }
+func (i *Integer) SetParent(x Object) { i.SParent = x }
 
 // String
 type String struct {
@@ -100,8 +105,12 @@ func (s *String) Type() Type                    { return STRING }
 func (s *String) Inspect() string               { return s.Value }
 func (s *String) Line() int                     { return s.SLine }
 func (s *String) Attributes() map[string]Object { return s.Attrs }
-func (s *String) Parent() Object                { return s.SParent }
-func (s *String) SetParent(x Object)            { s.SParent = x }
+func (s *String) SetAttribute(name string, value Object) Object {
+	s.Attrs[name] = value
+	return s
+}
+func (s *String) Parent() Object     { return s.SParent }
+func (s *String) SetParent(x Object) { s.SParent = x }
 
 func init() {
 
@@ -139,8 +148,12 @@ func (a *Array) Inspect() string {
 }
 func (a *Array) Line() int                     { return a.SLine }
 func (a *Array) Attributes() map[string]Object { return a.Attrs }
-func (a *Array) Parent() Object                { return a.SParent }
-func (a *Array) SetParent(x Object)            { a.SParent = x }
+func (a *Array) SetAttribute(name string, value Object) Object {
+	a.Attrs[name] = value
+	return a
+}
+func (a *Array) Parent() Object     { return a.SParent }
+func (a *Array) SetParent(x Object) { a.SParent = x }
 
 func (a *Array) Push(x Object) Object {
 	a.Value = append(a.Value, x)
@@ -185,13 +198,18 @@ func (b *Boolean) Inspect() string { return fmt.Sprintf("%t", b.Value) }
 
 func (b *Boolean) Line() int                     { return b.SLine }
 func (b *Boolean) Attributes() map[string]Object { return b.Attrs }
-func (b *Boolean) Parent() Object                { return b.SParent }
-func (b *Boolean) SetParent(x Object)            { b.SParent = x }
+func (b *Boolean) SetAttribute(name string, value Object) Object {
+	b.Attrs[name] = value
+	return b
+}
+func (b *Boolean) Parent() Object     { return b.SParent }
+func (b *Boolean) SetParent(x Object) { b.SParent = x }
 
 // Null is the null type and used to represent the absence of a value
 type Null struct {
 	SLine   int
 	SParent Object
+	Attrs   map[string]Object
 }
 
 // Type returns the type of the object
@@ -201,9 +219,13 @@ func (n *Null) Type() Type { return NULLT }
 func (n *Null) Inspect() string { return "null" }
 
 func (n *Null) Line() int                     { return n.SLine }
-func (n *Null) Attributes() map[string]Object { return noAttr }
-func (n *Null) Parent() Object                { return n.SParent }
-func (n *Null) SetParent(x Object)            { n.SParent = x }
+func (n *Null) Attributes() map[string]Object { return n.Attrs }
+func (n *Null) SetAttribute(name string, value Object) Object {
+	n.Attrs[name] = value
+	return n
+}
+func (n *Null) Parent() Object     { return n.SParent }
+func (n *Null) SetParent(x Object) { n.SParent = x }
 
 // Return is the return statement
 type Return struct {
@@ -218,10 +240,11 @@ func (rv *Return) Type() Type { return RETURN }
 // Inspect returns a stringified version of the object for debugging
 func (rv *Return) Inspect() string { return rv.Value.Inspect() }
 
-func (rv *Return) Line() int                     { return rv.SLine }
-func (rv *Return) Attributes() map[string]Object { return noAttr }
-func (rv *Return) Parent() Object                { return rv.SParent }
-func (rv *Return) SetParent(x Object)            { rv.SParent = x }
+func (rv *Return) Line() int                          { return rv.SLine }
+func (rv *Return) Attributes() map[string]Object      { return noAttr }
+func (rv *Return) SetAttribute(string, Object) Object { return rv }
+func (rv *Return) Parent() Object                     { return rv.SParent }
+func (rv *Return) SetParent(x Object)                 { rv.SParent = x }
 
 // Error the the error object
 type Error struct {
@@ -236,15 +259,17 @@ func (e *Error) Type() Type { return ERROR }
 // Inspect returns a stringified version of the object for debugging
 func (e *Error) Inspect() string { return " Runtime Error:\n\t" + e.Message }
 
-func (e *Error) Line() int                     { return e.SLine }
-func (e *Error) Attributes() map[string]Object { return noAttr }
-func (e *Error) Parent() Object                { return e.SParent }
-func (e *Error) SetParent(x Object)            { e.SParent = x }
+func (e *Error) Line() int                          { return e.SLine }
+func (e *Error) Attributes() map[string]Object      { return noAttr }
+func (e *Error) SetAttribute(string, Object) Object { return e }
+func (e *Error) Parent() Object                     { return e.SParent }
+func (e *Error) SetParent(x Object)                 { e.SParent = x }
 
 // Function is the base function object type
 type Function struct {
 	Parameters []*ast.Identifier
 	Body       *ast.BlockStatement
+	Attrs      map[string]Object
 	Env        *Environment
 	SLine      int
 	SParent    Object
@@ -273,9 +298,13 @@ func (f *Function) Inspect() string {
 }
 
 func (f *Function) Line() int                     { return f.SLine }
-func (f *Function) Attributes() map[string]Object { return noAttr }
-func (f *Function) Parent() Object                { return f.SParent }
-func (f *Function) SetParent(x Object)            { f.SParent = x }
+func (f *Function) Attributes() map[string]Object { return f.Attrs }
+func (f *Function) SetAttribute(name string, value Object) Object {
+	f.Attrs[name] = value
+	return f
+}
+func (f *Function) Parent() Object     { return f.SParent }
+func (f *Function) SetParent(x Object) { f.SParent = x }
 
 type CompiledFunction struct {
 	Instructions  code.Instructions
@@ -283,6 +312,7 @@ type CompiledFunction struct {
 	NumParameters int
 	SLine         int
 	SParent       Object
+	Attrs         map[string]Object
 }
 
 func (cf *CompiledFunction) Type() Type { return COMPILEDFUNCTION }
@@ -291,14 +321,19 @@ func (cf *CompiledFunction) Inspect() string {
 }
 
 func (cf *CompiledFunction) Line() int                     { return cf.SLine }
-func (cf *CompiledFunction) Attributes() map[string]Object { return noAttr }
-func (cf *CompiledFunction) Parent() Object                { return cf.SParent }
-func (cf *CompiledFunction) SetParent(x Object)            { cf.SParent = x }
+func (cf *CompiledFunction) Attributes() map[string]Object { return cf.Attrs }
+func (cf *CompiledFunction) SetAttribute(name string, value Object) Object {
+	cf.Attrs[name] = value
+	return cf
+}
+func (cf *CompiledFunction) Parent() Object     { return cf.SParent }
+func (cf *CompiledFunction) SetParent(x Object) { cf.SParent = x }
 
 type Builtin struct {
 	Fn      BuiltinFunction
 	SLine   int
 	SParent Object
+	Attrs   map[string]Object
 }
 
 // Type returns the type of the object
@@ -308,15 +343,20 @@ func (b *Builtin) Type() Type { return BUILTIN }
 func (b *Builtin) Inspect() string { return "Builtin Function" }
 
 func (b *Builtin) Line() int                     { return b.SLine }
-func (b *Builtin) Attributes() map[string]Object { return noAttr }
-func (b *Builtin) Parent() Object                { return b.SParent }
-func (b *Builtin) SetParent(x Object)            { b.SParent = x }
+func (b *Builtin) Attributes() map[string]Object { return b.Attrs }
+func (b *Builtin) SetAttribute(name string, value Object) Object {
+	b.Attrs[name] = value
+	return b
+}
+func (b *Builtin) Parent() Object     { return b.SParent }
+func (b *Builtin) SetParent(x Object) { b.SParent = x }
 
 type Closure struct {
 	Fn      *CompiledFunction
 	Free    []Object
 	SLine   int
 	SParent Object
+	Attrs   map[string]Object
 }
 
 func (c *Closure) Type() Type { return CLOSURE }
@@ -326,6 +366,10 @@ func (c *Closure) Inspect() string {
 }
 
 func (c *Closure) Line() int                     { return c.SLine }
-func (c *Closure) Attributes() map[string]Object { return noAttr }
-func (c *Closure) Parent() Object                { return c.SParent }
-func (c *Closure) SetParent(x Object)            { c.SParent = x }
+func (c *Closure) Attributes() map[string]Object { return c.Attrs }
+func (c *Closure) SetAttribute(name string, value Object) Object {
+	c.Attrs[name] = value
+	return c
+}
+func (c *Closure) Parent() Object     { return c.SParent }
+func (c *Closure) SetParent(x Object) { c.SParent = x }
