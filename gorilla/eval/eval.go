@@ -493,7 +493,7 @@ func evalNumericInfixExpression(
 	case "!=":
 		return FromNativeBoolean(leftVal != rightVal, left.Line())
 	default:
-		return NewError("[Line %d] Unknown numeric operator: %d", left.Line()+1, operator)
+		return NewError("[Line %d] Unknown numeric operator: %s", left.Line()+1, operator)
 	}
 }
 
