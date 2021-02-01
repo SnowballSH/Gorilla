@@ -1,10 +1,10 @@
 package code
 
-type opcode byte
+type Opcode byte
 
 // All Bytecodes
 const (
-	_ opcode = iota
+	_ Opcode = iota
 
 	// Loads a Constant
 	LoadConstant
