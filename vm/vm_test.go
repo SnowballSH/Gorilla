@@ -31,14 +31,14 @@ func Test1(t *testing.T) {
 			code.LoadConstant,
 		},
 		[]object.BaseObject{
-			&object.Integer{
-				Value: 123,
-				SLine: 0,
-			},
-			&object.Integer{
-				Value: 456,
-				SLine: 0,
-			},
+			object.NewInteger(
+				123,
+				0,
+			),
+			object.NewInteger(
+				456,
+				0,
+			),
 		},
 		[]object.Message{
 			&object.IntMessage{Value: 0},
@@ -47,18 +47,18 @@ func Test1(t *testing.T) {
 		},
 	)
 	stack := []object.BaseObject{
-		&object.Integer{
-			Value: 123,
-			SLine: 0,
-		},
-		&object.Integer{
-			Value: 123,
-			SLine: 0,
-		},
-		&object.Integer{
-			Value: 456,
-			SLine: 0,
-		},
+		object.NewInteger(
+			123,
+			0,
+		),
+		object.NewInteger(
+			123,
+			0,
+		),
+		object.NewInteger(
+			456,
+			0,
+		),
 	}
 	assertStack(t, vm, stack)
 }
@@ -72,14 +72,14 @@ func Test2(t *testing.T) {
 			code.LoadConstant,
 		},
 		[]object.BaseObject{
-			&object.Integer{
-				Value: 123,
-				SLine: 0,
-			},
-			&object.Integer{
-				Value: 456,
-				SLine: 0,
-			},
+			object.NewInteger(
+				123,
+				0,
+			),
+			object.NewInteger(
+				456,
+				0,
+			),
 		},
 		[]object.Message{
 			&object.IntMessage{Value: 0},
@@ -88,14 +88,14 @@ func Test2(t *testing.T) {
 		},
 	)
 	stack := []object.BaseObject{
-		&object.Integer{
-			Value: 123,
-			SLine: 0,
-		},
-		&object.Integer{
-			Value: 456,
-			SLine: 0,
-		},
+		object.NewInteger(
+			123,
+			0,
+		),
+		object.NewInteger(
+			456,
+			0,
+		),
 	}
 	assertStack(t, vm, stack)
 }

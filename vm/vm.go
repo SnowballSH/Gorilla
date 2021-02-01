@@ -34,10 +34,13 @@ func New(bytecodes []code.Opcode, constants []object.BaseObject, messages []obje
 	}
 }
 
-func (vm *VM) pop() object.BaseObject {
+func (vm *VM) pop() (object.BaseObject, error) {
+	if vm.sp == 0 {
+		return nil, fmt.Errorf("stack underflow")
+	}
 	o := vm.Stack[vm.sp-1]
 	vm.sp--
-	return o
+	return o, nil
 }
 
 func (vm *VM) push(o object.BaseObject) error {
@@ -62,8 +65,15 @@ func (vm *VM) Run() error {
 			if err != nil {
 				return err
 			}
+
 		case code.Pop:
-			vm.pop()
+			_, e := vm.pop()
+			if e != nil {
+				return e
+			}
+
+		case code.Addition:
+
 		default:
 			return fmt.Errorf("bytecode not supported: %d", bytecode)
 		}
