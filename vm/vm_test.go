@@ -6,10 +6,26 @@ import (
 	"testing"
 )
 
-func assertStack(t *testing.T, vm *VM, stack []object.BaseObject) {
+func assertStack(t *testing.T, vm *VM, stack []object.BaseObject, result object.BaseObject) {
 	err := vm.Run()
-	if err != nil {
+	if err != nil && isError(err) {
 		t.Errorf("VM ERROR: %s", err)
+		return
+	}
+	if result != vm.lastPopped {
+		var val1, val2 string
+		if result != nil {
+			val1 = result.Inspect()
+		} else {
+			val1 = "nil"
+		}
+		if vm.lastPopped != nil {
+			val2 = vm.lastPopped.Inspect()
+		} else {
+			val2 = "nil"
+		}
+
+		t.Errorf("Result not match: expected %s, got %s", val1, val2)
 		return
 	}
 	if vm.sp != len(stack) {
@@ -23,6 +39,16 @@ func assertStack(t *testing.T, vm *VM, stack []object.BaseObject) {
 	}
 }
 
+var testInt1 = object.NewInteger(
+	123,
+	0,
+)
+
+var testInt2 = object.NewInteger(
+	456,
+	0,
+)
+
 func Test1(t *testing.T) {
 	vm := New(
 		[]code.Opcode{
@@ -31,14 +57,8 @@ func Test1(t *testing.T) {
 			code.LoadConstant,
 		},
 		[]object.BaseObject{
-			object.NewInteger(
-				123,
-				0,
-			),
-			object.NewInteger(
-				456,
-				0,
-			),
+			testInt1,
+			testInt2,
 		},
 		[]object.Message{
 			&object.IntMessage{Value: 0},
@@ -47,20 +67,11 @@ func Test1(t *testing.T) {
 		},
 	)
 	stack := []object.BaseObject{
-		object.NewInteger(
-			123,
-			0,
-		),
-		object.NewInteger(
-			123,
-			0,
-		),
-		object.NewInteger(
-			456,
-			0,
-		),
+		testInt1,
+		testInt1,
+		testInt2,
 	}
-	assertStack(t, vm, stack)
+	assertStack(t, vm, stack, nil)
 }
 
 func Test2(t *testing.T) {
@@ -72,14 +83,8 @@ func Test2(t *testing.T) {
 			code.LoadConstant,
 		},
 		[]object.BaseObject{
-			object.NewInteger(
-				123,
-				0,
-			),
-			object.NewInteger(
-				456,
-				0,
-			),
+			testInt1,
+			testInt2,
 		},
 		[]object.Message{
 			&object.IntMessage{Value: 0},
@@ -88,14 +93,8 @@ func Test2(t *testing.T) {
 		},
 	)
 	stack := []object.BaseObject{
-		object.NewInteger(
-			123,
-			0,
-		),
-		object.NewInteger(
-			456,
-			0,
-		),
+		testInt1,
+		testInt2,
 	}
-	assertStack(t, vm, stack)
+	assertStack(t, vm, stack, testInt2)
 }

@@ -12,9 +12,11 @@ const (
 	// Pops the stack
 	Pop
 
-	// Binary Operations
-	Addition
-	Subtract
-	Multiply
-	Division
+	// Call Method
+	CallMethod
+	/*
+		Syntax:
+			Messages: [line int, name string, amountArgs int]
+			Stack:    [arg1, arg2, arg3, ..., callee]
+	*/
 )

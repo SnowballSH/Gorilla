@@ -20,6 +20,8 @@ type VM struct {
 
 	Stack []object.BaseObject
 	sp    int // Always points to the next value. Top of stack is stack[sp-1]
+
+	lastPopped object.BaseObject
 }
 
 func New(bytecodes []code.Opcode, constants []object.BaseObject, messages []object.Message) *VM {
@@ -31,21 +33,23 @@ func New(bytecodes []code.Opcode, constants []object.BaseObject, messages []obje
 		sp:           0,
 		ip:           0,
 		mp:           0,
+		lastPopped:   nil,
 	}
 }
 
-func (vm *VM) pop() (object.BaseObject, error) {
+func (vm *VM) pop() (object.BaseObject, object.BaseObject) {
 	if vm.sp == 0 {
-		return nil, fmt.Errorf("stack underflow")
+		return nil, object.NewError("stack underflow", 0)
 	}
 	o := vm.Stack[vm.sp-1]
 	vm.sp--
+	vm.lastPopped = o
 	return o, nil
 }
 
-func (vm *VM) push(o object.BaseObject) error {
+func (vm *VM) push(o object.BaseObject) object.BaseObject {
 	if vm.sp >= StackSize {
-		return fmt.Errorf("stack overflow")
+		return object.NewError("stack overflow", o.Line())
 	}
 
 	vm.Stack[vm.sp] = o
@@ -54,7 +58,7 @@ func (vm *VM) push(o object.BaseObject) error {
 	return nil
 }
 
-func (vm *VM) Run() error {
+func (vm *VM) Run() object.BaseObject {
 	for vm.ip < len(vm.Instructions) {
 		bytecode := vm.Instructions[vm.ip]
 		switch bytecode {
@@ -72,12 +76,53 @@ func (vm *VM) Run() error {
 				return e
 			}
 
-		case code.Addition:
+		case code.CallMethod:
+			line := vm.Messages[vm.mp].(*object.IntMessage).Value
+			vm.mp++
+			name := vm.Messages[vm.mp].(*object.StringMessage).Value
+			vm.mp++
+			amountArgs := vm.Messages[vm.mp].(*object.IntMessage).Value
+			vm.mp++
+
+			val, e := vm.pop()
+			if e != nil {
+				return e
+			}
+
+			var arguments []object.BaseObject
+			var v object.BaseObject
+			for i := 0; i < amountArgs; i++ {
+				v, e = vm.pop()
+				if e != nil {
+					return e
+				}
+				arguments = prependObj(arguments, v)
+			}
+
+			fn, er := val.FindMethod(name)
+			if er != nil {
+				return er
+			}
+			err := vm.push(fn.Call(arguments, line))
+			if err != nil {
+				return err
+			}
 
 		default:
-			return fmt.Errorf("bytecode not supported: %d", bytecode)
+			return object.NewError(fmt.Sprintf("bytecode not supported: %d", bytecode), 0)
 		}
 		vm.ip++
 	}
 	return nil
+}
+
+func prependObj(x []object.BaseObject, y object.BaseObject) []object.BaseObject {
+	x = append(x, nil)
+	copy(x[1:], x)
+	x[0] = y
+	return x
+}
+
+func isError(obj object.BaseObject) bool {
+	return obj.Type() == object.ERROR
 }
