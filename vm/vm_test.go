@@ -103,25 +103,27 @@ func Test2(t *testing.T) {
 }
 
 func Test3(t *testing.T) {
+	// Pseudo Code: `2.add(1)` or `2 + 1`
 	vm := New(
 		[]code.Opcode{
-			code.LoadConstant,
-			code.LoadConstant,
-			code.CallMethod,
+			code.LoadConstant, // Load 2
+			code.Method,       // Find 2's "add"
+			code.LoadConstant, // Load 1
+			code.Call,         // Call 2's"add"
 			code.Pop,
 		},
 		[]object.BaseObject{
-			object.NewInteger(2, 0),
-			object.NewInteger(1, 0),
+			object.NewInteger(2, 0), // Constant: 2
+			object.NewInteger(1, 0), // Constant: 1
 		},
 		[]object.Message{
-			&object.IntMessage{Value: 0},
-			&object.IntMessage{Value: 1},
-			&object.IntMessage{Value: 0},
-			&object.StringMessage{Value: "add"},
-			&object.IntMessage{Value: 1},
+			&object.IntMessage{Value: 0},        // Load 2
+			&object.StringMessage{Value: "add"}, // Add
+			&object.IntMessage{Value: 1},        // Load 1
+			&object.IntMessage{Value: 66},       // Line 66
+			&object.IntMessage{Value: 1},        // 1 argument
 		},
 	)
 	var stack []object.BaseObject
-	assertStack(t, vm, stack, object.NewInteger(3, 0))
+	assertStack(t, vm, stack, object.NewInteger(3, 66))
 }

@@ -5,6 +5,8 @@ import "fmt"
 const (
 	ERROR = "Error"
 
+	MAIN = "MAIN"
+
 	BUILTINFUNCTION = "Builtin Function"
 
 	INTEGER = "Integer"
@@ -18,7 +20,9 @@ type BaseObject interface {
 	Value() interface{}
 	FindMethod(name string) (BaseObject, BaseObject)
 	SetMethod(name string, value BaseObject)
-	Call(self *Object, params []BaseObject, line int) BaseObject
+	Call(env *Environment, self *Object, params []BaseObject, line int) BaseObject
+	Parent() BaseObject
+	SetParent(obj BaseObject) BaseObject
 }
 
 // Implements BaseObject
@@ -28,7 +32,8 @@ type Object struct {
 	InspectValue  func(self BaseObject) string
 	SLine         int
 	Methods       map[string]BaseObject
-	CallFunc      func(self *Object, args []BaseObject, line int) BaseObject
+	CallFunc      func(env *Environment, self *Object, args []BaseObject, line int) BaseObject
+	ParentObj     BaseObject
 }
 
 func (o *Object) Type() string {
@@ -59,8 +64,17 @@ func (o *Object) SetMethod(name string, value BaseObject) {
 	o.Methods[name] = value
 }
 
-func (o *Object) Call(self *Object, args []BaseObject, line int) BaseObject {
-	return o.CallFunc(self, args, line)
+func (o *Object) Call(env *Environment, self *Object, args []BaseObject, line int) BaseObject {
+	return o.CallFunc(env, self, args, line)
+}
+
+func (o *Object) Parent() BaseObject {
+	return o.ParentObj
+}
+
+func (o *Object) SetParent(obj BaseObject) BaseObject {
+	o.ParentObj = obj
+	return o
 }
 
 // Helper function, creates a new Object
@@ -70,10 +84,11 @@ func NewObject(
 	InspectValue func(self BaseObject) string,
 	SLine int,
 	Methods map[string]BaseObject,
-	CallFunc func(self *Object, args []BaseObject, line int) BaseObject,
+	CallFunc func(env *Environment, self *Object, args []BaseObject, line int) BaseObject,
+	Parent BaseObject,
 ) *Object {
 	if CallFunc == nil {
-		CallFunc = func(self *Object, args []BaseObject, line int) BaseObject {
+		CallFunc = func(env *Environment, self *Object, args []BaseObject, line int) BaseObject {
 			return NewError(
 				fmt.Sprintf("Type %s is not Callable", self.Type()),
 				self.Line(),
@@ -87,6 +102,7 @@ func NewObject(
 		SLine:         SLine,
 		Methods:       Methods,
 		CallFunc:      CallFunc,
+		ParentObj:     Parent,
 	}
 }
 
@@ -104,6 +120,17 @@ func NewError(
 		line,
 		map[string]BaseObject{},
 		nil,
+		nil,
+	)
+}
+
+// The MAIN Object
+func NewMain() *Object {
+	return NewObject(
+		MAIN, "",
+		func(self BaseObject) string { return "MAIN" }, 0,
+		map[string]BaseObject{}, nil,
+		nil,
 	)
 }
 
@@ -120,7 +147,7 @@ func NewBuiltinFunction(
 		},
 		0,
 		map[string]BaseObject{},
-		func(self *Object, args []BaseObject, lline int) BaseObject {
+		func(env *Environment, self *Object, args []BaseObject, lline int) BaseObject {
 			// Argument
 			if len(args) != len(params) {
 				return NewError(
@@ -152,6 +179,7 @@ func NewBuiltinFunction(
 
 			return value(self, args, lline)
 		},
+		nil,
 	)
 }
 
@@ -168,6 +196,7 @@ func NewInteger(
 		},
 		line,
 		IntegerBuiltins,
+		nil,
 		nil,
 	)
 }

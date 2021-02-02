@@ -12,11 +12,19 @@ const (
 	// Pops the stack
 	Pop
 
-	// Call Method
-	CallMethod
+	// Call Function
+	Call
 	/*
 		Syntax:
-			Messages: [line int, name string, amountArgs int]
-			Stack:    [arg1, arg2, arg3, ..., callee]
+			Messages: [line int, amountArgs int]
+			Stack:    [function, arg1, arg2, arg3, ...]
+	*/
+
+	// Call Method
+	Method
+	/*
+		Syntax:
+			Messages: [name string]
+			Stack:    [callee]
 	*/
 )

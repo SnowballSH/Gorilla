@@ -22,6 +22,8 @@ type VM struct {
 	sp    int // Always points to the next value. Top of stack is stack[sp-1]
 
 	lastPopped object.BaseObject
+
+	env *object.Environment
 }
 
 func New(bytecodes []code.Opcode, constants []object.BaseObject, messages []object.Message) *VM {
@@ -34,7 +36,16 @@ func New(bytecodes []code.Opcode, constants []object.BaseObject, messages []obje
 		ip:           0,
 		mp:           0,
 		lastPopped:   nil,
+		env:          object.NewEnvironment(),
 	}
+}
+
+func NewExVM(
+	bytecodes []code.Opcode, constants []object.BaseObject, messages []object.Message, env *object.Environment,
+) *VM {
+	vm := New(bytecodes, constants, messages)
+	vm.env = env
+	return vm
 }
 
 func (vm *VM) pop() (object.BaseObject, object.BaseObject) {
@@ -76,21 +87,14 @@ func (vm *VM) Run() object.BaseObject {
 				return e
 			}
 
-		case code.CallMethod:
+		case code.Call:
 			line := vm.Messages[vm.mp].(*object.IntMessage).Value
-			vm.mp++
-			name := vm.Messages[vm.mp].(*object.StringMessage).Value
 			vm.mp++
 			amountArgs := vm.Messages[vm.mp].(*object.IntMessage).Value
 			vm.mp++
 
-			val, e := vm.pop()
-			if e != nil {
-				return e
-			}
-
 			var arguments []object.BaseObject
-			var v object.BaseObject
+			var v, e object.BaseObject
 			for i := 0; i < amountArgs; i++ {
 				v, e = vm.pop()
 				if e != nil {
@@ -99,11 +103,33 @@ func (vm *VM) Run() object.BaseObject {
 				arguments = prependObj(arguments, v)
 			}
 
+			val, e := vm.pop()
+			if e != nil {
+				return e
+			}
+
+			err := vm.push(val.Call(vm.env, val.Parent().(*object.Object), arguments, line))
+			if err != nil {
+				return err
+			}
+
+		case code.Method:
+			name := vm.Messages[vm.mp].(*object.StringMessage).Value
+			vm.mp++
+
+			val, e := vm.pop()
+			if e != nil {
+				return e
+			}
+
 			fn, er := val.FindMethod(name)
 			if er != nil {
 				return er
 			}
-			err := vm.push(fn.Call(val.(*object.Object), arguments, line))
+
+			fn.SetParent(val)
+
+			err := vm.push(fn)
 			if err != nil {
 				return err
 			}
