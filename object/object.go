@@ -18,7 +18,7 @@ type BaseObject interface {
 	Value() interface{}
 	FindMethod(name string) (BaseObject, BaseObject)
 	SetMethod(name string, value BaseObject)
-	Call(params []BaseObject, line int) BaseObject
+	Call(self *Object, params []BaseObject, line int) BaseObject
 }
 
 // Implements BaseObject
@@ -59,8 +59,8 @@ func (o *Object) SetMethod(name string, value BaseObject) {
 	o.Methods[name] = value
 }
 
-func (o *Object) Call(args []BaseObject, line int) BaseObject {
-	return o.CallFunc(o, args, line)
+func (o *Object) Call(self *Object, args []BaseObject, line int) BaseObject {
+	return o.CallFunc(self, args, line)
 }
 
 // Helper function, creates a new Object
@@ -122,8 +122,6 @@ func NewBuiltinFunction(
 		line,
 		map[string]BaseObject{},
 		func(self *Object, args []BaseObject, lline int) BaseObject {
-			selfFunc := self.Value().(func(self *Object, args []BaseObject, line int) BaseObject)
-
 			// Argument
 			if len(args) != len(params) {
 				return NewError(
@@ -134,10 +132,15 @@ func NewBuiltinFunction(
 
 			// Type Checking
 			for i, v := range args {
+				ok := false
 				for _, vv := range params[i] {
 					if v.Type() == vv {
-						continue
+						ok = true
+						break
 					}
+				}
+				if ok {
+					continue
 				}
 				return NewError(
 					fmt.Sprintf(
@@ -148,7 +151,7 @@ func NewBuiltinFunction(
 				)
 			}
 
-			return selfFunc(self, args, lline)
+			return value(self, args, lline)
 		},
 	)
 }
@@ -165,17 +168,23 @@ func NewInteger(
 			return fmt.Sprintf("%d", self.Value().(int))
 		},
 		line,
-		map[string]BaseObject{
-			"add": NewBuiltinFunction(
-				func(self *Object, args []BaseObject, line int) BaseObject {
-					return NewInteger(self.Value().(int), line)
-				},
-				[][]string{
-					{INTEGER},
-				},
-				0,
-			),
-		},
+		IntegerBuiltins,
 		nil,
 	)
+}
+
+var IntegerBuiltins map[string]BaseObject
+
+func init() {
+	IntegerBuiltins = map[string]BaseObject{
+		"add": NewBuiltinFunction(
+			func(self *Object, args []BaseObject, line int) BaseObject {
+				return NewInteger(self.Value().(int)+args[0].(*Object).Value().(int), line)
+			},
+			[][]string{
+				{INTEGER},
+			},
+			0,
+		),
+	}
 }

@@ -103,7 +103,7 @@ func (vm *VM) Run() object.BaseObject {
 			if er != nil {
 				return er
 			}
-			err := vm.push(fn.Call(arguments, line))
+			err := vm.push(fn.Call(val.(*object.Object), arguments, line))
 			if err != nil {
 				return err
 			}

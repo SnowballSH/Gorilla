@@ -25,8 +25,11 @@ func assertStack(t *testing.T, vm *VM, stack []object.BaseObject, result object.
 			val2 = "nil"
 		}
 
-		t.Errorf("Result not match: expected %s, got %s", val1, val2)
-		return
+		if val1 == val2 {
+		} else {
+			t.Errorf("Result not match: expected %s, got %s", val1, val2)
+			return
+		}
 	}
 	if vm.sp != len(stack) {
 		t.Errorf("Stack length not same, expected length %d, got %d", len(stack), vm.sp)
@@ -97,4 +100,28 @@ func Test2(t *testing.T) {
 		testInt2,
 	}
 	assertStack(t, vm, stack, testInt2)
+}
+
+func Test3(t *testing.T) {
+	vm := New(
+		[]code.Opcode{
+			code.LoadConstant,
+			code.LoadConstant,
+			code.CallMethod,
+			code.Pop,
+		},
+		[]object.BaseObject{
+			object.NewInteger(2, 0),
+			object.NewInteger(1, 0),
+		},
+		[]object.Message{
+			&object.IntMessage{Value: 0},
+			&object.IntMessage{Value: 1},
+			&object.IntMessage{Value: 0},
+			&object.StringMessage{Value: "add"},
+			&object.IntMessage{Value: 1},
+		},
+	)
+	var stack []object.BaseObject
+	assertStack(t, vm, stack, object.NewInteger(3, 0))
 }
