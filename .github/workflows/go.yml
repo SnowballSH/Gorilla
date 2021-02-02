@@ -2,9 +2,9 @@ name: Go
 
 on:
   push:
-    branches: [ master ]
+    branches: [ Rewrite ]
   pull_request:
-    branches: [ master ]
+    branches: [ Rewrite ]
 
 jobs:
 
@@ -19,7 +19,7 @@ jobs:
         go-version: 1.15
         
     - name: Build
-      run: go build -v ./...
+      run: go build -v
 
     - name: Test
       run: go test -v ./...
