@@ -4,8 +4,6 @@ import (
 	"Gorilla/code"
 	"Gorilla/object"
 	"fmt"
-
-	_ "github.com/alecthomas/participle"
 )
 
 const StackSize = 1 << 12
@@ -44,7 +42,7 @@ func NewExVM(
 	bytecodes []code.Opcode, constants []object.BaseObject, messages []object.Message, env *object.Environment,
 ) *VM {
 	vm := New(bytecodes, constants, messages)
-	vm.env = env
+	vm.env = object.NewEnclosedEnvironment(env)
 	return vm
 }
 
@@ -130,6 +128,36 @@ func (vm *VM) Run() object.BaseObject {
 			fn.SetParent(val)
 
 			err := vm.push(fn)
+			if err != nil {
+				return err
+			}
+
+		case code.GetVar:
+			name := vm.Messages[vm.mp].(*object.StringMessage).Value
+			vm.mp++
+			line := vm.Messages[vm.mp].(*object.IntMessage).Value
+			vm.mp++
+
+			v, ok := vm.env.Get(name)
+			if !ok {
+				return object.NewError(fmt.Sprintf("name '%s' is not defined", name), line)
+			}
+			err := vm.push(v)
+			if err != nil {
+				return err
+			}
+
+		case code.SetVar:
+			name := vm.Messages[vm.mp].(*object.StringMessage).Value
+			vm.mp++
+
+			val, e := vm.pop()
+			if e != nil {
+				return e
+			}
+
+			vm.env.Set(name, val)
+			err := vm.push(val)
 			if err != nil {
 				return err
 			}

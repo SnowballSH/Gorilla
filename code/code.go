@@ -8,9 +8,19 @@ const (
 
 	// Loads a Constant
 	LoadConstant
+	/*
+		Syntax:
+			Messages: [index int]
+			Stack:    []
+	*/
 
 	// Pops the stack
 	Pop
+	/*
+		Syntax:
+			Messages: []
+			Stack:    [(at least 1 object)]
+	*/
 
 	// Call Function
 	Call
@@ -20,11 +30,27 @@ const (
 			Stack:    [function, arg1, arg2, arg3, ...]
 	*/
 
-	// Call Method
+	// Get Method
 	Method
 	/*
 		Syntax:
 			Messages: [name string]
 			Stack:    [callee]
+	*/
+
+	// Get Var
+	GetVar
+	/*
+		Syntax:
+			Messages: [name string line int]
+			Stack:    []
+	*/
+
+	// Set Var
+	SetVar
+	/*
+		Syntax:
+			Messages: [name string]
+			Stack:    [value]
 	*/
 )

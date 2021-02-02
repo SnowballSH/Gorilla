@@ -9,7 +9,7 @@ import (
 func assertStack(t *testing.T, vm *VM, stack []object.BaseObject, result object.BaseObject) {
 	err := vm.Run()
 	if err != nil && isError(err) {
-		t.Errorf("VM ERROR: %s", err)
+		t.Errorf("VM ERROR: %s", err.Inspect())
 		return
 	}
 	if result != vm.lastPopped {
@@ -126,4 +126,28 @@ func Test3(t *testing.T) {
 	)
 	var stack []object.BaseObject
 	assertStack(t, vm, stack, object.NewInteger(3, 66))
+}
+
+func Test4(t *testing.T) {
+	// Pseudo Code: `a = 4; a`
+	vm := New(
+		[]code.Opcode{
+			code.LoadConstant, // Load 4
+			code.SetVar,       // Set a to 4
+			code.Pop,
+			code.GetVar, // Load a
+			code.Pop,
+		},
+		[]object.BaseObject{
+			object.NewInteger(4, 0), // Constant: 4
+		},
+		[]object.Message{
+			object.NewMessage(0),
+			object.NewMessage("a"),
+			object.NewMessage("a"),
+			object.NewMessage(66),
+		},
+	)
+	var stack []object.BaseObject
+	assertStack(t, vm, stack, object.NewInteger(4, 66))
 }
