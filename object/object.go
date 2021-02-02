@@ -111,7 +111,6 @@ func NewError(
 func NewBuiltinFunction(
 	value func(self *Object, args []BaseObject, line int) BaseObject,
 	params [][]string,
-	line int,
 ) *Object {
 	return NewObject(
 		BUILTINFUNCTION,
@@ -119,7 +118,7 @@ func NewBuiltinFunction(
 		func(self BaseObject) string {
 			return fmt.Sprintf("Builtin Function [%p]", self)
 		},
-		line,
+		0,
 		map[string]BaseObject{},
 		func(self *Object, args []BaseObject, lline int) BaseObject {
 			// Argument
@@ -184,7 +183,6 @@ func init() {
 			[][]string{
 				{INTEGER},
 			},
-			0,
 		),
 	}
 }
