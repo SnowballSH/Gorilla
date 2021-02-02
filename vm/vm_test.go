@@ -64,9 +64,9 @@ func Test1(t *testing.T) {
 			testInt2,
 		},
 		[]object.Message{
-			&object.IntMessage{Value: 0},
-			&object.IntMessage{Value: 0},
-			&object.IntMessage{Value: 1},
+			object.NewMessage(0),
+			object.NewMessage(0),
+			object.NewMessage(1),
 		},
 	)
 	stack := []object.BaseObject{
@@ -90,9 +90,9 @@ func Test2(t *testing.T) {
 			testInt2,
 		},
 		[]object.Message{
-			&object.IntMessage{Value: 0},
-			&object.IntMessage{Value: 1},
-			&object.IntMessage{Value: 1},
+			object.NewMessage(0),
+			object.NewMessage(1),
+			object.NewMessage(1),
 		},
 	)
 	stack := []object.BaseObject{
@@ -117,11 +117,11 @@ func Test3(t *testing.T) {
 			object.NewInteger(1, 0), // Constant: 1
 		},
 		[]object.Message{
-			&object.IntMessage{Value: 0},        // Load 2
-			&object.StringMessage{Value: "add"}, // Add
-			&object.IntMessage{Value: 1},        // Load 1
-			&object.IntMessage{Value: 66},       // Line 66
-			&object.IntMessage{Value: 1},        // 1 argument
+			object.NewMessage(0),     // Load 2
+			object.NewMessage("add"), // Add
+			object.NewMessage(1),     // Load 1
+			object.NewMessage(66),    // Line 66
+			object.NewMessage(1),     // 1 argument
 		},
 	)
 	var stack []object.BaseObject
