@@ -12,15 +12,15 @@ func assertStack(t *testing.T, vm *VM, stack []object.BaseObject, result object.
 		t.Errorf("VM ERROR: %s", err.Inspect())
 		return
 	}
-	if result != vm.lastPopped {
+	if result != vm.LastPopped {
 		var val1, val2 string
 		if result != nil {
 			val1 = result.Inspect()
 		} else {
 			val1 = "nil"
 		}
-		if vm.lastPopped != nil {
-			val2 = vm.lastPopped.Inspect()
+		if vm.LastPopped != nil {
+			val2 = vm.LastPopped.Inspect()
 		} else {
 			val2 = "nil"
 		}

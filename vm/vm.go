@@ -19,7 +19,7 @@ type VM struct {
 	Stack []object.BaseObject
 	sp    int // Always points to the next value. Top of stack is stack[sp-1]
 
-	lastPopped object.BaseObject
+	LastPopped object.BaseObject
 
 	env *object.Environment
 }
@@ -33,17 +33,9 @@ func New(bytecodes []code.Opcode, constants []object.BaseObject, messages []obje
 		sp:           0,
 		ip:           0,
 		mp:           0,
-		lastPopped:   nil,
+		LastPopped:   nil,
 		env:          object.NewEnvironment(),
 	}
-}
-
-func NewExVM(
-	bytecodes []code.Opcode, constants []object.BaseObject, messages []object.Message, env *object.Environment,
-) *VM {
-	vm := New(bytecodes, constants, messages)
-	vm.env = object.NewEnclosedEnvironment(env)
-	return vm
 }
 
 func (vm *VM) pop() (object.BaseObject, object.BaseObject) {
@@ -52,7 +44,7 @@ func (vm *VM) pop() (object.BaseObject, object.BaseObject) {
 	}
 	o := vm.Stack[vm.sp-1]
 	vm.sp--
-	vm.lastPopped = o
+	vm.LastPopped = o
 	return o, nil
 }
 

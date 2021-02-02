@@ -54,3 +54,12 @@ const (
 			Stack:    [value]
 	*/
 )
+
+var StringToCode = map[string]Opcode{
+	"LOAD": LoadConstant,
+	"POP":  Pop,
+	"CALL": Call,
+	"METH": Method,
+	"GETV": GetVar,
+	"SETV": SetVar,
+}
