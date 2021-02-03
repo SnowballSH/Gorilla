@@ -75,6 +75,10 @@ func (c *BytecodeCompiler) Compile(node ast.Node) error {
 		c.addMessage(c.addConstant(object.NewBool(node.Value, node.Token.Line)))
 		c.emit(code.LoadConstant)
 
+	case *ast.StringLiteral:
+		c.addMessage(c.addConstant(object.NewString(node.Value, node.Token.Line)))
+		c.emit(code.LoadConstant)
+
 	case *ast.InfixExpression:
 		name := ""
 		switch node.Operator {

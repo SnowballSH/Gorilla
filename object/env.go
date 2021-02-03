@@ -21,6 +21,9 @@ func (e *Environment) Get(name string) (BaseObject, bool) {
 	if !ok && e.outer != nil {
 		obj, ok = e.outer.Get(name)
 	}
+	if !ok {
+		obj, ok = GlobalBuiltins[name]
+	}
 	return obj, ok
 }
 func (e *Environment) Set(name string, val BaseObject) BaseObject {

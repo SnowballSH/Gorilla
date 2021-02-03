@@ -98,7 +98,13 @@ func (vm *VM) Run() object.BaseObject {
 				return e
 			}
 
-			ret := val.Call(vm.Env, val.Parent().(*object.Object), arguments, line)
+			var prt *object.Object
+			if val.Parent() != nil {
+				prt = val.Parent().(*object.Object)
+			} else {
+				prt = nil
+			}
+			ret := val.Call(vm.Env, prt, arguments, line)
 
 			if isError(ret) {
 				return ret

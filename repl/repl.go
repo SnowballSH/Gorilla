@@ -58,7 +58,7 @@ func Start(in io.Reader, out io.Writer) {
 		env = machine.Env
 
 		stackTop := machine.LastPopped
-		if stackTop == nil {
+		if stackTop == nil || stackTop == object.NULLOBJ {
 			continue
 		}
 		_, _ = io.WriteString(out, stackTop.Inspect())

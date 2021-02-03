@@ -1,32 +1,56 @@
 package object
 
+import (
+	"Gorilla/config"
+	"fmt"
+	"strings"
+)
+
 var (
+	GlobalBuiltins     map[string]BaseObject
 	BaseObjectBuiltins map[string]BaseObject
 	IntegerBuiltins    map[string]BaseObject
+
+	NULLOBJ BaseObject = NewNull(0)
 )
 
 func init() {
+	GlobalBuiltins = map[string]BaseObject{
+		"print": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				var k []string
+				for _, s := range args {
+					k = append(k, s.Inspect())
+				}
+				_, _ = fmt.Fprintln(config.OUT, strings.Join(k, " "))
+				return NULLOBJ
+			},
+			nil,
+		),
+	}
+
 	BaseObjectBuiltins = map[string]BaseObject{
 		"eq": NewBuiltinFunction(
-			func(self *Object, args []BaseObject, line int) BaseObject {
-				return NewBool(self.Inspect() == args[0].(*Object).Inspect(), line)
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewBool(self.Inspect() == args[0].(*Object).Inspect() && self.Type() == args[0].Type(), line)
 			},
 			[][]string{
 				{ANY},
 			},
 		),
 		"neq": NewBuiltinFunction(
-			func(self *Object, args []BaseObject, line int) BaseObject {
-				return NewBool(self.Inspect() != args[0].(*Object).Inspect(), line)
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewBool(self.Inspect() != args[0].(*Object).Inspect() || self.Type() != args[0].Type(), line)
 			},
 			[][]string{
 				{ANY},
 			},
 		),
 	}
+
 	IntegerBuiltins = map[string]BaseObject{
 		"add": NewBuiltinFunction(
-			func(self *Object, args []BaseObject, line int) BaseObject {
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
 				return NewInteger(self.Value().(int)+args[0].(*Object).Value().(int), line)
 			},
 			[][]string{
@@ -34,7 +58,7 @@ func init() {
 			},
 		),
 		"sub": NewBuiltinFunction(
-			func(self *Object, args []BaseObject, line int) BaseObject {
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
 				return NewInteger(self.Value().(int)-args[0].(*Object).Value().(int), line)
 			},
 			[][]string{
@@ -42,7 +66,7 @@ func init() {
 			},
 		),
 		"mul": NewBuiltinFunction(
-			func(self *Object, args []BaseObject, line int) BaseObject {
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
 				return NewInteger(self.Value().(int)*args[0].(*Object).Value().(int), line)
 			},
 			[][]string{
@@ -50,7 +74,7 @@ func init() {
 			},
 		),
 		"div": NewBuiltinFunction(
-			func(self *Object, args []BaseObject, line int) BaseObject {
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
 				v := args[0].(*Object).Value().(int)
 				if v == 0 {
 					return NewError("Integer division by Zero", line)
@@ -62,7 +86,7 @@ func init() {
 			},
 		),
 		"mod": NewBuiltinFunction(
-			func(self *Object, args []BaseObject, line int) BaseObject {
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
 				v := args[0].(*Object).Value().(int)
 				if v == 0 {
 					return NewError("Integer division by Zero", line)
@@ -74,10 +98,10 @@ func init() {
 			},
 		),
 		"eq": NewBuiltinFunction(
-			func(self *Object, args []BaseObject, line int) BaseObject {
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
 				v, ok := args[0].(*Object).Value().(int)
 				if !ok {
-					return NewBool(self.Inspect() != args[0].Inspect(), line)
+					return NewBool(false, line)
 				}
 				return NewBool(self.Value().(int) == v, line)
 			},
@@ -86,10 +110,10 @@ func init() {
 			},
 		),
 		"neq": NewBuiltinFunction(
-			func(self *Object, args []BaseObject, line int) BaseObject {
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
 				v, ok := args[0].(*Object).Value().(int)
 				if !ok {
-					return NewBool(self.Inspect() != args[0].Inspect(), line)
+					return NewBool(true, line)
 				}
 				return NewBool(self.Value().(int) != v, line)
 			},

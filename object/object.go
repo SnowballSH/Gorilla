@@ -15,6 +15,8 @@ const (
 
 	INTEGER = "Integer"
 	BOOLEAN = "Boolean"
+	STRING  = "String"
+	NULL    = "Null"
 )
 
 // Every Gorilla Object implements this
@@ -152,7 +154,7 @@ func NewMain() *Object {
 
 // Base BUILTINFUNCTION Type
 func NewBuiltinFunction(
-	value func(self *Object, args []BaseObject, line int) BaseObject,
+	value func(self *Object, env *Environment, args []BaseObject, line int) BaseObject,
 	params [][]string,
 ) *Object {
 	return NewObject(
@@ -164,40 +166,42 @@ func NewBuiltinFunction(
 		0,
 		map[string]BaseObject{},
 		func(env *Environment, self *Object, args []BaseObject, lline int) BaseObject {
-			// Argument
-			if len(args) != len(params) {
-				return NewError(
-					fmt.Sprintf("Argument amount mismatch: Expected %d, got %d", len(params), len(args)),
-					lline,
-				)
+			if params != nil {
+				// Argument
+				if len(args) != len(params) {
+					return NewError(
+						fmt.Sprintf("Argument amount mismatch: Expected %d, got %d", len(params), len(args)),
+						lline,
+					)
+				}
+
+				// Type Checking
+				for i, v := range args {
+					ok := false
+					for _, vv := range params[i] {
+						if vv == ANY {
+							ok = true
+							break
+						}
+						if v.Type() == vv {
+							ok = true
+							break
+						}
+					}
+					if ok {
+						continue
+					}
+					return NewError(
+						fmt.Sprintf(
+							"Argument #%d expected to be Type '%s', got Type '%s'",
+							i, params[i], v.Type(),
+						),
+						lline,
+					)
+				}
 			}
 
-			// Type Checking
-			for i, v := range args {
-				ok := false
-				for _, vv := range params[i] {
-					if vv == ANY {
-						ok = true
-						break
-					}
-					if v.Type() == vv {
-						ok = true
-						break
-					}
-				}
-				if ok {
-					continue
-				}
-				return NewError(
-					fmt.Sprintf(
-						"Argument #%d expected to be Type '%s', got Type '%s'",
-						i, params[i], v.Type(),
-					),
-					lline,
-				)
-			}
-
-			return value(self, args, lline)
+			return value(self, env, args, lline)
 		},
 		nil,
 	)
@@ -231,6 +235,41 @@ func NewBool(
 		value,
 		func(self BaseObject) string {
 			return fmt.Sprintf("%s", strconv.FormatBool(self.Value().(bool)))
+		},
+		line,
+		map[string]BaseObject{},
+		nil,
+		nil,
+	)
+}
+
+// Base STRING Type
+func NewString(
+	value string,
+	line int,
+) *Object {
+	return NewObject(
+		STRING,
+		value,
+		func(self BaseObject) string {
+			return fmt.Sprintf("%s", self.Value().(string))
+		},
+		line,
+		map[string]BaseObject{},
+		nil,
+		nil,
+	)
+}
+
+// Base NULL Type
+func NewNull(
+	line int,
+) *Object {
+	return NewObject(
+		NULL,
+		nil,
+		func(self BaseObject) string {
+			return "null"
 		},
 		line,
 		map[string]BaseObject{},
