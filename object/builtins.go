@@ -22,11 +22,37 @@ func init() {
 				for _, s := range args {
 					k = append(k, s.Inspect())
 				}
+				_, _ = fmt.Fprint(config.OUT, strings.Join(k, " "))
+				return NULLOBJ
+			},
+			nil,
+		),
+		"println": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				var k []string
+				for _, s := range args {
+					k = append(k, s.Inspect())
+				}
 				_, _ = fmt.Fprintln(config.OUT, strings.Join(k, " "))
 				return NULLOBJ
 			},
 			nil,
 		),
+		"debug": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				var k []string
+				for _, s := range args {
+					k = append(k, s.Debug())
+				}
+				_, _ = fmt.Fprintln(config.OUT, strings.Join(k, " "))
+				if len(args) > 0 {
+					return args[len(args)-1]
+				}
+				return NULLOBJ
+			},
+			nil,
+		),
+		"null": NULLOBJ,
 	}
 
 	BaseObjectBuiltins = map[string]BaseObject{

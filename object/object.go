@@ -8,8 +8,7 @@ import (
 const (
 	ERROR = "Error"
 
-	MAIN = "MAIN"
-	ANY  = "Any"
+	ANY = "Any"
 
 	BUILTINFUNCTION = "Builtin Function"
 
@@ -23,6 +22,7 @@ const (
 type BaseObject interface {
 	Type() string
 	Inspect() string
+	Debug() string
 	Line() int
 	Value() interface{}
 	FindMethod(name string) (BaseObject, BaseObject)
@@ -37,6 +37,7 @@ type Object struct {
 	TT            string
 	InternalValue interface{}
 	InspectValue  func(self BaseObject) string
+	DebugValue    func(self BaseObject) string
 	SLine         int
 	Methods       map[string]BaseObject
 	CallFunc      func(env *Environment, self *Object, args []BaseObject, line int) BaseObject
@@ -49,6 +50,10 @@ func (o *Object) Type() string {
 
 func (o *Object) Inspect() string {
 	return o.InspectValue(o)
+}
+
+func (o *Object) Debug() string {
+	return o.DebugValue(o)
 }
 
 func (o *Object) Line() int {
@@ -89,6 +94,7 @@ func NewObject(
 	TT string,
 	InternalValue interface{},
 	InspectValue func(self BaseObject) string,
+	DebugValue func(self BaseObject) string,
 	SLine int,
 	Methods map[string]BaseObject,
 	CallFunc func(env *Environment, self *Object, args []BaseObject, line int) BaseObject,
@@ -117,6 +123,7 @@ func NewObject(
 		TT:            TT,
 		InternalValue: InternalValue,
 		InspectValue:  InspectValue,
+		DebugValue:    DebugValue,
 		SLine:         SLine,
 		Methods:       mts,
 		CallFunc:      CallFunc,
@@ -135,19 +142,12 @@ func NewError(
 		func(self BaseObject) string {
 			return fmt.Sprintf("[Line %d] %s", self.Line()+1, self.Value().(string))
 		},
+		func(self BaseObject) string {
+			return fmt.Sprintf("Gorilla Error: [Line %d] %s", self.Line()+1, self.Value().(string))
+		},
 		line,
 		map[string]BaseObject{},
 		nil,
-		nil,
-	)
-}
-
-// The MAIN Object
-func NewMain() *Object {
-	return NewObject(
-		MAIN, "",
-		func(self BaseObject) string { return "MAIN" }, 0,
-		map[string]BaseObject{}, nil,
 		nil,
 	)
 }
@@ -160,6 +160,9 @@ func NewBuiltinFunction(
 	return NewObject(
 		BUILTINFUNCTION,
 		value,
+		func(self BaseObject) string {
+			return fmt.Sprintf("Builtin Function")
+		},
 		func(self BaseObject) string {
 			return fmt.Sprintf("Builtin Function [%p]", self)
 		},
@@ -218,6 +221,9 @@ func NewInteger(
 		func(self BaseObject) string {
 			return fmt.Sprintf("%d", self.Value().(int))
 		},
+		func(self BaseObject) string {
+			return fmt.Sprintf("%d", self.Value().(int))
+		},
 		line,
 		IntegerBuiltins,
 		nil,
@@ -233,6 +239,9 @@ func NewBool(
 	return NewObject(
 		BOOLEAN,
 		value,
+		func(self BaseObject) string {
+			return fmt.Sprintf("%s", strconv.FormatBool(self.Value().(bool)))
+		},
 		func(self BaseObject) string {
 			return fmt.Sprintf("%s", strconv.FormatBool(self.Value().(bool)))
 		},
@@ -254,6 +263,9 @@ func NewString(
 		func(self BaseObject) string {
 			return fmt.Sprintf("%s", self.Value().(string))
 		},
+		func(self BaseObject) string {
+			return fmt.Sprintf("\"%s\"", self.Value().(string))
+		},
 		line,
 		map[string]BaseObject{},
 		nil,
@@ -268,6 +280,9 @@ func NewNull(
 	return NewObject(
 		NULL,
 		nil,
+		func(self BaseObject) string {
+			return "null"
+		},
 		func(self BaseObject) string {
 			return "null"
 		},
