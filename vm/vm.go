@@ -98,7 +98,13 @@ func (vm *VM) Run() object.BaseObject {
 				return e
 			}
 
-			err := vm.push(val.Call(vm.env, val.Parent().(*object.Object), arguments, line))
+			ret := val.Call(vm.env, val.Parent().(*object.Object), arguments, line)
+
+			if isError(ret) {
+				return ret
+			}
+
+			err := vm.push(ret)
 			if err != nil {
 				return err
 			}

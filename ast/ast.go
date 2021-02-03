@@ -211,7 +211,7 @@ func (b *Boolean) String() string { return b.Token.Literal }
 // IntegerLiteral represents a literal integare and holds an integer value
 type IntegerLiteral struct {
 	Token token.Token
-	Value int64
+	Value int
 }
 
 func (il *IntegerLiteral) expressionNode() {}

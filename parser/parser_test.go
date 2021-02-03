@@ -875,9 +875,9 @@ func testLiteralExpression(
 ) bool {
 	switch v := expected.(type) {
 	case int:
-		return testIntegerLiteral(t, exp, int64(v))
-	case int64:
 		return testIntegerLiteral(t, exp, v)
+	case int64:
+		return testIntegerLiteral(t, exp, int(v))
 	case string:
 		return testIdentifier(t, exp, v)
 	case bool:
@@ -887,7 +887,7 @@ func testLiteralExpression(
 	return false
 }
 
-func testIntegerLiteral(t *testing.T, il ast.Expression, value int64) bool {
+func testIntegerLiteral(t *testing.T, il ast.Expression, value int) bool {
 	integ, ok := il.(*ast.IntegerLiteral)
 	if !ok {
 		t.Errorf("il not *ast.IntegerLiteral. got=%T", il)
