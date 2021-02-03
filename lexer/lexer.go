@@ -224,7 +224,7 @@ func (l *Lexer) readNumber() ([]rune, bool) {
 	for isDigit(l.ch) {
 		l.readChar()
 	}
-	if l.ch == '.' {
+	if l.ch == '.' && isDigit(l.peekChar()) {
 		isInt = false
 		l.readChar()
 		for isDigit(l.ch) {

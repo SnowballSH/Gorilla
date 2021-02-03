@@ -3,6 +3,7 @@ package repl
 import (
 	"Gorilla/compiler"
 	"Gorilla/lexer"
+	"Gorilla/object"
 	"Gorilla/parser"
 	"Gorilla/vm"
 	"bufio"
@@ -14,7 +15,11 @@ func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
 	_, _ = io.WriteString(out, "Gorilla \n")
 
+	var env = object.NewEnvironment()
+
 	for {
+		_, _ = io.WriteString(out, ">> ")
+
 		scanned := scanner.Scan()
 		if !scanned {
 			return
@@ -43,11 +48,14 @@ func Start(in io.Reader, out io.Writer) {
 		messages := comp.Messages
 
 		machine := vm.New(code, constants, messages)
+		machine.Env = env
 		e := machine.Run()
 		if e != nil {
 			_, _ = io.WriteString(out, fmt.Sprintf(" Runtime Error:\n\t%s\n", e.Inspect()))
 			continue
 		}
+
+		env = machine.Env
 
 		stackTop := machine.LastPopped
 		if stackTop == nil {

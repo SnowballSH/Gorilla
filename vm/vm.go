@@ -21,7 +21,7 @@ type VM struct {
 
 	LastPopped object.BaseObject
 
-	env *object.Environment
+	Env *object.Environment
 }
 
 func New(bytecodes []code.Opcode, constants []object.BaseObject, messages []object.Message) *VM {
@@ -34,7 +34,7 @@ func New(bytecodes []code.Opcode, constants []object.BaseObject, messages []obje
 		ip:           0,
 		mp:           0,
 		LastPopped:   nil,
-		env:          object.NewEnvironment(),
+		Env:          object.NewEnvironment(),
 	}
 }
 
@@ -98,7 +98,7 @@ func (vm *VM) Run() object.BaseObject {
 				return e
 			}
 
-			ret := val.Call(vm.env, val.Parent().(*object.Object), arguments, line)
+			ret := val.Call(vm.Env, val.Parent().(*object.Object), arguments, line)
 
 			if isError(ret) {
 				return ret
@@ -136,7 +136,7 @@ func (vm *VM) Run() object.BaseObject {
 			line := vm.Messages[vm.mp].(*object.IntMessage).Value
 			vm.mp++
 
-			v, ok := vm.env.Get(name)
+			v, ok := vm.Env.Get(name)
 			if !ok {
 				return object.NewError(fmt.Sprintf("name '%s' is not defined", name), line)
 			}
@@ -154,7 +154,7 @@ func (vm *VM) Run() object.BaseObject {
 				return e
 			}
 
-			vm.env.Set(name, val)
+			vm.Env.Set(name, val)
 			err := vm.push(val)
 			if err != nil {
 				return err

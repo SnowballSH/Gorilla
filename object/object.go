@@ -1,15 +1,20 @@
 package object
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+)
 
 const (
 	ERROR = "Error"
 
 	MAIN = "MAIN"
+	ANY  = "Any"
 
 	BUILTINFUNCTION = "Builtin Function"
 
 	INTEGER = "Integer"
+	BOOLEAN = "Boolean"
 )
 
 // Every Gorilla Object implements this
@@ -95,12 +100,23 @@ func NewObject(
 			)
 		}
 	}
+
+	var mts = map[string]BaseObject{}
+
+	for n, v := range BaseObjectBuiltins {
+		mts[n] = v
+	}
+
+	for n, v := range Methods {
+		mts[n] = v
+	}
+
 	return &Object{
 		TT:            TT,
 		InternalValue: InternalValue,
 		InspectValue:  InspectValue,
 		SLine:         SLine,
-		Methods:       Methods,
+		Methods:       mts,
 		CallFunc:      CallFunc,
 		ParentObj:     Parent,
 	}
@@ -115,7 +131,7 @@ func NewError(
 		ERROR,
 		value,
 		func(self BaseObject) string {
-			return fmt.Sprintf("[Line %d] %s", self.Line(), self.Value().(string))
+			return fmt.Sprintf("[Line %d] %s", self.Line()+1, self.Value().(string))
 		},
 		line,
 		map[string]BaseObject{},
@@ -160,6 +176,10 @@ func NewBuiltinFunction(
 			for i, v := range args {
 				ok := false
 				for _, vv := range params[i] {
+					if vv == ANY {
+						ok = true
+						break
+					}
 					if v.Type() == vv {
 						ok = true
 						break
@@ -201,17 +221,20 @@ func NewInteger(
 	)
 }
 
-var IntegerBuiltins map[string]BaseObject
-
-func init() {
-	IntegerBuiltins = map[string]BaseObject{
-		"add": NewBuiltinFunction(
-			func(self *Object, args []BaseObject, line int) BaseObject {
-				return NewInteger(self.Value().(int)+args[0].(*Object).Value().(int), line)
-			},
-			[][]string{
-				{INTEGER},
-			},
-		),
-	}
+// Base BOOLEAN Type
+func NewBool(
+	value bool,
+	line int,
+) *Object {
+	return NewObject(
+		BOOLEAN,
+		value,
+		func(self BaseObject) string {
+			return fmt.Sprintf("%s", strconv.FormatBool(self.Value().(bool)))
+		},
+		line,
+		map[string]BaseObject{},
+		nil,
+		nil,
+	)
 }
