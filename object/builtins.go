@@ -52,6 +52,14 @@ func init() {
 			},
 			nil,
 		),
+		"type": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewString(args[0].Type(), line)
+			},
+			[][]string{
+				{ANY},
+			},
+		),
 		"null": NULLOBJ,
 	}
 

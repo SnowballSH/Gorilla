@@ -103,8 +103,8 @@ func NewObject(
 	if CallFunc == nil {
 		CallFunc = func(env *Environment, self *Object, args []BaseObject, line int) BaseObject {
 			return NewError(
-				fmt.Sprintf("Type %s is not Callable", self.Type()),
-				self.Line(),
+				fmt.Sprintf("Type '%s' is not Callable", TT),
+				SLine,
 			)
 		}
 	}
@@ -196,7 +196,7 @@ func NewBuiltinFunction(
 					}
 					return NewError(
 						fmt.Sprintf(
-							"Argument #%d expected to be Type '%s', got Type '%s'",
+							"Argument #%d expected to be one of %s, got Type '%s'",
 							i, params[i], v.Type(),
 						),
 						lline,
