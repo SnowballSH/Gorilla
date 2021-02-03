@@ -59,13 +59,42 @@ func (vm *VM) push(o object.BaseObject) object.BaseObject {
 	return nil
 }
 
+func (vm *VM) getMessage(p interface{}) interface{} {
+	var val interface{}
+	switch p.(type) {
+	case int, int64:
+		val = vm.Messages[vm.mp].(*object.IntMessage).Value
+	case string:
+		val = vm.Messages[vm.mp].(*object.StringMessage).Value
+	default:
+		panic(fmt.Sprintf("Cannot get message of type: %T", p))
+	}
+
+	vm.mp++
+
+	return val
+}
+
+func (vm *VM) getIntMessage() int {
+	val := vm.Messages[vm.mp].(*object.IntMessage).Value
+	vm.mp++
+
+	return val
+}
+
+func (vm *VM) getStringMessage() string {
+	val := vm.Messages[vm.mp].(*object.StringMessage).Value
+	vm.mp++
+
+	return val
+}
+
 func (vm *VM) Run() object.BaseObject {
 	for vm.ip < len(vm.Instructions) {
 		bytecode := vm.Instructions[vm.ip]
 		switch bytecode {
 		case code.LoadConstant:
-			index := vm.Messages[vm.mp].(*object.IntMessage).Value
-			vm.mp++
+			index := vm.getIntMessage()
 			err := vm.push(vm.Constants[index])
 			if err != nil {
 				return err
@@ -78,10 +107,8 @@ func (vm *VM) Run() object.BaseObject {
 			}
 
 		case code.Call:
-			line := vm.Messages[vm.mp].(*object.IntMessage).Value
-			vm.mp++
-			amountArgs := vm.Messages[vm.mp].(*object.IntMessage).Value
-			vm.mp++
+			line := vm.getIntMessage()
+			amountArgs := vm.getIntMessage()
 
 			var arguments []object.BaseObject
 			var v, e object.BaseObject
@@ -116,8 +143,7 @@ func (vm *VM) Run() object.BaseObject {
 			}
 
 		case code.Method:
-			name := vm.Messages[vm.mp].(*object.StringMessage).Value
-			vm.mp++
+			name := vm.getStringMessage()
 
 			val, e := vm.pop()
 			if e != nil {
@@ -137,10 +163,8 @@ func (vm *VM) Run() object.BaseObject {
 			}
 
 		case code.GetVar:
-			name := vm.Messages[vm.mp].(*object.StringMessage).Value
-			vm.mp++
-			line := vm.Messages[vm.mp].(*object.IntMessage).Value
-			vm.mp++
+			name := vm.getStringMessage()
+			line := vm.getIntMessage()
 
 			v, ok := vm.Env.Get(name)
 			if !ok {
@@ -152,8 +176,7 @@ func (vm *VM) Run() object.BaseObject {
 			}
 
 		case code.SetVar:
-			name := vm.Messages[vm.mp].(*object.StringMessage).Value
-			vm.mp++
+			name := vm.getStringMessage()
 
 			val, e := vm.pop()
 			if e != nil {
@@ -164,6 +187,30 @@ func (vm *VM) Run() object.BaseObject {
 			err := vm.push(val)
 			if err != nil {
 				return err
+			}
+
+		case code.Jump:
+			index := vm.getIntMessage()
+			mindex := vm.getIntMessage()
+			vm.ip = index
+			vm.mp = mindex
+
+		case code.JumpFalse:
+			index := vm.getIntMessage()
+			mindex := vm.getIntMessage()
+			val, e := vm.pop()
+			if e != nil {
+				return e
+			}
+
+			isTruthy, err := object.GetOneTruthy(val.(*object.Object), vm.Env, val.Line())
+			if err != nil {
+				return err
+			}
+
+			if !isTruthy {
+				vm.ip = index
+				vm.mp = mindex
 			}
 
 		default:

@@ -21,8 +21,9 @@ func (c *BytecodeCompiler) addConstant(obj object.BaseObject) int {
 	return len(c.Constants) - 1
 }
 
-func (c *BytecodeCompiler) addMessage(val interface{}) {
+func (c *BytecodeCompiler) addMessage(val interface{}) int {
 	c.Messages = append(c.Messages, object.NewMessage(val))
+	return len(c.Messages) - 1
 }
 
 func (c *BytecodeCompiler) emit(co code.Opcode) {
@@ -45,6 +46,14 @@ func (c *BytecodeCompiler) Compile(node ast.Node) error {
 			return err
 		}
 		c.emit(code.Pop)
+
+	case *ast.BlockStatement:
+		for _, s := range node.Statements {
+			err := c.Compile(s)
+			if err != nil {
+				return err
+			}
+		}
 
 	case *ast.LetStatement:
 		err := c.Compile(node.Value)
@@ -154,6 +163,50 @@ func (c *BytecodeCompiler) Compile(node ast.Node) error {
 		c.addMessage(0)
 		c.emit(code.Call)
 
+	case *ast.IfExpression:
+		err := c.Compile(node.Condition)
+		if err != nil {
+			return err
+		}
+
+		c.emit(code.JumpFalse)
+		m1 := c.addMessage(0)
+		m2 := c.addMessage(0)
+
+		err = c.Compile(node.Consequence)
+		if err != nil {
+			return err
+		}
+
+		if c.Bytecodes[len(c.Bytecodes)-1] == code.Pop {
+			c.Bytecodes = c.Bytecodes[:len(c.Bytecodes)-1]
+		}
+
+		c.emit(code.Jump)
+
+		m3 := c.addMessage(0)
+		m4 := c.addMessage(0)
+
+		c.Messages[m1] = object.NewMessage(len(c.Bytecodes) - 1)
+		c.Messages[m2] = object.NewMessage(len(c.Messages))
+
+		if node.Alternative != nil {
+			err = c.Compile(node.Alternative)
+			if err != nil {
+				return err
+			}
+
+			if c.Bytecodes[len(c.Bytecodes)-1] == code.Pop {
+				c.Bytecodes = c.Bytecodes[:len(c.Bytecodes)-1]
+			}
+		} else {
+			c.addMessage(c.addConstant(object.NULLOBJ))
+			c.emit(code.LoadConstant)
+		}
+
+		c.Messages[m3] = object.NewMessage(len(c.Bytecodes) - 1)
+		c.Messages[m4] = object.NewMessage(len(c.Messages))
+
 	case *ast.GetAttr:
 		err := c.Compile(node.Expr)
 		if err != nil {
@@ -180,7 +233,7 @@ func (c *BytecodeCompiler) Compile(node ast.Node) error {
 		c.emit(code.Call)
 
 	default:
-		panic("Node not supported: " + node.String())
+		panic("Node not supported: " + node.TokenLiteral() + " | " + node.String())
 	}
 	return nil
 }

@@ -53,4 +53,19 @@ const (
 			Messages: [name string]
 			Stack:    [value]
 	*/
+
+	// If Else
+	Jump
+	/*
+		Syntax:
+			Messages: [index int, message int]
+			Stack:    []
+	*/
+
+	JumpFalse
+	/*
+		Syntax:
+			Messages: [index int, message int]
+			Stack:    [value]
+	*/
 )

@@ -151,3 +151,63 @@ func Test4(t *testing.T) {
 	var stack []object.BaseObject
 	assertStack(t, vm, stack, object.NewInteger(4, 66))
 }
+
+func Test5(t *testing.T) {
+	// Pseudo Code: `if true {1} else {2}`
+	vm := New(
+		[]code.Opcode{
+			code.LoadConstant, // Load true                     0
+			code.JumpFalse,    // Jump If true is false         1
+			code.LoadConstant, // Load 1                        2
+			code.Jump,         // Jump Out                      3
+			code.LoadConstant, // Else, Load 2                  4
+			code.Pop,          // Pop                           5
+		},
+		[]object.BaseObject{
+			object.NewBool(true, 0),
+			object.NewInteger(1, 0),
+			object.NewInteger(2, 0),
+		},
+		[]object.Message{
+			object.NewMessage(0), // Load true             0
+			object.NewMessage(3), // Jump to 3 -> 4        1
+			object.NewMessage(6), // Jump Message to 6     2
+			object.NewMessage(1), // Load 1                3
+			object.NewMessage(4), // Jump to 4 -> 5        4
+			object.NewMessage(7), // Jump Message to 7     5
+			object.NewMessage(2), // Load 2                6
+		},
+	)
+	var stack []object.BaseObject
+	assertStack(t, vm, stack, object.NewInteger(1, 0))
+}
+
+func Test6(t *testing.T) {
+	// Pseudo Code: `if false {1} else {2}`
+	vm := New(
+		[]code.Opcode{
+			code.LoadConstant, // Load false                     0
+			code.JumpFalse,    // Jump If false is false        1
+			code.LoadConstant, // Load 1                        2
+			code.Jump,         // Jump Out                      3
+			code.LoadConstant, // Else, Load 2                  4
+			code.Pop,          // Pop                           5
+		},
+		[]object.BaseObject{
+			object.NewBool(false, 0),
+			object.NewInteger(1, 0),
+			object.NewInteger(2, 0),
+		},
+		[]object.Message{
+			object.NewMessage(0), // Load false             0
+			object.NewMessage(3), // Jump to 3 -> 4        1
+			object.NewMessage(6), // Jump Message to 6     2
+			object.NewMessage(1), // Load 1                3
+			object.NewMessage(4), // Jump to 4 -> 5        4
+			object.NewMessage(7), // Jump Message to 7     5
+			object.NewMessage(2), // Load 2                6
+		},
+	)
+	var stack []object.BaseObject
+	assertStack(t, vm, stack, object.NewInteger(2, 0))
+}
