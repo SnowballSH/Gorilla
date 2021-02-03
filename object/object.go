@@ -246,7 +246,7 @@ func NewBool(
 			return fmt.Sprintf("%s", strconv.FormatBool(self.Value().(bool)))
 		},
 		line,
-		map[string]BaseObject{},
+		BooleanBuiltins,
 		nil,
 		nil,
 	)

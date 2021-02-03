@@ -6,14 +6,6 @@ import (
 	"strings"
 )
 
-var (
-	GlobalBuiltins     map[string]BaseObject
-	BaseObjectBuiltins map[string]BaseObject
-	IntegerBuiltins    map[string]BaseObject
-
-	NULLOBJ BaseObject = NewNull(0)
-)
-
 func init() {
 	GlobalBuiltins = map[string]BaseObject{
 		"print": NewBuiltinFunction(
@@ -79,6 +71,18 @@ func init() {
 			[][]string{
 				{ANY},
 			},
+		),
+		"toStr": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewString(self.Inspect(), line)
+			},
+			[][]string{},
+		),
+		"toDebugStr": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewString(self.Debug(), line)
+			},
+			[][]string{},
 		),
 	}
 
@@ -155,5 +159,47 @@ func init() {
 				{ANY},
 			},
 		),
+		"pos": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewInteger(+self.Value().(int), line)
+			},
+			[][]string{},
+		),
+		"neg": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewInteger(-self.Value().(int), line)
+			},
+			[][]string{},
+		),
+	}
+
+	BooleanBuiltins = map[string]BaseObject{
+		"not": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewBool(!self.Value().(bool), line)
+			},
+			[][]string{},
+		),
+		"and": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewBool(self.Value().(bool) && args[0].Value().(bool), line)
+			},
+			[][]string{{BOOLEAN}},
+		),
+		"or": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewBool(self.Value().(bool) || args[0].Value().(bool), line)
+			},
+			[][]string{{BOOLEAN}},
+		),
 	}
 }
+
+var (
+	GlobalBuiltins     map[string]BaseObject
+	BaseObjectBuiltins map[string]BaseObject
+	IntegerBuiltins    map[string]BaseObject
+	BooleanBuiltins    map[string]BaseObject
+
+	NULLOBJ BaseObject = NewNull(0)
+)

@@ -130,6 +130,30 @@ func (c *BytecodeCompiler) Compile(node ast.Node) error {
 		c.addMessage(1)
 		c.emit(code.Call)
 
+	case *ast.PrefixExpression:
+		name := ""
+		switch node.Operator {
+		case "!":
+			name = "not"
+		case "-":
+			name = "neg"
+		case "+":
+			name = "pos"
+		default:
+			panic("Prefix Operator not handled: " + node.Operator)
+		}
+
+		err := c.Compile(node.Right)
+		if err != nil {
+			return err
+		}
+		c.addMessage(name)
+		c.emit(code.Method)
+
+		c.addMessage(node.Token.Line)
+		c.addMessage(0)
+		c.emit(code.Call)
+
 	case *ast.GetAttr:
 		err := c.Compile(node.Expr)
 		if err != nil {
