@@ -144,3 +144,41 @@ func Test2(t *testing.T) {
 		},
 	)
 }
+
+func Test3(t *testing.T) {
+	assert(
+		t,
+		"2 + (7 + 10)",
+		[]code.Opcode{
+			code.LoadConstant, // 2
+			code.Method,       // +
+			// (
+			code.LoadConstant, // 7
+			code.Method,       // +
+			code.LoadConstant, // 10
+			code.Call,
+			// )
+			code.Call,
+			code.Pop,
+		},
+		[]object.Message{
+			object.NewMessage(0),     // 2
+			object.NewMessage("add"), // +
+			// (
+			object.NewMessage(1),     // 7
+			object.NewMessage("add"), // +
+			object.NewMessage(2),     // 10
+			object.NewMessage(0),
+			object.NewMessage(1),
+			// )
+
+			object.NewMessage(0),
+			object.NewMessage(1),
+		},
+		[]object.BaseObject{
+			object.NewInteger(2, 0),
+			object.NewInteger(7, 0),
+			object.NewInteger(10, 0),
+		},
+	)
+}

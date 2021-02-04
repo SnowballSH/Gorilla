@@ -332,5 +332,6 @@ func (c *BytecodeCompiler) makeStmtFunc(node *ast.FunctionStmt) {
 		c.emit(code.LoadConstant)
 		c.emit(code.SetVar)
 		c.addMessage(node.Name)
+		c.emit(code.Pop)
 	}
 }

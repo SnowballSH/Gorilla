@@ -192,7 +192,7 @@ func (vm *VM) Run() object.BaseObject {
 				return er
 			}
 
-			fn.SetParent(val)
+			fn.SetParent(val.(*object.Object))
 
 			err := vm.push(fn)
 			if err != nil {
@@ -273,6 +273,19 @@ func (vm *VM) Run() object.BaseObject {
 			return object.NewError(fmt.Sprintf("bytecode not supported: %d", bytecode), 0)
 		}
 		vm.ip++
+
+		/*
+			println("[")
+			for _, o := range vm.Stack[:vm.sp] {
+				if o != nil {
+					if o.Parent() != nil {
+						println("PARENT: " + o.Parent().Debug(), o.Parent().(*object.Object))
+					}
+					println(o.Debug(), o.(*object.Object))
+				}
+			}
+			println("]")
+		*/
 	}
 	return nil
 }

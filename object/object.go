@@ -31,7 +31,7 @@ type BaseObject interface {
 	SetMethod(name string, value BaseObject)
 	Call(env *Environment, self *Object, params []BaseObject, line int) BaseObject
 	Parent() BaseObject
-	SetParent(obj BaseObject) BaseObject
+	SetParent(obj *Object) BaseObject
 }
 
 // Implements BaseObject
@@ -71,7 +71,7 @@ func (o *Object) FindMethod(name string) (BaseObject, BaseObject) {
 	if !ok {
 		return nil, NewError(fmt.Sprintf("Method not found: %s on type '%s'", name, o.Type()), o.Line())
 	}
-	return v, nil
+	return CopyObject(v.(*Object)), nil
 }
 
 func (o *Object) SetMethod(name string, value BaseObject) {
@@ -86,7 +86,7 @@ func (o *Object) Parent() BaseObject {
 	return o.ParentObj
 }
 
-func (o *Object) SetParent(obj BaseObject) BaseObject {
+func (o *Object) SetParent(obj *Object) BaseObject {
 	o.ParentObj = obj
 	return o
 }
@@ -166,7 +166,7 @@ func NewBuiltinFunction(
 			return fmt.Sprintf("Builtin Function")
 		},
 		func(self BaseObject) string {
-			return fmt.Sprintf("Builtin Function [%p]", self)
+			return fmt.Sprintf("Builtin Function [%p]", self.(*Object))
 		},
 		0,
 		map[string]BaseObject{},
@@ -321,4 +321,8 @@ func NewFunction(
 		nil, // in vm
 		nil,
 	)
+}
+
+func CopyObject(obj *Object) *Object {
+	return NewObject(obj.TT, obj.InternalValue, obj.InspectValue, obj.DebugValue, obj.SLine, obj.Methods, obj.CallFunc, obj.ParentObj)
 }

@@ -258,3 +258,42 @@ func Test7(t *testing.T) {
 	var stack []object.BaseObject
 	assertStack(t, vm, stack, object.NULLOBJ)
 }
+
+func Test8(t *testing.T) {
+	// Pseudo Code: `2 + (7 + 10)`
+	vm := New(
+		[]code.Opcode{
+			code.LoadConstant, // 2
+			code.Method,       // +
+			// (
+			code.LoadConstant, // 7
+			code.Method,       // +
+			code.LoadConstant, // 10
+			code.Call,
+			// )
+			code.Call,
+			code.Pop,
+		},
+		[]object.BaseObject{
+			object.NewInteger(2, 0),
+			object.NewInteger(7, 0),
+			object.NewInteger(10, 0),
+		},
+		[]object.Message{
+			object.NewMessage(0),     // 2
+			object.NewMessage("add"), // +
+			// (
+			object.NewMessage(1),     // 7
+			object.NewMessage("add"), // +
+			object.NewMessage(2),     // 10
+			object.NewMessage(0),
+			object.NewMessage(1),
+			// )
+
+			object.NewMessage(0),
+			object.NewMessage(1),
+		},
+	)
+	var stack []object.BaseObject
+	assertStack(t, vm, stack, object.NewInteger(19, 0))
+}
