@@ -9,4 +9,4 @@ func fib(x) {  # x is positive
     fib(x-1) + fib(x-2)
 }
 
-print(fib(20))
+print("RESULT: " + fib(20) + "\n")

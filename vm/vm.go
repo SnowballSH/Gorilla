@@ -6,99 +6,53 @@ import (
 	"fmt"
 )
 
-const StackSize = 1 << 12
-
 type VM struct {
-	Constants []object.BaseObject
-	Messages  []object.Message
-	mp        int
-
-	Instructions []code.Opcode
-	ip           int
-
-	Stack []object.BaseObject
-	sp    int // Always points to the next value. Top of stack is stack[sp-1]
-
-	LastPopped object.BaseObject
-
-	Env *object.Environment
+	Frame     *Frame
+	LastFrame *Frame
 }
 
 func New(bytecodes []code.Opcode, constants []object.BaseObject, messages []object.Message) *VM {
 	return &VM{
-		Instructions: bytecodes,
-		Constants:    constants,
-		Messages:     messages,
-		Stack:        make([]object.BaseObject, StackSize),
-		sp:           0,
-		ip:           0,
-		mp:           0,
-		LastPopped:   nil,
-		Env:          object.NewEnvironment(),
+		Frame: NewFrame(bytecodes, constants, messages),
 	}
 }
 
 func (vm *VM) pop() (object.BaseObject, object.BaseObject) {
-	if vm.sp == 0 {
+	l := len(vm.Frame.Stack)
+	if l == 0 {
 		return nil, object.NewError("stack underflow", 0)
 	}
-	o := vm.Stack[vm.sp-1]
-	vm.sp--
-	vm.LastPopped = o
+	o := vm.Frame.Stack[l-1]
+	vm.Frame.Stack = vm.Frame.Stack[:l-1]
+	vm.Frame.LastPopped = o
 	return o, nil
 }
 
-func (vm *VM) push(o object.BaseObject) object.BaseObject {
-	if vm.sp >= StackSize {
-		return object.NewError("stack overflow", o.Line())
-	}
-
-	vm.Stack[vm.sp] = o
-	vm.sp++
-
-	return nil
-}
-
-func (vm *VM) getMessage(p interface{}) interface{} {
-	var val interface{}
-	switch p.(type) {
-	case int, int64:
-		val = vm.Messages[vm.mp].(*object.IntMessage).Value
-	case string:
-		val = vm.Messages[vm.mp].(*object.StringMessage).Value
-	default:
-		panic(fmt.Sprintf("Cannot get message of type: %T", p))
-	}
-
-	vm.mp++
-
-	return val
+func (vm *VM) push(o object.BaseObject) {
+	vm.Frame.Stack = append(vm.Frame.Stack, o)
 }
 
 func (vm *VM) getIntMessage() int {
-	val := vm.Messages[vm.mp].(*object.IntMessage).Value
-	vm.mp++
+	val := vm.Frame.Messages[vm.Frame.mp].(*object.IntMessage).Value
+	vm.Frame.mp++
 
 	return val
 }
 
 func (vm *VM) getStringMessage() string {
-	val := vm.Messages[vm.mp].(*object.StringMessage).Value
-	vm.mp++
+	val := vm.Frame.Messages[vm.Frame.mp].(*object.StringMessage).Value
+	vm.Frame.mp++
 
 	return val
 }
 
 func (vm *VM) Run() object.BaseObject {
-	for vm.ip < len(vm.Instructions) {
-		bytecode := vm.Instructions[vm.ip]
+	for vm.Frame.ip < len(vm.Frame.Instructions) {
+		bytecode := vm.Frame.Instructions[vm.Frame.ip]
 		switch bytecode {
 		case code.LoadConstant:
 			index := vm.getIntMessage()
-			err := vm.push(vm.Constants[index])
-			if err != nil {
-				return err
-			}
+			vm.push(vm.Frame.Constants[index])
 
 		case code.Pop:
 			_, e := vm.pop()
@@ -145,39 +99,43 @@ func (vm *VM) Run() object.BaseObject {
 						)
 					}
 
-					newvm := New(fstr.Bytecodes, fstr.Constants, fstr.Messages)
-					newvm.Env = object.NewEnclosedEnvironment(env)
+					newframe := NewFrame(fstr.Bytecodes, fstr.Constants, fstr.Messages)
+					newframe.Env = object.NewEnclosedEnvironment(env)
 
 					for i, vvv := range fstr.Params {
-						newvm.Env.Set(vvv, args[i])
+						newframe.Env.Set(vvv, args[i])
 					}
 
-					e := newvm.Run()
+					newframe.LastFrame = vm.Frame
+					vm.Frame = newframe
+
+					e := vm.Run()
 					if e != nil {
 						return e
 					}
 
-					last := newvm.LastPopped
+					last := vm.Frame.LastPopped
+
+					vm.Frame = vm.Frame.LastFrame
+
 					if last == nil {
 						return object.NULLOBJ
 					}
 
 					if isError(last) {
+						return last
 					}
 					return last
 				}
 			}
 
-			ret := vv.Call(vm.Env, prt, arguments, line)
+			ret := vv.Call(vm.Frame.Env, prt, arguments, line)
 
 			if isError(ret) {
 				return ret
 			}
 
-			err := vm.push(ret)
-			if err != nil {
-				return err
-			}
+			vm.push(ret)
 
 		case code.Method:
 			name := vm.getStringMessage()
@@ -194,10 +152,7 @@ func (vm *VM) Run() object.BaseObject {
 
 			fn.SetParent(val.(*object.Object))
 
-			err := vm.push(fn)
-			if err != nil {
-				return err
-			}
+			vm.push(fn)
 
 		case code.SetMethod:
 			name := vm.getStringMessage()
@@ -213,23 +168,17 @@ func (vm *VM) Run() object.BaseObject {
 			}
 
 			rec.SetMethod(name, val)
-			err := vm.push(rec)
-			if err != nil {
-				return err
-			}
+			vm.push(rec)
 
 		case code.GetVar:
 			name := vm.getStringMessage()
 			line := vm.getIntMessage()
 
-			v, ok := vm.Env.Get(name)
+			v, ok := vm.Frame.Env.Get(name)
 			if !ok {
 				return object.NewError(fmt.Sprintf("name '%s' is not defined", name), line)
 			}
-			err := vm.push(v)
-			if err != nil {
-				return err
-			}
+			vm.push(v)
 
 		case code.SetVar:
 			name := vm.getStringMessage()
@@ -239,17 +188,14 @@ func (vm *VM) Run() object.BaseObject {
 				return e
 			}
 
-			vm.Env.Set(name, val)
-			err := vm.push(val)
-			if err != nil {
-				return err
-			}
+			vm.Frame.Env.Set(name, val)
+			vm.push(val)
 
 		case code.Jump:
 			index := vm.getIntMessage()
 			mindex := vm.getIntMessage()
-			vm.ip = index
-			vm.mp = mindex
+			vm.Frame.ip = index
+			vm.Frame.mp = mindex
 
 		case code.JumpFalse:
 			index := vm.getIntMessage()
@@ -259,20 +205,20 @@ func (vm *VM) Run() object.BaseObject {
 				return e
 			}
 
-			isTruthy, err := object.GetOneTruthy(val.(*object.Object), vm.Env, val.Line())
+			isTruthy, err := object.GetOneTruthy(val.(*object.Object), vm.Frame.Env, val.Line())
 			if err != nil {
 				return err
 			}
 
 			if !isTruthy {
-				vm.ip = index
-				vm.mp = mindex
+				vm.Frame.ip = index
+				vm.Frame.mp = mindex
 			}
 
 		default:
 			return object.NewError(fmt.Sprintf("bytecode not supported: %d", bytecode), 0)
 		}
-		vm.ip++
+		vm.Frame.ip++
 
 		/*
 			println("[")

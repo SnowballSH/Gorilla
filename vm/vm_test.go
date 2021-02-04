@@ -12,15 +12,15 @@ func assertStack(t *testing.T, vm *VM, stack []object.BaseObject, result object.
 		t.Errorf("VM ERROR: %s", err.Inspect())
 		return
 	}
-	if result != vm.LastPopped {
+	if result != vm.Frame.LastPopped {
 		var val1, val2 string
 		if result != nil {
 			val1 = result.Inspect()
 		} else {
 			val1 = "nil"
 		}
-		if vm.LastPopped != nil {
-			val2 = vm.LastPopped.Inspect()
+		if vm.Frame.LastPopped != nil {
+			val2 = vm.Frame.LastPopped.Inspect()
 		} else {
 			val2 = "nil"
 		}
@@ -31,13 +31,13 @@ func assertStack(t *testing.T, vm *VM, stack []object.BaseObject, result object.
 			return
 		}
 	}
-	if vm.sp != len(stack) {
-		t.Errorf("Stack length not same, expected length %d, got %d", len(stack), vm.sp)
+	if len(vm.Frame.Stack) != len(stack) {
+		t.Errorf("Stack length not same, expected length %d, got %d", len(stack), len(vm.Frame.Stack))
 		return
 	}
 	for i, v := range stack {
-		if vm.Stack[i].Inspect() != v.Inspect() {
-			t.Errorf("Stack Child %d not correct, expected %s, got %s", i, v.Inspect(), vm.Stack[i].Inspect())
+		if vm.Frame.Stack[i].Inspect() != v.Inspect() {
+			t.Errorf("Stack Child %d not correct, expected %s, got %s", i, v.Inspect(), vm.Frame.Stack[i].Inspect())
 		}
 	}
 }

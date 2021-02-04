@@ -1,0 +1,41 @@
+func sum(a, b) {
+    a + b
+}
+
+func product(a, b, c, d) {
+    a * b * c * d * (sum(a, c) + sum(c, d) + 3)
+}
+
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+print(product((a = product(2679, 308, 400, 80) - product(9, 8057, 1057, 7567)) % 100, a % 1000, a % 500, a % 2))
+

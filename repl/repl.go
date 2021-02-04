@@ -48,16 +48,16 @@ func Start(in io.Reader, out io.Writer) {
 		messages := comp.Messages
 
 		machine := vm.New(code, constants, messages)
-		machine.Env = env
+		machine.Frame.Env = env
 		e := machine.Run()
 		if e != nil {
 			_, _ = io.WriteString(out, fmt.Sprintf(" Runtime Error:\n\t%s\n", e.Inspect()))
 			continue
 		}
 
-		env = machine.Env
+		env = machine.Frame.Env
 
-		stackTop := machine.LastPopped
+		stackTop := machine.Frame.LastPopped
 		if stackTop == nil || stackTop == object.NULLOBJ {
 			continue
 		}
