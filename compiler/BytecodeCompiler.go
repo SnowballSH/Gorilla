@@ -281,6 +281,13 @@ func (c *BytecodeCompiler) Compile(node ast.Node) error {
 		c.addMessage(len(node.Arguments))
 		c.emit(code.Call)
 
+	case *ast.ReturnStatement:
+		err := c.Compile(node.ReturnValue)
+		if err != nil {
+			return err
+		}
+		c.emit(code.Return)
+
 	default:
 		panic("Node not supported: " + node.TokenLiteral() + " | " + node.String())
 	}

@@ -24,7 +24,7 @@ func init() {
 
 		"eq": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
-				return NewBool(self.Inspect() == args[0].(*Object).Inspect() && self.Type() == args[0].Type(), line)
+				return NewBool(self.Inspect() == args[0].Inspect() && self.Type() == args[0].Type(), line)
 			},
 			[][]string{
 				{ANY},
@@ -32,7 +32,7 @@ func init() {
 		),
 		"neq": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
-				return NewBool(self.Inspect() != args[0].(*Object).Inspect() || self.Type() != args[0].Type(), line)
+				return NewBool(self.Inspect() != args[0].Inspect() || self.Type() != args[0].Type(), line)
 			},
 			[][]string{
 				{ANY},
@@ -84,7 +84,7 @@ func init() {
 	IntegerBuiltins = map[string]BaseObject{
 		"add": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
-				return NewInteger(self.Value().(int)+args[0].(*Object).Value().(int), line)
+				return NewInteger(self.Value().(int)+args[0].Value().(int), line)
 			},
 			[][]string{
 				{INTEGER},
@@ -92,7 +92,7 @@ func init() {
 		),
 		"sub": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
-				return NewInteger(self.Value().(int)-args[0].(*Object).Value().(int), line)
+				return NewInteger(self.Value().(int)-args[0].Value().(int), line)
 			},
 			[][]string{
 				{INTEGER},
@@ -100,7 +100,7 @@ func init() {
 		),
 		"mul": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
-				return NewInteger(self.Value().(int)*args[0].(*Object).Value().(int), line)
+				return NewInteger(self.Value().(int)*args[0].Value().(int), line)
 			},
 			[][]string{
 				{INTEGER},
@@ -108,7 +108,7 @@ func init() {
 		),
 		"div": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
-				v := args[0].(*Object).Value().(int)
+				v := args[0].Value().(int)
 				if v == 0 {
 					return NewError("Integer division by Zero", line)
 				}
@@ -120,7 +120,7 @@ func init() {
 		),
 		"mod": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
-				v := args[0].(*Object).Value().(int)
+				v := args[0].Value().(int)
 				if v == 0 {
 					return NewError("Integer division by Zero", line)
 				}
@@ -132,7 +132,7 @@ func init() {
 		),
 		"eq": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
-				v, ok := args[0].(*Object).Value().(int)
+				v, ok := args[0].Value().(int)
 				if !ok {
 					return NewBool(false, line)
 				}
@@ -144,7 +144,7 @@ func init() {
 		),
 		"neq": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
-				v, ok := args[0].(*Object).Value().(int)
+				v, ok := args[0].Value().(int)
 				if !ok {
 					return NewBool(true, line)
 				}

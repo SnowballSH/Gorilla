@@ -76,4 +76,11 @@ const (
 			Messages: [index int, message int]
 			Stack:    [value]
 	*/
+
+	Return
+	/*
+		Syntax:
+			Messages: []
+			Stack:    [value]
+	*/
 )

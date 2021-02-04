@@ -215,6 +215,14 @@ func (vm *VM) Run() object.BaseObject {
 				vm.Frame.mp = mindex
 			}
 
+		case code.Return:
+			_, e := vm.pop()
+			if e != nil {
+				return e
+			}
+
+			vm.Frame.ip = len(vm.Frame.Instructions)
+
 		default:
 			return object.NewError(fmt.Sprintf("bytecode not supported: %d", bytecode), 0)
 		}
