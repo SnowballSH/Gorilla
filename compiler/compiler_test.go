@@ -5,6 +5,7 @@ import (
 	"Gorilla/lexer"
 	"Gorilla/object"
 	"Gorilla/parser"
+	"strconv"
 	"testing"
 )
 
@@ -28,7 +29,15 @@ func assert(t *testing.T, code string, bytecodes []code.Opcode, messages []objec
 	_messages := cp.Messages
 
 	if len(bytecodes) != len(_code) {
-		t.Fatalf("Bytecode Length not same, Expected %d, got %d", len(bytecodes), len(_code))
+		var m, n []string
+		for _, v := range bytecodes {
+			m = append(m, strconv.Itoa(int(v)))
+		}
+		for _, v := range _code {
+			n = append(n, strconv.Itoa(int(v)))
+		}
+		t.Fatalf("Bytecode Length not same, Expected %d, got %d\nExpected Bytecode: %s, Got: %s",
+			len(bytecodes), len(_code), m, n)
 	}
 	for i, v := range bytecodes {
 		if v != _code[i] {
@@ -86,6 +95,52 @@ func Test1(t *testing.T) {
 			object.NewBool(false, 0),
 			object.NewInteger(1, 0),
 			object.NewInteger(2, 0),
+		},
+	)
+}
+
+func Test2(t *testing.T) {
+	assert(
+		t,
+		"i = 5; while i i = i - 1",
+		[]code.Opcode{
+			code.LoadConstant, // Load 5                        0
+			code.SetVar,       // Set i to 5                    1
+			code.Pop,          // Pop                           2
+			code.GetVar,       // Get Variable 'i'              3
+			code.JumpFalse,    // Jump                          4
+			code.GetVar,       // Get Variable 'i'              5
+			code.Method,       // Find i's "sub"                6
+			code.LoadConstant, // Load 1                        7
+			code.Call,         // Call i's "sub"                8
+			code.SetVar,       // Set i to i - 1                9
+			code.Pop,          // Pop                           10
+			code.Jump,         // Jump Back                     11
+			code.LoadConstant, // Load NULL                     12
+			code.Pop,          // Pop                           13
+		},
+		[]object.Message{
+			object.NewMessage(0),     // Load 5            0
+			object.NewMessage("i"),   //                   1
+			object.NewMessage("i"),   //                   2
+			object.NewMessage(0),     //                   3
+			object.NewMessage(11),    // 11 -> 12          4
+			object.NewMessage(15),    // 15                5
+			object.NewMessage("i"),   //                   6
+			object.NewMessage(0),     //                   7
+			object.NewMessage("sub"), //                   8
+			object.NewMessage(1),     //                   9
+			object.NewMessage(0),     //                   10
+			object.NewMessage(1),     //                   11
+			object.NewMessage("i"),   //                   12
+			object.NewMessage(2),     // 2 -> 3            13
+			object.NewMessage(2),     // 2                 14
+			object.NewMessage(2),     // NULL              15
+		},
+		[]object.BaseObject{
+			object.NewInteger(5, 0),
+			object.NewInteger(1, 0),
+			object.NULLOBJ,
 		},
 	)
 }

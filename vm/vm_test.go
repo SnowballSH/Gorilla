@@ -186,7 +186,7 @@ func Test6(t *testing.T) {
 	// Pseudo Code: `if false {1} else {2}`
 	vm := New(
 		[]code.Opcode{
-			code.LoadConstant, // Load false                     0
+			code.LoadConstant, // Load false                    0
 			code.JumpFalse,    // Jump If false is false        1
 			code.LoadConstant, // Load 1                        2
 			code.Jump,         // Jump Out                      3
@@ -210,4 +210,51 @@ func Test6(t *testing.T) {
 	)
 	var stack []object.BaseObject
 	assertStack(t, vm, stack, object.NewInteger(2, 0))
+}
+
+func Test7(t *testing.T) {
+	// Pseudo Code: `i = 5; while i { i = i - 1 }`
+	vm := New(
+		[]code.Opcode{
+			code.LoadConstant, // Load 5                        0
+			code.SetVar,       // Set i to 5                    1
+			code.Pop,          // Pop                           2
+			code.GetVar,       // Get Variable 'i'              3
+			code.JumpFalse,    // Jump                          4
+			code.GetVar,       // Get Variable 'i'              5
+			code.Method,       // Find i's "sub"                6
+			code.LoadConstant, // Load 1                        7
+			code.Call,         // Call i's "sub"                8
+			code.SetVar,       // Set i to i - 1                9
+			code.Pop,          // Pop                           10
+			code.Jump,         // Jump Back                     11
+			code.LoadConstant, // Load NULL                     12
+			code.Pop,          // Pop                           13
+		},
+		[]object.BaseObject{
+			object.NewInteger(5, 0),
+			object.NewInteger(1, 0),
+			object.NULLOBJ,
+		},
+		[]object.Message{
+			object.NewMessage(0),     // Load 5            0
+			object.NewMessage("i"),   //                   1
+			object.NewMessage("i"),   //                   2
+			object.NewMessage(0),     //                   3
+			object.NewMessage(11),    // 11 -> 12          4
+			object.NewMessage(15),    // 15                5
+			object.NewMessage("i"),   //                   6
+			object.NewMessage(0),     //                   7
+			object.NewMessage("sub"), //                   8
+			object.NewMessage(1),     //                   9
+			object.NewMessage(0),     //                   10
+			object.NewMessage(1),     //                   11
+			object.NewMessage("i"),   //                   12
+			object.NewMessage(2),     // 2 -> 3            13
+			object.NewMessage(2),     // 2                 14
+			object.NewMessage(2),     // NULL              15
+		},
+	)
+	var stack []object.BaseObject
+	assertStack(t, vm, stack, object.NULLOBJ)
 }

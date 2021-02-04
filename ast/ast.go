@@ -323,7 +323,6 @@ type WhileExpression struct {
 	Token       token.Token // The 'while' token
 	Condition   Expression
 	Consequence *BlockStatement
-	Alternative *BlockStatement
 }
 
 func (we *WhileExpression) expressionNode() {}

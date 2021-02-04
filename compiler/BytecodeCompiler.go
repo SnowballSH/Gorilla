@@ -207,6 +207,35 @@ func (c *BytecodeCompiler) Compile(node ast.Node) error {
 		c.Messages[m3] = object.NewMessage(len(c.Bytecodes) - 1)
 		c.Messages[m4] = object.NewMessage(len(c.Messages))
 
+	case *ast.WhileExpression:
+		m3i := len(c.Bytecodes) - 1
+		m4i := len(c.Messages)
+
+		err := c.Compile(node.Condition)
+		if err != nil {
+			return err
+		}
+
+		c.emit(code.JumpFalse)
+		m1 := c.addMessage(0)
+		m2 := c.addMessage(0)
+
+		err = c.Compile(node.Consequence)
+		if err != nil {
+			return err
+		}
+
+		c.emit(code.Jump)
+		m3 := c.addMessage(0)
+		m4 := c.addMessage(0)
+		c.Messages[m1] = object.NewMessage(len(c.Bytecodes) - 1)
+		c.Messages[m2] = object.NewMessage(len(c.Messages))
+		c.Messages[m3] = object.NewMessage(m3i)
+		c.Messages[m4] = object.NewMessage(m4i)
+
+		c.addMessage(c.addConstant(object.NULLOBJ))
+		c.emit(code.LoadConstant)
+
 	case *ast.GetAttr:
 		err := c.Compile(node.Expr)
 		if err != nil {
