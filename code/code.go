@@ -38,6 +38,14 @@ const (
 			Stack:    [callee]
 	*/
 
+	// Set Method
+	SetMethod
+	/*
+		Syntax:
+			Messages: [name string]
+			Stack:    [receiver, value]
+	*/
+
 	// Get Var
 	GetVar
 	/*

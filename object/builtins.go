@@ -4,6 +4,7 @@ import (
 	"Gorilla/config"
 	"fmt"
 	"strings"
+	"unicode/utf8"
 )
 
 func init() {
@@ -176,6 +177,29 @@ func init() {
 		),
 	}
 
+	StringBuiltins = map[string]BaseObject{
+		"add": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewString(self.Value().(string)+args[0].Inspect(), line)
+			},
+			[][]string{{ANY}},
+		),
+
+		"mul": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewString(strings.Repeat(self.Value().(string), args[0].Value().(int)), line)
+			},
+			[][]string{{INTEGER}},
+		),
+
+		"length": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewInteger(utf8.RuneCountInString(self.Value().(string)), line)
+			},
+			[][]string{},
+		),
+	}
+
 	GlobalBuiltins = map[string]BaseObject{
 		"print": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
@@ -230,6 +254,7 @@ var (
 	BaseObjectBuiltins map[string]BaseObject
 	IntegerBuiltins    map[string]BaseObject
 	BooleanBuiltins    map[string]BaseObject
+	StringBuiltins     map[string]BaseObject
 
 	NULLOBJ BaseObject
 )
@@ -241,6 +266,9 @@ func getTwoBool(self *Object, other *Object, env *Environment, line int) (bool, 
 	}
 
 	res := fn.Call(env, self, []BaseObject{}, line)
+	if res.Type() == ERROR {
+		return false, false, res
+	}
 	if res.Type() != BOOLEAN {
 		return false, false, NewError("isTruthy() Method expected to return Boolean", line)
 	}
@@ -251,6 +279,9 @@ func getTwoBool(self *Object, other *Object, env *Environment, line int) (bool, 
 	}
 
 	res2 := fn.Call(env, other, []BaseObject{}, line)
+	if res2.Type() == ERROR {
+		return false, false, res2
+	}
 	if res2.Type() != BOOLEAN {
 		return false, false, NewError("isTruthy() Method expected to return Boolean", line)
 	}
@@ -265,6 +296,9 @@ func GetOneTruthy(self *Object, env *Environment, line int) (bool, BaseObject) {
 	}
 
 	res := fn.Call(env, self, []BaseObject{}, line)
+	if res.Type() == ERROR {
+		return false, res
+	}
 	if res.Type() != BOOLEAN {
 		return false, NewError("isTruthy() Method expected to return Boolean", line)
 	}

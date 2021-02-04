@@ -1,6 +1,7 @@
 package object
 
 import (
+	"Gorilla/code"
 	"fmt"
 	"strconv"
 )
@@ -11,6 +12,7 @@ const (
 	ANY = "Any"
 
 	BUILTINFUNCTION = "Builtin Function"
+	FUNCTION        = "Function"
 
 	INTEGER = "Integer"
 	BOOLEAN = "Boolean"
@@ -67,7 +69,7 @@ func (o *Object) Value() interface{} {
 func (o *Object) FindMethod(name string) (BaseObject, BaseObject) {
 	v, ok := o.Methods[name]
 	if !ok {
-		return nil, NewError(fmt.Sprintf("Method not found: %s", name), o.Line())
+		return nil, NewError(fmt.Sprintf("Method not found: %s on type '%s'", name, o.Type()), o.Line())
 	}
 	return v, nil
 }
@@ -267,7 +269,7 @@ func NewString(
 			return fmt.Sprintf("\"%s\"", self.Value().(string))
 		},
 		line,
-		map[string]BaseObject{},
+		StringBuiltins,
 		nil,
 		nil,
 	)
@@ -289,6 +291,34 @@ func NewNull(
 		line,
 		map[string]BaseObject{},
 		nil,
+		nil,
+	)
+}
+
+type FunctionValue struct {
+	Constants []BaseObject
+	Bytecodes []code.Opcode
+	Messages  []Message
+	Params    []string
+}
+
+// Base FUNCTION Type
+func NewFunction(
+	value *FunctionValue,
+	line int,
+) *Object {
+	return NewObject(
+		FUNCTION,
+		value,
+		func(self BaseObject) string {
+			return "Function"
+		},
+		func(self BaseObject) string {
+			return fmt.Sprintf("Function [%p]", self)
+		},
+		line,
+		map[string]BaseObject{},
+		nil, // in vm
 		nil,
 	)
 }

@@ -131,7 +131,44 @@ func (vm *VM) Run() object.BaseObject {
 			} else {
 				prt = nil
 			}
-			ret := val.Call(vm.Env, prt, arguments, line)
+
+			// Call function
+			vv := val.(*object.Object)
+			if val.Type() == object.FUNCTION {
+				vv.CallFunc = func(env *object.Environment, self *object.Object, args []object.BaseObject, line int) object.BaseObject {
+					fstr := vv.Value().(*object.FunctionValue)
+
+					if len(args) != len(fstr.Params) {
+						return object.NewError(
+							fmt.Sprintf("Argument amount mismatch: Expected %d, got %d", len(fstr.Params), len(args)),
+							line,
+						)
+					}
+
+					newvm := New(fstr.Bytecodes, fstr.Constants, fstr.Messages)
+					newvm.Env = object.NewEnclosedEnvironment(env)
+
+					for i, vvv := range fstr.Params {
+						newvm.Env.Set(vvv, args[i])
+					}
+
+					e := newvm.Run()
+					if e != nil {
+						return e
+					}
+
+					last := newvm.LastPopped
+					if last == nil {
+						return object.NULLOBJ
+					}
+
+					if isError(last) {
+					}
+					return last
+				}
+			}
+
+			ret := vv.Call(vm.Env, prt, arguments, line)
 
 			if isError(ret) {
 				return ret
@@ -158,6 +195,25 @@ func (vm *VM) Run() object.BaseObject {
 			fn.SetParent(val)
 
 			err := vm.push(fn)
+			if err != nil {
+				return err
+			}
+
+		case code.SetMethod:
+			name := vm.getStringMessage()
+
+			val, e := vm.pop()
+			if e != nil {
+				return e
+			}
+
+			rec, e := vm.pop()
+			if e != nil {
+				return e
+			}
+
+			rec.SetMethod(name, val)
+			err := vm.push(rec)
 			if err != nil {
 				return err
 			}

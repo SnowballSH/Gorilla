@@ -88,6 +88,28 @@ func (c *BytecodeCompiler) Compile(node ast.Node) error {
 		c.addMessage(c.addConstant(object.NewString(node.Value, node.Token.Line)))
 		c.emit(code.LoadConstant)
 
+	case *ast.FunctionLiteral:
+		newc := NewBytecodeCompiler()
+		err := newc.Compile(node.Body)
+		if err != nil {
+			c.addMessage(c.addConstant(object.NewError(err.Error(), node.Token.Line)))
+			c.emit(code.LoadConstant)
+		} else {
+			var prms []string
+			for _, v := range node.Parameters {
+				prms = append(prms, v.Value)
+			}
+
+			c.addMessage(c.addConstant(object.NewFunction(
+				&object.FunctionValue{
+					Constants: newc.Constants,
+					Bytecodes: newc.Bytecodes,
+					Messages:  newc.Messages,
+					Params:    prms,
+				}, node.Token.Line)))
+			c.emit(code.LoadConstant)
+		}
+
 	case *ast.InfixExpression:
 		name := ""
 		switch node.Operator {
@@ -243,6 +265,20 @@ func (c *BytecodeCompiler) Compile(node ast.Node) error {
 		}
 		c.addMessage(node.Name.String())
 		c.emit(code.Method)
+
+	case *ast.AttrAssignmentExpression:
+		err := c.Compile(node.Receiver)
+		if err != nil {
+			return err
+		}
+
+		err = c.Compile(node.Value)
+		if err != nil {
+			return err
+		}
+
+		c.emit(code.SetMethod)
+		c.addMessage(node.Name)
 
 	case *ast.CallExpression:
 		err := c.Compile(node.Function)

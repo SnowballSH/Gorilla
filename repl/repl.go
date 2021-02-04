@@ -39,7 +39,7 @@ func Start(in io.Reader, out io.Writer) {
 		comp := compiler.NewBytecodeCompiler()
 		err := comp.Compile(program)
 		if err != nil {
-			_, _ = io.WriteString(out, fmt.Sprintf("Compilation failed:\n\t%s\n", err))
+			_, _ = io.WriteString(out, fmt.Sprintf(" Compilation failed:\n\t%s\n", err))
 			continue
 		}
 
@@ -67,7 +67,7 @@ func Start(in io.Reader, out io.Writer) {
 }
 
 func PrintParserErrors(out io.Writer, errors []string) {
-	_, _ = io.WriteString(out, " parser errors:\n")
+	_, _ = io.WriteString(out, " Parser Errors:\n")
 	for _, msg := range errors {
 		_, _ = io.WriteString(out, "\t"+msg+"\n")
 	}
