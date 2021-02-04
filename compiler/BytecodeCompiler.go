@@ -89,26 +89,10 @@ func (c *BytecodeCompiler) Compile(node ast.Node) error {
 		c.emit(code.LoadConstant)
 
 	case *ast.FunctionLiteral:
-		newc := NewBytecodeCompiler()
-		err := newc.Compile(node.Body)
-		if err != nil {
-			c.addMessage(c.addConstant(object.NewError(err.Error(), node.Token.Line)))
-			c.emit(code.LoadConstant)
-		} else {
-			var prms []string
-			for _, v := range node.Parameters {
-				prms = append(prms, v.Value)
-			}
+		c.makeFunc(node)
 
-			c.addMessage(c.addConstant(object.NewFunction(
-				&object.FunctionValue{
-					Constants: newc.Constants,
-					Bytecodes: newc.Bytecodes,
-					Messages:  newc.Messages,
-					Params:    prms,
-				}, node.Token.Line)))
-			c.emit(code.LoadConstant)
-		}
+	case *ast.FunctionStmt:
+		c.makeStmtFunc(node)
 
 	case *ast.InfixExpression:
 		name := ""
@@ -301,4 +285,52 @@ func (c *BytecodeCompiler) Compile(node ast.Node) error {
 		panic("Node not supported: " + node.TokenLiteral() + " | " + node.String())
 	}
 	return nil
+}
+
+func (c *BytecodeCompiler) makeFunc(node *ast.FunctionLiteral) {
+	newc := NewBytecodeCompiler()
+	err := newc.Compile(node.Body)
+	if err != nil {
+		c.addMessage(c.addConstant(object.NewError(err.Error(), node.Token.Line)))
+		c.emit(code.LoadConstant)
+	} else {
+		var prms []string
+		for _, v := range node.Parameters {
+			prms = append(prms, v.Value)
+		}
+
+		c.addMessage(c.addConstant(object.NewFunction(
+			&object.FunctionValue{
+				Constants: newc.Constants,
+				Bytecodes: newc.Bytecodes,
+				Messages:  newc.Messages,
+				Params:    prms,
+			}, node.Token.Line)))
+		c.emit(code.LoadConstant)
+	}
+}
+
+func (c *BytecodeCompiler) makeStmtFunc(node *ast.FunctionStmt) {
+	newc := NewBytecodeCompiler()
+	err := newc.Compile(node.Body)
+	if err != nil {
+		c.addMessage(c.addConstant(object.NewError(err.Error(), node.Token.Line)))
+		c.emit(code.LoadConstant)
+	} else {
+		var prms []string
+		for _, v := range node.Parameters {
+			prms = append(prms, v.Value)
+		}
+
+		c.addMessage(c.addConstant(object.NewFunction(
+			&object.FunctionValue{
+				Constants: newc.Constants,
+				Bytecodes: newc.Bytecodes,
+				Messages:  newc.Messages,
+				Params:    prms,
+			}, node.Token.Line)))
+		c.emit(code.LoadConstant)
+		c.emit(code.SetVar)
+		c.addMessage(node.Name)
+	}
 }
