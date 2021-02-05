@@ -88,6 +88,17 @@ func (c *BytecodeCompiler) Compile(node ast.Node) error {
 		c.addMessage(c.addConstant(object.NewString(node.Value, node.Token.Line)))
 		c.emit(code.LoadConstant)
 
+	case *ast.ArrayLiteral:
+		for _, v := range node.Elements {
+			err := c.Compile(v)
+			if err != nil {
+				return err
+			}
+		}
+		c.addMessage(len(node.Elements))
+		c.addMessage(node.Token.Line)
+		c.emit(code.MakeArray)
+
 	case *ast.FunctionLiteral:
 		c.makeFunc(node)
 

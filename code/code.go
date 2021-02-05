@@ -83,4 +83,11 @@ const (
 			Messages: []
 			Stack:    [value]
 	*/
+
+	MakeArray
+	/*
+		Syntax:
+			Messages: [amountValues int, line int]
+			Stack:    [value1, value2, ...]
+	*/
 )

@@ -52,7 +52,13 @@ func (vm *VM) Run() object.BaseObject {
 		switch bytecode {
 		case code.LoadConstant:
 			index := vm.getIntMessage()
-			vm.push(vm.Frame.Constants[index])
+			obj := vm.Frame.Constants[index]
+
+			if obj.Type() == object.FUNCTION {
+				obj.(*object.Object).InternalValue.(*object.FunctionValue).FreeEnv = vm.Frame.Env
+			}
+
+			vm.push(obj)
 
 		case code.Pop:
 			_, e := vm.pop()
@@ -101,6 +107,10 @@ func (vm *VM) Run() object.BaseObject {
 
 					newframe := NewFrame(fstr.Bytecodes, fstr.Constants, fstr.Messages)
 					newframe.Env = object.NewEnclosedEnvironment(env)
+
+					for name, free := range fstr.FreeEnv.Store {
+						newframe.Env.Set(name, free)
+					}
 
 					for i, vvv := range fstr.Params {
 						newframe.Env.Set(vvv, args[i])
@@ -222,6 +232,19 @@ func (vm *VM) Run() object.BaseObject {
 			}
 
 			vm.Frame.ip = len(vm.Frame.Instructions)
+
+		case code.MakeArray:
+			amountVals := vm.getIntMessage()
+			line := vm.getIntMessage()
+			var values []object.BaseObject
+			for i := 0; i < amountVals; i++ {
+				val, e := vm.pop()
+				if e != nil {
+					return e
+				}
+				values = prependObj(values, val)
+			}
+			vm.push(object.NewArray(values, line))
 
 		default:
 			return object.NewError(fmt.Sprintf("bytecode not supported: %d", bytecode), 0)

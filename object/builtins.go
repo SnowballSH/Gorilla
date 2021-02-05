@@ -247,6 +247,29 @@ func init() {
 		),
 		"null": NULLOBJ,
 	}
+
+	ArrayBuiltins = map[string]BaseObject{
+		"push": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				self.InternalValue = append(self.InternalValue.([]BaseObject), args[0])
+				return self
+			},
+			[][]string{
+				{ANY},
+			},
+		),
+		"pop": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				k := self.InternalValue.([]BaseObject)
+				if len(k) < 1 {
+					return NewError("Cannot pop empty list", line)
+				}
+				self.InternalValue = k[:len(k)-1]
+				return self
+			},
+			[][]string{},
+		),
+	}
 }
 
 var (
@@ -255,6 +278,7 @@ var (
 	IntegerBuiltins    map[string]BaseObject
 	BooleanBuiltins    map[string]BaseObject
 	StringBuiltins     map[string]BaseObject
+	ArrayBuiltins      map[string]BaseObject
 
 	NULLOBJ BaseObject
 )

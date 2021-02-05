@@ -4,6 +4,7 @@ import (
 	"Gorilla/code"
 	"fmt"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -17,6 +18,7 @@ const (
 	INTEGER = "Integer"
 	BOOLEAN = "Boolean"
 	STRING  = "String"
+	ARRAY   = "Array"
 	NULL    = "Null"
 )
 
@@ -300,6 +302,7 @@ type FunctionValue struct {
 	Bytecodes []code.Opcode
 	Messages  []Message
 	Params    []string
+	FreeEnv   *Environment
 }
 
 // Base FUNCTION Type
@@ -307,7 +310,7 @@ func NewFunction(
 	value *FunctionValue,
 	line int,
 ) *Object {
-	return NewObject(
+	o := NewObject(
 		FUNCTION,
 		value,
 		func(self BaseObject) string {
@@ -319,6 +322,32 @@ func NewFunction(
 		line,
 		map[string]BaseObject{},
 		nil, // in vm
+		nil,
+	)
+	return o
+}
+
+func af(self BaseObject) string {
+	var k []string
+	for _, v := range self.Value().([]BaseObject) {
+		k = append(k, v.Debug())
+	}
+	return "[" + strings.Join(k, ", ") + "]"
+}
+
+// Base ARRAY Type
+func NewArray(
+	value []BaseObject,
+	line int,
+) *Object {
+	return NewObject(
+		ARRAY,
+		value,
+		af,
+		af,
+		line,
+		ArrayBuiltins,
+		nil,
 		nil,
 	)
 }
