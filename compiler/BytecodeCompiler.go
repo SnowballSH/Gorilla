@@ -156,6 +156,45 @@ func (c *BytecodeCompiler) Compile(node ast.Node) error {
 		c.addMessage(1)
 		c.emit(code.Call)
 
+	case *ast.IndexExpression:
+		err := c.Compile(node.Left)
+		if err != nil {
+			return err
+		}
+		c.addMessage("getIndex")
+		c.emit(code.Method)
+
+		err = c.Compile(node.Index)
+		if err != nil {
+			return err
+		}
+
+		c.addMessage(node.Token.Line)
+		c.addMessage(1)
+		c.emit(code.Call)
+
+	case *ast.IndexAssignmentExpression:
+		err := c.Compile(node.Receiver)
+		if err != nil {
+			return err
+		}
+		c.addMessage("setIndex")
+		c.emit(code.Method)
+
+		err = c.Compile(node.Index)
+		if err != nil {
+			return err
+		}
+
+		err = c.Compile(node.Value)
+		if err != nil {
+			return err
+		}
+
+		c.addMessage(node.Token.Line)
+		c.addMessage(2)
+		c.emit(code.Call)
+
 	case *ast.PrefixExpression:
 		name := ""
 		switch node.Operator {

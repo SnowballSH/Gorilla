@@ -200,6 +200,76 @@ func init() {
 		),
 	}
 
+	ArrayBuiltins = map[string]BaseObject{
+		"add": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				for _, v := range args[0].Value().([]BaseObject) {
+					self.InternalValue = append(self.InternalValue.([]BaseObject), v)
+				}
+				return self
+			},
+			[][]string{
+				{ARRAY},
+			},
+		),
+
+		"push": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				self.InternalValue = append(self.InternalValue.([]BaseObject), args[0])
+				return self
+			},
+			[][]string{
+				{ANY},
+			},
+		),
+		"pop": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				k := self.InternalValue.([]BaseObject)
+				if len(k) < 1 {
+					return NewError("Cannot pop empty list", line)
+				}
+				self.InternalValue = k[:len(k)-1]
+				return self
+			},
+			[][]string{},
+		),
+		"getIndex": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				k := self.InternalValue.([]BaseObject)
+				idx := args[0].Value().(int)
+				if idx < 0 {
+					idx = len(k) + idx
+				}
+				if len(k) <= idx || idx < 0 {
+					return NewError(fmt.Sprintf("Array Index %d out of range on length %d", args[0].Value().(int), len(k)), line)
+				}
+				return k[idx]
+			},
+			[][]string{
+				{INTEGER},
+			},
+		),
+		"setIndex": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				k := self.InternalValue.([]BaseObject)
+				idx := args[0].Value().(int)
+				if idx < 0 {
+					idx = len(k) + idx
+				}
+				if len(k) <= idx || idx < 0 {
+					return NewError(fmt.Sprintf("Array Index %d out of range on length %d", args[0].Value().(int), len(k)), line)
+				}
+				k[idx] = args[1]
+				self.InternalValue = k
+				return self
+			},
+			[][]string{
+				{INTEGER},
+				{ANY},
+			},
+		),
+	}
+
 	GlobalBuiltins = map[string]BaseObject{
 		"print": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
@@ -246,29 +316,6 @@ func init() {
 			},
 		),
 		"null": NULLOBJ,
-	}
-
-	ArrayBuiltins = map[string]BaseObject{
-		"push": NewBuiltinFunction(
-			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
-				self.InternalValue = append(self.InternalValue.([]BaseObject), args[0])
-				return self
-			},
-			[][]string{
-				{ANY},
-			},
-		),
-		"pop": NewBuiltinFunction(
-			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
-				k := self.InternalValue.([]BaseObject)
-				if len(k) < 1 {
-					return NewError("Cannot pop empty list", line)
-				}
-				self.InternalValue = k[:len(k)-1]
-				return self
-			},
-			[][]string{},
-		),
 	}
 }
 
