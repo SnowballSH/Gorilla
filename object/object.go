@@ -16,6 +16,7 @@ const (
 	FUNCTION        = "Function"
 
 	INTEGER = "Integer"
+	FLOAT   = "Float"
 	BOOLEAN = "Boolean"
 	STRING  = "String"
 	ARRAY   = "Array"
@@ -230,6 +231,27 @@ func NewInteger(
 		},
 		line,
 		IntegerBuiltins,
+		nil,
+		nil,
+	)
+}
+
+// Base INTEGER Type
+func NewFloat(
+	value float64,
+	line int,
+) *Object {
+	return NewObject(
+		FLOAT,
+		value,
+		func(self BaseObject) string {
+			return fmt.Sprintf("%f", self.Value().(float64))
+		},
+		func(self BaseObject) string {
+			return fmt.Sprintf("%f", self.Value().(float64))
+		},
+		line,
+		FloatBuiltins,
 		nil,
 		nil,
 	)

@@ -80,6 +80,10 @@ func (c *BytecodeCompiler) Compile(node ast.Node) error {
 		c.addMessage(c.addConstant(object.NewInteger(node.Value, node.Token.Line)))
 		c.emit(code.LoadConstant)
 
+	case *ast.FloatLiteral:
+		c.addMessage(c.addConstant(object.NewFloat(node.Value, node.Token.Line)))
+		c.emit(code.LoadConstant)
+
 	case *ast.Boolean:
 		c.addMessage(c.addConstant(object.NewBool(node.Value, node.Token.Line)))
 		c.emit(code.LoadConstant)

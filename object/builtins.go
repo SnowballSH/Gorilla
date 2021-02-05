@@ -2,7 +2,12 @@ package object
 
 import (
 	"Gorilla/config"
+	"bufio"
 	"fmt"
+	"io"
+	"math"
+	"os"
+	"strconv"
 	"strings"
 	"unicode/utf8"
 )
@@ -166,6 +171,151 @@ func init() {
 			},
 			[][]string{},
 		),
+
+		"chr": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewString(string(rune(self.Value().(int))), line)
+			},
+			[][]string{},
+		),
+		"toFloat": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewFloat(float64(self.Value().(int)), line)
+			},
+			[][]string{},
+		),
+	}
+
+	FloatBuiltins = map[string]BaseObject{
+		"add": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				var otherv float64
+				if args[0].Type() == FLOAT {
+					otherv = args[0].Value().(float64)
+				} else if args[0].Type() == INTEGER {
+					otherv = float64(args[0].Value().(int))
+				}
+				return NewFloat(self.Value().(float64)+otherv, line)
+			},
+			[][]string{
+				{FLOAT, INTEGER},
+			},
+		),
+		"sub": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				var otherv float64
+				if args[0].Type() == FLOAT {
+					otherv = args[0].Value().(float64)
+				} else if args[0].Type() == INTEGER {
+					otherv = float64(args[0].Value().(int))
+				}
+				return NewFloat(self.Value().(float64)-otherv, line)
+			},
+			[][]string{
+				{FLOAT, INTEGER},
+			},
+		),
+		"mul": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				var otherv float64
+				if args[0].Type() == FLOAT {
+					otherv = args[0].Value().(float64)
+				} else if args[0].Type() == INTEGER {
+					otherv = float64(args[0].Value().(int))
+				}
+				return NewFloat(self.Value().(float64)*otherv, line)
+			},
+			[][]string{
+				{FLOAT, INTEGER},
+			},
+		),
+		"div": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				var otherv float64
+				if args[0].Type() == FLOAT {
+					otherv = args[0].Value().(float64)
+				} else if args[0].Type() == INTEGER {
+					otherv = float64(args[0].Value().(int))
+				}
+
+				if otherv == 0 {
+					return NewError("Integer division by Zero", line)
+				}
+
+				return NewFloat(self.Value().(float64)/otherv, line)
+			},
+			[][]string{
+				{FLOAT, INTEGER},
+			},
+		),
+		"eq": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				v, ok := args[0].Value().(float64)
+				if !ok {
+					return NewBool(false, line)
+				}
+				return NewBool(self.Value().(float64) == v, line)
+			},
+			[][]string{
+				{ANY},
+			},
+		),
+		"neq": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				v, ok := args[0].Value().(float64)
+				if !ok {
+					return NewBool(false, line)
+				}
+				return NewBool(self.Value().(float64) == v, line)
+			},
+			[][]string{
+				{ANY},
+			},
+		),
+		"pos": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewFloat(+self.Value().(float64), line)
+			},
+			[][]string{},
+		),
+		"neg": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewFloat(-self.Value().(float64), line)
+			},
+			[][]string{},
+		),
+
+		"toInt": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				res := int(self.Value().(float64))
+				return NewInteger(res, line)
+			},
+			[][]string{},
+		),
+
+		"round": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				res := math.Round(self.Value().(float64))
+				return NewInteger(int(res), line)
+			},
+			[][]string{},
+		),
+
+		"floor": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				res := math.Floor(self.Value().(float64))
+				return NewInteger(int(res), line)
+			},
+			[][]string{},
+		),
+
+		"ceil": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				res := math.Ceil(self.Value().(float64))
+				return NewInteger(int(res), line)
+			},
+			[][]string{},
+		),
 	}
 
 	BooleanBuiltins = map[string]BaseObject{
@@ -195,6 +345,40 @@ func init() {
 		"length": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
 				return NewInteger(utf8.RuneCountInString(self.Value().(string)), line)
+			},
+			[][]string{},
+		),
+
+		"toInt": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				res, err := strconv.Atoi(self.Value().(string))
+				if err != nil {
+					return NewError(fmt.Sprintf("'%s' is not a valid integer", self.Value().(string)), line)
+				}
+				return NewInteger(res, line)
+			},
+			[][]string{},
+		),
+
+		"ord": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				r := []rune(self.Value().(string))
+				rr := make([]BaseObject, len(r))
+				for i, v := range r {
+					rr[i] = NewInteger(int(v), line)
+				}
+				return NewArray(rr, line)
+			},
+			[][]string{},
+		),
+
+		"chars": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				var arr []BaseObject
+				for _, v := range self.Value().(string) {
+					arr = append(arr, NewString(string(v), line))
+				}
+				return NewArray(arr, line)
 			},
 			[][]string{},
 		),
@@ -315,7 +499,26 @@ func init() {
 				{ANY},
 			},
 		),
-		"null": NULLOBJ,
+		"input": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				var k []string
+				for _, s := range args {
+					k = append(k, s.Inspect())
+				}
+				_, _ = fmt.Fprint(config.OUT, strings.Join(k, " "))
+
+				buffer := bufio.NewReader(os.Stdin)
+
+				lineC, _, err := buffer.ReadLine()
+				if err != nil && err != io.EOF {
+					return NewError("EOF When getting input", line+1)
+				}
+				return NewString(string(lineC), line)
+			},
+			nil,
+		),
+		"null":            NULLOBJ,
+		"GORILLA_VERSION": NewString(config.VERSION, 0),
 	}
 }
 
@@ -323,6 +526,7 @@ var (
 	GlobalBuiltins     map[string]BaseObject
 	BaseObjectBuiltins map[string]BaseObject
 	IntegerBuiltins    map[string]BaseObject
+	FloatBuiltins      map[string]BaseObject
 	BooleanBuiltins    map[string]BaseObject
 	StringBuiltins     map[string]BaseObject
 	ArrayBuiltins      map[string]BaseObject

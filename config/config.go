@@ -10,3 +10,5 @@ var OUT io.Writer = os.Stdout
 func SetOut(out io.Writer) {
 	OUT = out
 }
+
+const VERSION = "0.5.0"
