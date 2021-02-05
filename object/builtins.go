@@ -89,50 +89,112 @@ func init() {
 	IntegerBuiltins = map[string]BaseObject{
 		"add": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
-				return NewInteger(self.Value().(int)+args[0].Value().(int), line)
+				var otherv float64
+				if args[0].Type() == FLOAT {
+					otherv = args[0].Value().(float64)
+				} else if args[0].Type() == INTEGER {
+					otherv = float64(args[0].Value().(int))
+				}
+				result := float64(self.Value().(int)) + otherv
+
+				if float64(int(result)) == result {
+					return NewInteger(int(result), line)
+				}
+
+				return NewFloat(result, line)
 			},
 			[][]string{
-				{INTEGER},
+				{FLOAT, INTEGER},
 			},
 		),
 		"sub": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
-				return NewInteger(self.Value().(int)-args[0].Value().(int), line)
+				var otherv float64
+				if args[0].Type() == FLOAT {
+					otherv = args[0].Value().(float64)
+				} else if args[0].Type() == INTEGER {
+					otherv = float64(args[0].Value().(int))
+				}
+				result := float64(self.Value().(int)) - otherv
+
+				if float64(int(result)) == result {
+					return NewInteger(int(result), line)
+				}
+
+				return NewFloat(result, line)
 			},
 			[][]string{
-				{INTEGER},
+				{FLOAT, INTEGER},
 			},
 		),
 		"mul": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
-				return NewInteger(self.Value().(int)*args[0].Value().(int), line)
+				var otherv float64
+				if args[0].Type() == FLOAT {
+					otherv = args[0].Value().(float64)
+				} else if args[0].Type() == INTEGER {
+					otherv = float64(args[0].Value().(int))
+				}
+				result := float64(self.Value().(int)) * otherv
+
+				if float64(int(result)) == result {
+					return NewInteger(int(result), line)
+				}
+
+				return NewFloat(result, line)
 			},
 			[][]string{
-				{INTEGER},
+				{FLOAT, INTEGER},
 			},
 		),
 		"div": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
-				v := args[0].Value().(int)
-				if v == 0 {
+				var otherv float64
+				if args[0].Type() == FLOAT {
+					otherv = args[0].Value().(float64)
+				} else if args[0].Type() == INTEGER {
+					otherv = float64(args[0].Value().(int))
+				}
+
+				if otherv == 0 {
 					return NewError("Integer division by Zero", line)
 				}
-				return NewInteger(self.Value().(int)/v, line)
+
+				result := float64(self.Value().(int)) / otherv
+
+				if float64(int(result)) == result {
+					return NewInteger(int(result), line)
+				}
+
+				return NewFloat(result, line)
 			},
 			[][]string{
-				{INTEGER},
+				{FLOAT, INTEGER},
 			},
 		),
 		"mod": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
-				v := args[0].Value().(int)
-				if v == 0 {
-					return NewError("Integer division by Zero", line)
+				var otherv float64
+				if args[0].Type() == FLOAT {
+					otherv = args[0].Value().(float64)
+				} else if args[0].Type() == INTEGER {
+					otherv = float64(args[0].Value().(int))
 				}
-				return NewInteger(self.Value().(int)%v, line)
+
+				if otherv == 0 {
+					return NewError("Integer modulo by Zero", line)
+				}
+
+				result := math.Mod(float64(self.Value().(int)), otherv)
+
+				if float64(int(result)) == result {
+					return NewInteger(int(result), line)
+				}
+
+				return NewFloat(result, line)
 			},
 			[][]string{
-				{INTEGER},
+				{FLOAT, INTEGER},
 			},
 		),
 		"eq": NewBuiltinFunction(
@@ -239,10 +301,29 @@ func init() {
 				}
 
 				if otherv == 0 {
-					return NewError("Integer division by Zero", line)
+					return NewError("Float division by Zero", line)
 				}
 
 				return NewFloat(self.Value().(float64)/otherv, line)
+			},
+			[][]string{
+				{FLOAT, INTEGER},
+			},
+		),
+		"mod": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				var otherv float64
+				if args[0].Type() == FLOAT {
+					otherv = args[0].Value().(float64)
+				} else if args[0].Type() == INTEGER {
+					otherv = float64(args[0].Value().(int))
+				}
+
+				if otherv == 0 {
+					return NewError("Float division by Zero", line)
+				}
+
+				return NewFloat(math.Mod(self.Value().(float64), otherv), line)
 			},
 			[][]string{
 				{FLOAT, INTEGER},
@@ -412,11 +493,25 @@ func init() {
 				if len(k) < 1 {
 					return NewError("Cannot pop empty list", line)
 				}
+				v := k[len(k)-1]
 				self.InternalValue = k[:len(k)-1]
-				return self
+				return v
 			},
 			[][]string{},
 		),
+		"shift": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				k := self.InternalValue.([]BaseObject)
+				if len(k) < 1 {
+					return NewError("Cannot shift empty list", line)
+				}
+				v := k[0]
+				self.InternalValue = k[1:]
+				return v
+			},
+			[][]string{},
+		),
+
 		"getIndex": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
 				k := self.InternalValue.([]BaseObject)
