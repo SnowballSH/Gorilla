@@ -2,9 +2,9 @@ name: Go
 
 on:
   push:
-    branches: [ Rewrite ]
+    branches: [ Rewrite, master ]
   pull_request:
-    branches: [ Rewrite ]
+    branches: [ Rewrite, master ]
 
 jobs:
 
