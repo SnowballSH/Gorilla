@@ -11,4 +11,4 @@ func SetOut(out io.Writer) {
 	OUT = out
 }
 
-const VERSION = "0.5.0"
+const VERSION = "0.4.0"
