@@ -2,6 +2,7 @@ package repl
 
 import (
 	"Gorilla/compiler"
+	"Gorilla/config"
 	"Gorilla/lexer"
 	"Gorilla/object"
 	"Gorilla/parser"
@@ -19,7 +20,7 @@ const (
 
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
-	_, _ = io.WriteString(out, "Gorilla \n")
+	_, _ = io.WriteString(out, fmt.Sprintf("Gorilla %s\n", config.VERSION))
 
 	var env = object.NewEnvironment()
 
