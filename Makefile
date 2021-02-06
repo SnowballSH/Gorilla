@@ -1,5 +1,5 @@
 build:
-	@go build ./gorilla
+	@go build .
 
 prod:
-	@go build -ldflags "-s -w" ./gorilla
+	@go build -ldflags "-s -w" .
