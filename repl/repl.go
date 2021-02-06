@@ -9,6 +9,12 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"strings"
+)
+
+const (
+	PROMPT1 = "#>> "
+	PROMPT2 = "*>> "
 )
 
 func Start(in io.Reader, out io.Writer) {
@@ -17,17 +23,52 @@ func Start(in io.Reader, out io.Writer) {
 
 	var env = object.NewEnvironment()
 
-	for {
-		_, _ = io.WriteString(out, ">> ")
+	var prompt = PROMPT1
 
-		scanned := scanner.Scan()
-		if !scanned {
-			return
+	for {
+		text := ""
+
+		for {
+			_, _ = io.WriteString(out, prompt)
+
+			if len(text) > 1 {
+				ts := strings.TrimSpace(text)
+				st := ts[len(ts)-1]
+				if st == '{' ||
+					st == '[' ||
+					st == '(' ||
+					st == ',' {
+					_, _ = io.WriteString(out, "\t")
+				}
+			}
+
+			scanned := scanner.Scan()
+			if !scanned {
+				return
+			}
+
+			line := scanner.Text() + "\n"
+
+			text += line
+
+			if len(strings.TrimSpace(line)) == 0 {
+				break
+			}
+
+			l := lexer.New(text)
+			p := parser.New(l)
+
+			p.ParseProgram()
+			if len(p.Errors()) != 0 {
+				prompt = PROMPT2
+				continue
+			}
+			break
 		}
 
-		line := scanner.Text() + "\n"
+		prompt = PROMPT1
 
-		l := lexer.New(line)
+		l := lexer.New(text)
 		p := parser.New(l)
 
 		program := p.ParseProgram()

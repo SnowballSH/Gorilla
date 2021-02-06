@@ -581,10 +581,13 @@ func (p *Parser) parseList(t token.TType) []ast.Expression {
 
 	for p.peekTokenIs(token.COMMA) {
 		p.nextToken()
-		p.nextToken()
-		for p.curTokenIs(token.SEMICOLON) {
+		for p.peekTokenIs(token.SEMICOLON) {
 			p.nextToken()
 		}
+		if p.peekTokenIs(t) {
+			break
+		}
+		p.nextToken()
 		args = append(args, p.parseExpression(LOWEST))
 		for p.peekTokenIs(token.SEMICOLON) {
 			p.nextToken()

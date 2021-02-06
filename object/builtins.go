@@ -612,6 +612,14 @@ func init() {
 			},
 			nil,
 		),
+		"exit": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				os.Exit(args[0].Value().(int))
+				return NULLOBJ
+			},
+			[][]string{{INTEGER}},
+		),
+
 		"null":            NULLOBJ,
 		"GORILLA_VERSION": NewString(config.VERSION, 0),
 	}
