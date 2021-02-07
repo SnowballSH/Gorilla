@@ -90,4 +90,11 @@ const (
 			Messages: [amountValues int, line int]
 			Stack:    [value1, value2, ...]
 	*/
+
+	MakeHash
+	/*
+		Syntax:
+			Messages: [amountValues int, line int]
+			Stack:    [key1, value1, key2, value2, ...]
+	*/
 )

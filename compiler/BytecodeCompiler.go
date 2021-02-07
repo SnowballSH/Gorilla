@@ -146,6 +146,21 @@ func (c *BytecodeCompiler) Compile(node ast.Node) error {
 		c.addMessage(node.Token.Line)
 		c.emit(code.MakeArray)
 
+	case *ast.HashLiteral:
+		for k, v := range node.Pairs {
+			err := c.Compile(k)
+			if err != nil {
+				return err
+			}
+			err = c.Compile(v)
+			if err != nil {
+				return err
+			}
+		}
+		c.addMessage(len(node.Pairs))
+		c.addMessage(node.Token.Line)
+		c.emit(code.MakeHash)
+
 	case *ast.FunctionLiteral:
 		c.makeFunc(node)
 

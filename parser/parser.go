@@ -94,6 +94,8 @@ func New(l *lexer.Lexer) *Parser {
 
 	p.registerPrefix(token.LBRACKET, p.parseArrayLiteral)
 
+	p.registerPrefix(token.LBRACE, p.parseHashLiteral)
+
 	p.infixParseFns = make(map[token.TType]infixParseFn)
 	p.registerInfix(token.PLUS, p.parseInfixExpression)
 	p.registerInfix(token.MINUS, p.parseInfixExpression)
@@ -232,10 +234,6 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseReturnStatement()
 	case token.STMTFUNCTION:
 		return p.parseFunctionStatement()
-	case token.BREAK:
-		return p.parseBreakStatement()
-	case token.NEXT:
-		return p.parseNextStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -284,22 +282,6 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	p.nextToken()
 
 	stmt.ReturnValue = p.parseExpression(LOWEST)
-
-	return stmt
-}
-
-func (p *Parser) parseBreakStatement() *ast.BreakStatement {
-	stmt := &ast.BreakStatement{Token: p.curToken}
-
-	p.nextToken()
-
-	return stmt
-}
-
-func (p *Parser) parseNextStatement() *ast.NextStatement {
-	stmt := &ast.NextStatement{Token: p.curToken}
-
-	p.nextToken()
 
 	return stmt
 }
@@ -459,6 +441,10 @@ func (p *Parser) parseIfExpression() ast.Expression {
 		return nil
 	}
 
+	for p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+
 	if p.peekTokenIs(token.ELSE) {
 		p.nextToken()
 
@@ -597,13 +583,10 @@ func (p *Parser) parseList(t token.TType) []ast.Expression {
 
 	for p.peekTokenIs(token.COMMA) {
 		p.nextToken()
-		for p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+		for p.curTokenIs(token.SEMICOLON) {
 			p.nextToken()
 		}
-		if p.peekTokenIs(t) {
-			break
-		}
-		p.nextToken()
 		args = append(args, p.parseExpression(LOWEST))
 		for p.peekTokenIs(token.SEMICOLON) {
 			p.nextToken()
@@ -665,4 +648,34 @@ func (p *Parser) parseGetAttr(expr ast.Expression) ast.Expression {
 		Expr:  expr,
 		Name:  iden,
 	}
+}
+
+func (p *Parser) parseHashLiteral() ast.Expression {
+	hash := &ast.HashLiteral{Token: p.curToken}
+	hash.Pairs = make(map[ast.Expression]ast.Expression)
+
+	for !p.peekTokenIs(token.RBRACE) {
+		p.nextToken()
+		key := p.parseExpression(LOWEST)
+
+		if !p.expectPeek(token.COLON) {
+			return nil
+		}
+
+		p.nextToken()
+		value := p.parseExpression(LOWEST)
+
+		hash.Pairs[key] = value
+
+		if !p.peekTokenIs(token.RBRACE) && !p.expectPeek(token.COMMA) {
+			return nil
+		}
+
+	}
+
+	if !p.expectPeek(token.RBRACE) {
+		return nil
+	}
+
+	return hash
 }

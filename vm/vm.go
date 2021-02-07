@@ -246,6 +246,32 @@ func (vm *VM) Run() object.BaseObject {
 			}
 			vm.push(object.NewArray(values, line))
 
+		case code.MakeHash:
+			amountVals := vm.getIntMessage()
+			line := vm.getIntMessage()
+			pairs := map[object.HashKey]*object.HashValue{}
+			for i := 0; i < amountVals; i++ {
+				value, e := vm.pop()
+				if e != nil {
+					return e
+				}
+				key, e := vm.pop()
+				if e != nil {
+					return e
+				}
+
+				hashedKey, ok := object.HashObject(key)
+				if !ok {
+					vm.push(object.NewError(fmt.Sprintf("Type '%s' is not hashable", key.Type()), line))
+				}
+
+				pairs[hashedKey] = &object.HashValue{
+					Key:   key,
+					Value: value,
+				}
+			}
+			vm.push(object.NewHash(pairs, line))
+
 		default:
 			return object.NewError(fmt.Sprintf("bytecode not supported: %d", bytecode), 0)
 		}

@@ -3,6 +3,7 @@ package object
 import (
 	"Gorilla/code"
 	"fmt"
+	"hash/fnv"
 	"strconv"
 	"strings"
 )
@@ -20,6 +21,7 @@ const (
 	BOOLEAN = "Boolean"
 	STRING  = "String"
 	ARRAY   = "Array"
+	HASH    = "Hash"
 	NULL    = "Null"
 )
 
@@ -374,6 +376,63 @@ func NewArray(
 	)
 }
 
+func hf(self BaseObject) string {
+	var pairs []string
+	for _, value := range self.Value().(map[HashKey]*HashValue) {
+		pairs = append(pairs, value.Key.Debug()+": "+value.Value.Debug())
+	}
+	return "{" + strings.Join(pairs, ", ") + "}"
+}
+
+type HashKey struct {
+	Type      string
+	HashedKey uint64
+}
+
+type HashValue struct {
+	Key   BaseObject
+	Value BaseObject
+}
+
+// Base HASH Type
+func NewHash(
+	value map[HashKey]*HashValue,
+	line int,
+) *Object {
+	return NewObject(
+		HASH,
+		value,
+		hf,
+		hf,
+		line,
+		HashBuiltins,
+		nil,
+		nil,
+	)
+}
+
 func CopyObject(obj *Object) *Object {
 	return NewObject(obj.TT, obj.InternalValue, obj.InspectValue, obj.DebugValue, obj.SLine, obj.Methods, obj.CallFunc, obj.ParentObj)
+}
+
+func HashObject(obj BaseObject) (key HashKey, ok bool) {
+	switch obj.Type() {
+	case INTEGER:
+		return HashKey{Type: obj.Type(), HashedKey: uint64(obj.Value().(int))}, true
+	case STRING:
+		h := fnv.New64a()
+		_, _ = h.Write([]byte(obj.Value().(string)))
+		return HashKey{Type: obj.Type(), HashedKey: h.Sum64()}, true
+	case BOOLEAN:
+		var val uint64
+		if obj.Value().(bool) {
+			val = 1
+		} else {
+			val = 0
+		}
+
+		return HashKey{Type: obj.Type(), HashedKey: val}, true
+	default:
+		return HashKey{}, false
+	}
 }

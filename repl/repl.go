@@ -48,7 +48,7 @@ func Start(in io.Reader, out io.Writer) {
 				return
 			}
 
-			line := scanner.Text() + "\n"
+			line := scanner.Text()
 
 			text += line
 

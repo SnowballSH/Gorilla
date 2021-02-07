@@ -1,0 +1,35 @@
+func parse(code) {
+    stack = []
+    result = []
+    i = 0
+
+    code = code.chars()
+
+    while i < code.length() {
+        chr = code[i]
+        if chr == "+" || chr == "-" || chr == ">" || chr == "<" || chr == "." || chr == "," {
+            result <- [chr, null]
+        } else if chr == "[" {
+            stack <- i
+            result <- [chr, null]
+        } else if chr == "]" {
+            if stack.length() == 0 {
+                println("Missing '[' before ']'")
+                exit(1)
+            }
+            last = stack.pop()
+            result[last][1] = i
+            result <- [chr, last]
+        }
+
+        i = i + 1
+    }
+
+    result
+}
+
+func run(nodes) {
+    data = []
+}
+
+parse(input())

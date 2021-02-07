@@ -667,6 +667,53 @@ func init() {
 				{ANY},
 			},
 		),
+
+		"length": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewInteger(len(self.Value().([]BaseObject)), line)
+			},
+			[][]string{},
+		),
+	}
+
+	HashBuiltins = map[string]BaseObject{
+		"getIndex": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				k := self.InternalValue.(map[HashKey]*HashValue)
+				key, ok := HashObject(args[0])
+				if !ok {
+					return NewError(fmt.Sprintf("Type '%s' is not hashable", args[0].Type()), line)
+				}
+				value, get := k[key]
+				if !get {
+					return NewError(fmt.Sprintf("Key not found: %s", args[0].Debug()), line)
+				}
+
+				return value.Value
+			},
+			[][]string{
+				{ANY},
+			},
+		),
+		"setIndex": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				k := self.InternalValue.(map[HashKey]*HashValue)
+				key, ok := HashObject(args[0])
+				if !ok {
+					return NewError(fmt.Sprintf("Type '%s' is not hashable", args[0].Type()), line)
+				}
+				k[key] = &HashValue{
+					Key:   args[0],
+					Value: args[1],
+				}
+				self.InternalValue = k
+				return self
+			},
+			[][]string{
+				{ANY},
+				{ANY},
+			},
+		),
 	}
 
 	GlobalBuiltins = map[string]BaseObject{
@@ -753,6 +800,7 @@ var (
 	BooleanBuiltins    map[string]BaseObject
 	StringBuiltins     map[string]BaseObject
 	ArrayBuiltins      map[string]BaseObject
+	HashBuiltins       map[string]BaseObject
 
 	NULLOBJ BaseObject
 )

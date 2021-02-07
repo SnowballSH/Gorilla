@@ -35,7 +35,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		l := lexer.New(string(txt) + "\n")
+		l := lexer.New(string(txt))
 		p := parser.New(l)
 
 		program := p.ParseProgram()

@@ -46,6 +46,7 @@ const (
 	// Delimiters
 	COMMA     = ","
 	SEMICOLON = "; or newline"
+	COLON     = ":"
 
 	LPAREN   = "("
 	RPAREN   = ")"
