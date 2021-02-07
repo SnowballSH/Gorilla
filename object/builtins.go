@@ -221,6 +221,66 @@ func init() {
 				{ANY},
 			},
 		),
+		"lt": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				var otherv float64
+				if args[0].Type() == FLOAT {
+					otherv = args[0].Value().(float64)
+				} else if args[0].Type() == INTEGER {
+					otherv = float64(args[0].Value().(int))
+				}
+
+				return NewBool(float64(self.Value().(int)) < otherv, line)
+			},
+			[][]string{
+				{FLOAT, INTEGER},
+			},
+		),
+		"gt": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				var otherv float64
+				if args[0].Type() == FLOAT {
+					otherv = args[0].Value().(float64)
+				} else if args[0].Type() == INTEGER {
+					otherv = float64(args[0].Value().(int))
+				}
+
+				return NewBool(float64(self.Value().(int)) > otherv, line)
+			},
+			[][]string{
+				{FLOAT, INTEGER},
+			},
+		),
+		"lteq": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				var otherv float64
+				if args[0].Type() == FLOAT {
+					otherv = args[0].Value().(float64)
+				} else if args[0].Type() == INTEGER {
+					otherv = float64(args[0].Value().(int))
+				}
+
+				return NewBool(float64(self.Value().(int)) <= otherv, line)
+			},
+			[][]string{
+				{FLOAT, INTEGER},
+			},
+		),
+		"gteq": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				var otherv float64
+				if args[0].Type() == FLOAT {
+					otherv = args[0].Value().(float64)
+				} else if args[0].Type() == INTEGER {
+					otherv = float64(args[0].Value().(int))
+				}
+
+				return NewBool(float64(self.Value().(int)) >= otherv, line)
+			},
+			[][]string{
+				{FLOAT, INTEGER},
+			},
+		),
 		"pos": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
 				return NewInteger(+self.Value().(int), line)
@@ -324,6 +384,66 @@ func init() {
 				}
 
 				return NewFloat(math.Mod(self.Value().(float64), otherv), line)
+			},
+			[][]string{
+				{FLOAT, INTEGER},
+			},
+		),
+		"lt": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				var otherv float64
+				if args[0].Type() == FLOAT {
+					otherv = args[0].Value().(float64)
+				} else if args[0].Type() == INTEGER {
+					otherv = float64(args[0].Value().(int))
+				}
+
+				return NewBool(self.Value().(float64) < otherv, line)
+			},
+			[][]string{
+				{FLOAT, INTEGER},
+			},
+		),
+		"gt": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				var otherv float64
+				if args[0].Type() == FLOAT {
+					otherv = args[0].Value().(float64)
+				} else if args[0].Type() == INTEGER {
+					otherv = float64(args[0].Value().(int))
+				}
+
+				return NewBool(self.Value().(float64) > otherv, line)
+			},
+			[][]string{
+				{FLOAT, INTEGER},
+			},
+		),
+		"lteq": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				var otherv float64
+				if args[0].Type() == FLOAT {
+					otherv = args[0].Value().(float64)
+				} else if args[0].Type() == INTEGER {
+					otherv = float64(args[0].Value().(int))
+				}
+
+				return NewBool(self.Value().(float64) <= otherv, line)
+			},
+			[][]string{
+				{FLOAT, INTEGER},
+			},
+		),
+		"gteq": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				var otherv float64
+				if args[0].Type() == FLOAT {
+					otherv = args[0].Value().(float64)
+				} else if args[0].Type() == INTEGER {
+					otherv = float64(args[0].Value().(int))
+				}
+
+				return NewBool(self.Value().(float64) >= otherv, line)
 			},
 			[][]string{
 				{FLOAT, INTEGER},

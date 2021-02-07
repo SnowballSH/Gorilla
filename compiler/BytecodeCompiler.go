@@ -4,16 +4,29 @@ import (
 	"Gorilla/ast"
 	"Gorilla/code"
 	"Gorilla/object"
+	"fmt"
 )
+
+type MCCombo struct {
+	IIndex int
+	MIndex int
+}
 
 type BytecodeCompiler struct {
 	Constants []object.BaseObject
 	Bytecodes []code.Opcode
 	Messages  []object.Message
+
+	CurrentJumpFalse *MCCombo
+	InLoop           bool
+	BreakCombos      []*MCCombo
 }
 
 func NewBytecodeCompiler() *BytecodeCompiler {
-	return &BytecodeCompiler{}
+	return &BytecodeCompiler{
+		CurrentJumpFalse: nil,
+		InLoop:           false,
+	}
 }
 
 func (c *BytecodeCompiler) addConstant(obj object.BaseObject) int {
@@ -54,6 +67,10 @@ func (c *BytecodeCompiler) Compile(node ast.Node) error {
 				return err
 			}
 		}
+		if len(node.Statements) == 0 {
+			c.addMessage(c.addConstant(object.NULLOBJ))
+			c.emit(code.LoadConstant)
+		}
 
 	case *ast.LetStatement:
 		err := c.Compile(node.Value)
@@ -70,6 +87,32 @@ func (c *BytecodeCompiler) Compile(node ast.Node) error {
 		}
 		c.addMessage(node.Name.Value)
 		c.emit(code.SetVar)
+
+	case *ast.BreakStatement:
+		if !c.InLoop {
+			return fmt.Errorf("[Line %d] Break outside of loop", node.Token.Line+1)
+		}
+
+		c.addMessage(0)
+		c.addMessage(0)
+		c.emit(code.Jump)
+		ii := len(c.Messages) - 2
+		mi := len(c.Messages) - 1
+		c.BreakCombos = append(c.BreakCombos, &MCCombo{
+			IIndex: ii,
+			MIndex: mi,
+		})
+
+	case *ast.NextStatement:
+		if !c.InLoop {
+			return fmt.Errorf("[Line %d] Next outside of loop", node.Token.Line+1)
+		}
+
+		ii := c.CurrentJumpFalse.IIndex
+		mi := c.CurrentJumpFalse.MIndex
+		c.addMessage(ii)
+		c.addMessage(mi)
+		c.emit(code.Jump)
 
 	case *ast.Identifier:
 		c.addMessage(node.Value)
@@ -268,8 +311,18 @@ func (c *BytecodeCompiler) Compile(node ast.Node) error {
 		c.Messages[m4] = object.NewMessage(len(c.Messages))
 
 	case *ast.WhileExpression:
+		NestLoop := c.InLoop
+		LastCombo := c.CurrentJumpFalse
+		OldBreakCombo := c.BreakCombos
+		c.InLoop = true
+
 		m3i := len(c.Bytecodes) - 1
 		m4i := len(c.Messages)
+
+		c.CurrentJumpFalse = &MCCombo{
+			IIndex: m3i,
+			MIndex: m4i,
+		}
 
 		err := c.Compile(node.Condition)
 		if err != nil {
@@ -295,6 +348,17 @@ func (c *BytecodeCompiler) Compile(node ast.Node) error {
 
 		c.addMessage(c.addConstant(object.NULLOBJ))
 		c.emit(code.LoadConstant)
+
+		for _, combo := range c.BreakCombos {
+			c.Messages[combo.IIndex] = c.Messages[m1]
+			c.Messages[combo.MIndex] = c.Messages[m2]
+		}
+
+		c.CurrentJumpFalse = LastCombo
+		c.BreakCombos = OldBreakCombo
+		if !NestLoop {
+			c.InLoop = false
+		}
 
 	case *ast.GetAttr:
 		err := c.Compile(node.Expr)

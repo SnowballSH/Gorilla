@@ -232,6 +232,10 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseReturnStatement()
 	case token.STMTFUNCTION:
 		return p.parseFunctionStatement()
+	case token.BREAK:
+		return p.parseBreakStatement()
+	case token.NEXT:
+		return p.parseNextStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -280,6 +284,22 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	p.nextToken()
 
 	stmt.ReturnValue = p.parseExpression(LOWEST)
+
+	return stmt
+}
+
+func (p *Parser) parseBreakStatement() *ast.BreakStatement {
+	stmt := &ast.BreakStatement{Token: p.curToken}
+
+	p.nextToken()
+
+	return stmt
+}
+
+func (p *Parser) parseNextStatement() *ast.NextStatement {
+	stmt := &ast.NextStatement{Token: p.curToken}
+
+	p.nextToken()
 
 	return stmt
 }
@@ -437,10 +457,6 @@ func (p *Parser) parseIfExpression() ast.Expression {
 		expression.Consequence = res
 	} else {
 		return nil
-	}
-
-	for p.peekTokenIs(token.SEMICOLON) {
-		p.nextToken()
 	}
 
 	if p.peekTokenIs(token.ELSE) {

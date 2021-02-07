@@ -105,6 +105,30 @@ func (rs *ReturnStatement) String() string {
 	return out.String()
 }
 
+type BreakStatement struct {
+	Token token.Token
+}
+
+func (s *BreakStatement) statementNode() {}
+
+func (s *BreakStatement) TokenLiteral() string { return s.Token.Literal }
+
+func (s *BreakStatement) String() string {
+	return "break;"
+}
+
+type NextStatement struct {
+	Token token.Token
+}
+
+func (s *NextStatement) statementNode() {}
+
+func (s *NextStatement) TokenLiteral() string { return s.Token.Literal }
+
+func (s *NextStatement) String() string {
+	return "next;"
+}
+
 // FunctionStmt
 type FunctionStmt struct {
 	Token      token.Token
@@ -115,10 +139,8 @@ type FunctionStmt struct {
 
 func (fs *FunctionStmt) statementNode() {}
 
-// TokenLiteral prints the literal value of the token associated with this node
 func (fs *FunctionStmt) TokenLiteral() string { return fs.Token.Literal }
 
-// String returns a stringified version of the AST for debugging
 func (fs *FunctionStmt) String() string {
 	var out bytes.Buffer
 
@@ -180,7 +202,7 @@ func (bs *BlockStatement) String() string {
 	return out.String()
 }
 
-// Identifier represents an identiifer and holds the name of the identifier
+// Identifier represents an identifier and holds the name of the identifier
 type Identifier struct {
 	Token token.Token // the token.IDENT token
 	Value string
@@ -208,7 +230,7 @@ func (b *Boolean) TokenLiteral() string { return b.Token.Literal }
 // String returns a stringified version of the AST for debugging
 func (b *Boolean) String() string { return b.Token.Literal }
 
-// IntegerLiteral represents a literal integare and holds an integer value
+// IntegerLiteral represents a literal integer and holds an integer value
 type IntegerLiteral struct {
 	Token token.Token
 	Value int

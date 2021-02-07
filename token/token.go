@@ -65,6 +65,8 @@ const (
 	RETURN       = "RETURN"
 
 	WHILE = "WHILE"
+	BREAK = "BREAK"
+	NEXT  = "next"
 )
 
 type Token struct {
@@ -83,6 +85,8 @@ var keywords = map[string]TType{
 	"else":   ELSE,
 	"return": RETURN,
 	"while":  WHILE,
+	"break":  BREAK,
+	"next":   NEXT,
 }
 
 func LookupIdent(ident string) TType {
