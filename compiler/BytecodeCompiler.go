@@ -198,6 +198,8 @@ func (c *BytecodeCompiler) Compile(node ast.Node) error {
 			name = "or"
 		case "&&":
 			name = "and"
+		case "**":
+			name = "pow"
 		default:
 			panic("Operator not handled: " + node.Operator)
 		}

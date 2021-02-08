@@ -306,6 +306,22 @@ func init() {
 			},
 			[][]string{},
 		),
+
+		"pow": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				var otherv float64
+				if args[0].Type() == FLOAT {
+					otherv = args[0].Value().(float64)
+				} else if args[0].Type() == INTEGER {
+					otherv = float64(args[0].Value().(int))
+				}
+
+				return NewFloat(math.Pow(float64(self.Value().(int)), otherv), line)
+			},
+			[][]string{
+				{FLOAT, INTEGER},
+			},
+		),
 	}
 
 	FloatBuiltins = map[string]BaseObject{
@@ -517,6 +533,22 @@ func init() {
 			},
 			[][]string{},
 		),
+
+		"pow": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				var otherv float64
+				if args[0].Type() == FLOAT {
+					otherv = args[0].Value().(float64)
+				} else if args[0].Type() == INTEGER {
+					otherv = float64(args[0].Value().(int))
+				}
+
+				return NewFloat(math.Pow(self.Value().(float64), otherv), line)
+			},
+			[][]string{
+				{FLOAT, INTEGER},
+			},
+		),
 	}
 
 	BooleanBuiltins = map[string]BaseObject{
@@ -543,6 +575,23 @@ func init() {
 			[][]string{{INTEGER}},
 		),
 
+		"getIndex": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				k := self.InternalValue.(string)
+				idx := args[0].Value().(int)
+				if idx < 0 {
+					idx = utf8.RuneCountInString(k) + idx
+				}
+				if utf8.RuneCountInString(k) <= idx || idx < 0 {
+					return NewError(fmt.Sprintf("String Index %d out of range on length %d", args[0].Value().(int), len(k)), line)
+				}
+				return NewString(string([]rune(k)[idx]), line)
+			},
+			[][]string{
+				{INTEGER},
+			},
+		),
+
 		"length": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
 				return NewInteger(utf8.RuneCountInString(self.Value().(string)), line)
@@ -561,7 +610,7 @@ func init() {
 			[][]string{},
 		),
 
-		"ord": NewBuiltinFunction(
+		"ords": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
 				r := []rune(self.Value().(string))
 				rr := make([]BaseObject, len(r))
@@ -573,6 +622,17 @@ func init() {
 			[][]string{},
 		),
 
+		"ord": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				r := []rune(self.Value().(string))
+				if len(r) == 0 {
+					return NewError(fmt.Sprintf("String is empty"), line)
+				}
+				return NewInteger(int(r[0]), line)
+			},
+			[][]string{},
+		),
+
 		"chars": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
 				var arr []BaseObject
@@ -580,6 +640,13 @@ func init() {
 					arr = append(arr, NewString(string(v), line))
 				}
 				return NewArray(arr, line)
+			},
+			[][]string{},
+		),
+
+		"strip": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewString(strings.TrimSpace(self.Value().(string)), line)
 			},
 			[][]string{},
 		),

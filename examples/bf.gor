@@ -69,11 +69,11 @@ func run(nodes) {
         } else if kind == "." {
             print(data[pointer].chr())
         } else if kind == "," {
-            k = input().chars()
+            k = input()
             if k.length == 0 {
                 v = 0
             } else {
-                v = k[0].ord()[0]
+                v = k.ord()
             }
             data[pointer] = v
         } else if kind == "[" {
