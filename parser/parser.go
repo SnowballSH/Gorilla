@@ -234,6 +234,10 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseReturnStatement()
 	case token.STMTFUNCTION:
 		return p.parseFunctionStatement()
+	case token.BREAK:
+		return p.parseBreak()
+	case token.NEXT:
+		return p.parseNext()
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -256,6 +260,20 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 
 	stmt.Value = p.parseExpression(LOWEST)
 
+	return stmt
+}
+
+func (p *Parser) parseBreak() *ast.BreakStatement {
+	stmt := &ast.BreakStatement{Token: p.curToken}
+
+	p.nextToken()
+	return stmt
+}
+
+func (p *Parser) parseNext() *ast.NextStatement {
+	stmt := &ast.NextStatement{Token: p.curToken}
+
+	p.nextToken()
 	return stmt
 }
 
