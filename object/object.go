@@ -23,6 +23,8 @@ const (
 	ARRAY   = "Array"
 	HASH    = "Hash"
 	NULL    = "Null"
+
+	NAMESPACE = "Namespace"
 )
 
 // Every Gorilla Object implements this
@@ -74,7 +76,7 @@ func (o *Object) Value() interface{} {
 func (o *Object) FindMethod(name string) (BaseObject, BaseObject) {
 	v, ok := o.Methods[name]
 	if !ok {
-		return nil, NewError(fmt.Sprintf("Method not found: %s on type '%s'", name, o.Type()), o.Line())
+		return nil, NewError(fmt.Sprintf("Method not found: %s on %s", name, o.Debug()), o.Line())
 	}
 	return CopyObject(v.(*Object)), nil
 }
@@ -406,6 +408,27 @@ func NewHash(
 		hf,
 		line,
 		HashBuiltins,
+		nil,
+		nil,
+	)
+}
+
+func nf(self BaseObject) string {
+	return fmt.Sprintf("Namespace '%s'", self.Value().(string))
+}
+
+// Base NAMESPACE Type
+func NewNameSpace(
+	name string,
+	value map[string]BaseObject,
+) *Object {
+	return NewObject(
+		NAMESPACE,
+		name,
+		nf,
+		nf,
+		0,
+		value,
 		nil,
 		nil,
 	)

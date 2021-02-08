@@ -423,6 +423,11 @@ func (c *BytecodeCompiler) Compile(node ast.Node) error {
 		}
 		c.emit(code.Return)
 
+	case *ast.UseStatement:
+		c.addMessage(node.Name)
+		c.addMessage(node.Token.Line)
+		c.emit(code.Import)
+
 	default:
 		panic("Node not supported: " + node.TokenLiteral() + " | " + node.String())
 	}

@@ -238,6 +238,8 @@ func (p *Parser) parseStatement() ast.Statement {
 		return p.parseBreak()
 	case token.NEXT:
 		return p.parseNext()
+	case token.USE:
+		return p.parseUseStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -304,6 +306,20 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	return stmt
 }
 
+func (p *Parser) parseUseStatement() *ast.UseStatement {
+	stmt := &ast.UseStatement{Token: p.curToken}
+
+	if !p.expectPeek(token.STRING) {
+		return nil
+	}
+
+	iden := p.parseStringLiteral()
+
+	stmt.Name = iden.TokenLiteral()
+
+	return stmt
+}
+
 func (p *Parser) parseFunctionStatement() *ast.FunctionStmt {
 	lit := &ast.FunctionStmt{Token: p.curToken}
 
@@ -320,6 +336,7 @@ func (p *Parser) parseFunctionStatement() *ast.FunctionStmt {
 	lit.Parameters = p.parseFunctionParameters()
 
 	p.nextToken()
+
 	res := p.parseBlockStatement()
 	if res != nil {
 		lit.Body = res
@@ -481,6 +498,10 @@ func (p *Parser) parseIfExpression() ast.Expression {
 func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	block := &ast.BlockStatement{Token: p.curToken}
 	block.Statements = []ast.Statement{}
+
+	for p.curTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
 
 	if !p.curTokenIs(token.LBRACE) {
 		res := p.parseStatement()

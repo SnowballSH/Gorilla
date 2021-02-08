@@ -3,6 +3,7 @@ package vm
 import (
 	"Gorilla/code"
 	"Gorilla/object"
+	"Gorilla/stdlib"
 	"fmt"
 )
 
@@ -271,6 +272,15 @@ func (vm *VM) Run() object.BaseObject {
 				}
 			}
 			vm.push(object.NewHash(pairs, line))
+
+		case code.Import:
+			name := vm.getStringMessage()
+			line := vm.getIntMessage()
+			lib, ok := stdlib.StandardLibrary[name]
+			if !ok {
+				return object.NewError(fmt.Sprintf("Module not found: %s", name), line)
+			}
+			vm.Frame.Env.Set(name, lib)
 
 		default:
 			return object.NewError(fmt.Sprintf("bytecode not supported: %d", bytecode), 0)

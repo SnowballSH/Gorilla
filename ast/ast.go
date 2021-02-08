@@ -105,6 +105,27 @@ func (rs *ReturnStatement) String() string {
 	return out.String()
 }
 
+type UseStatement struct {
+	Token token.Token // the 'use' token
+	Name  string
+}
+
+func (us *UseStatement) statementNode() {}
+
+func (us *UseStatement) TokenLiteral() string { return us.Token.Literal }
+
+func (us *UseStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(us.TokenLiteral() + " ")
+
+	out.WriteString(us.Name)
+
+	out.WriteString(";")
+
+	return out.String()
+}
+
 type BreakStatement struct {
 	Token token.Token
 }

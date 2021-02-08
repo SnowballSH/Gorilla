@@ -322,6 +322,19 @@ func init() {
 				{FLOAT, INTEGER},
 			},
 		),
+
+		"abs": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewInteger(int(math.Abs(float64(self.Value().(int)))), line)
+			},
+			[][]string{},
+		),
+		"log": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewFloat(math.Log(float64(self.Value().(int))), line)
+			},
+			[][]string{},
+		),
 	}
 
 	FloatBuiltins = map[string]BaseObject{
@@ -548,6 +561,19 @@ func init() {
 			[][]string{
 				{FLOAT, INTEGER},
 			},
+		),
+
+		"abs": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewFloat(math.Abs(self.Value().(float64)), line)
+			},
+			[][]string{},
+		),
+		"log": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewFloat(math.Log(self.Value().(float64)), line)
+			},
+			[][]string{},
 		),
 	}
 

@@ -23,7 +23,8 @@ type Frame struct {
 }
 
 func NewFrame(bytecodes []code.Opcode, constants []object.BaseObject, messages []object.Message) *Frame {
-	return &Frame{
+	e := object.NewEnvironment()
+	f := &Frame{
 		Instructions: bytecodes,
 		Constants:    constants,
 		Messages:     messages,
@@ -31,7 +32,9 @@ func NewFrame(bytecodes []code.Opcode, constants []object.BaseObject, messages [
 		ip:           0,
 		mp:           0,
 		LastPopped:   nil,
-		Env:          object.NewEnvironment(),
+		Env:          e,
 		LastFrame:    nil,
 	}
+
+	return f
 }

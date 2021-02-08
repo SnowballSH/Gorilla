@@ -77,6 +77,7 @@ const (
 			Stack:    [value]
 	*/
 
+	// Return
 	Return
 	/*
 		Syntax:
@@ -84,6 +85,7 @@ const (
 			Stack:    [value]
 	*/
 
+	// Create Array
 	MakeArray
 	/*
 		Syntax:
@@ -91,10 +93,19 @@ const (
 			Stack:    [value1, value2, ...]
 	*/
 
+	// Create Hash
 	MakeHash
 	/*
 		Syntax:
 			Messages: [amountValues int, line int]
 			Stack:    [key1, value1, key2, value2, ...]
+	*/
+
+	// Import
+	Import
+	/*
+		Syntax:
+			Messages: [name string, line int]
+			Stack:    []
 	*/
 )
