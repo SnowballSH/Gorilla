@@ -1,0 +1,25 @@
+func fizzbuzz(top) {
+    i = 0
+    f = 0
+    b = 0
+    while i <= top {
+        f = f + 1
+        b = b + 1
+        if f == 3 {
+            msg = "Fizz"
+            f = 0
+        } else
+            msg = ""
+        if b == 5 {
+            msg = msg + "Buzz"
+            b = 0
+        }
+        if msg.length()
+            println(msg)
+        else
+            println(i)
+        i = i + 1
+    }
+}
+
+fizzbuzz(20)
