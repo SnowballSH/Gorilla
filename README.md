@@ -6,6 +6,8 @@
 
 ### The minimized executable size is only about 2 MB!
 
+#### View more on the [website](https://snowballsh.me/Gorilla/)
+
 #### Download the [latest release](https://github.com/SnowballSH/Gorilla/releases)
 
 #### Play it [Online](https://snowballsh.me/Gorilla-Playground/)
