@@ -29,12 +29,60 @@ Gorilla is built to make simple, flexible, well-understood programs in a relativ
 2. Try **Online**: [Gorilla Playground](https://snowballsh.me/Gorilla-Playground/) (made using Web Assembly)
 3. Download [Golang](https://golang.org/) (recommend v1.5), `git pull https://github.com/SnowballSH/Gorilla` and `go build`
 
-### Hello, world!
+## Hello, world!
 
 The simplest way to write a Hello World program in Gorilla:
 
-```go
+```ruby
 println("Hello, world!")
+# Hello, world!
 ```
 
 #### Note: `print` prints without a new line and `println` prints with a new line
+
+<br>
+
+## Learn Gorilla by Examples
+
+### Greeting
+
+We will create a function that greets everyone!
+
+```go
+func greet(name) {
+    println("Hello, " + name + "!")
+}
+```
+
+The `greet` function accepts a parameter `name` and prints `Hello, #{name}!`
+
+Because Gorilla has **flexible syntax**, `{ ... }` is optional if the function **only contains 1 statement**
+
+The above code is equal to:
+
+```go
+func greet(name)
+    println("Hello, " + name + "!")
+```
+
+We can call the function by doing:
+
+```ruby
+greet("world")
+# Hello, world!
+
+greet("Sam")
+# Hello, Sam!
+```
+
+Full code:
+
+```go
+func greet(name)
+    println("Hello, " + name + "!")
+
+greet("world")
+greet("Sam")
+```
+
+Feel free to modify and try other things out!
