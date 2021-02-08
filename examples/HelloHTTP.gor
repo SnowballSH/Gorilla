@@ -1,0 +1,17 @@
+# A simple web server in Gorilla
+
+use "http"
+
+http.get(
+    "/",
+    fn(writer, request) writer.write("Hello, world!")
+)
+
+http.get(
+    "/gorilla",
+    fn(writer, request) writer.write("Hello, gorilla!")
+)
+
+http.serve(":3000")
+
+# Try going to localhost://3000 and localhost://3000/gorilla and see the effect!
