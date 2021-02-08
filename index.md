@@ -19,15 +19,21 @@ Gorilla is built to make simple, flexible, well-understood programs in a relativ
     - 99% of Gorilla's builtin functions are **type-safe**
     - Gorilla has **builtin support** for type annotations and assertions for functions
 
+<br>
+
 ## Setting Up Gorilla
 
 ##### Warning: gorilla is still not production-ready, and it still contains some bugs, please report them if you found one!
+
+<br>
 
 ### There are 3 ways to set up Gorilla:
 
 1. If you are on **Windows 10** (and you trust I don't spread viruses), [download the latest binary executable](https://github.com/SnowballSH/Gorilla/releases)
 2. Try **Online**: [Gorilla Playground](https://snowballsh.me/Gorilla-Playground/) (made using Web Assembly)
 3. Download [Golang](https://golang.org/) (recommend v1.5), `git pull https://github.com/SnowballSH/Gorilla` and `go build`
+
+<br>
 
 ## Hello, world!
 
