@@ -12,7 +12,7 @@ Gorilla is built to make simple, flexible, well-understood programs in a relativ
     - According to a fibonacci benchmark, Gorilla is **36% faster** than [Python](https://www.python.org/)
     - Gorilla is compiled into [Gorilla Bytecode](https://github.com/SnowballSH/Gorilla/blob/master/code/code.go#L6-L100)
 - It is **dynamic and flexible**
-    - You **don't have to worry** about all those `semicolons or modules anymore!
+    - You **don't have to worry** about all those `semicolons or modules` anymore!
     - Gorilla has **Python/Ruby style** assignment expression: `name = value`, which looks clean
     - Gorilla also has **concise operators** like `array <- item`, which obviously puts `item` to the end of `array`
 - While it is dynamic, you can still write type-safe code
