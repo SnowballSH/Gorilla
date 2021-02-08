@@ -21,7 +21,9 @@ Gorilla is built to make simple, flexible, well-understood programs in a relativ
 
 ## Setting Up Gorilla
 
-###### Warning: gorilla is still not production-ready, and it still contains some bugs, please report them if you found one!
+##### Warning: gorilla is still not production-ready, and it still contains some bugs, please report them if you found one!
+
+<br>
 
 There are 3 ways to set up Gorilla:
 
