@@ -262,7 +262,7 @@ func (vm *VM) Run() object.BaseObject {
 
 				hashedKey, ok := object.HashObject(key)
 				if !ok {
-					vm.push(object.NewError(fmt.Sprintf("Type '%s' is not hashable", key.Type()), line))
+					return object.NewError(fmt.Sprintf("Type '%s' is not hashable", key.Type()), line)
 				}
 
 				pairs[hashedKey] = &object.HashValue{

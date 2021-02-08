@@ -29,7 +29,69 @@ func parse(code) {
 }
 
 func run(nodes) {
-    data = []
+    data = {0: 0}
+    pointer = 0
+
+    i = 0
+    while i < nodes.length() {
+        node = nodes[i]
+        kind = node[0]
+        if kind == "+" {
+            if data[pointer] == 255 {
+                data[pointer] = 0
+            } else {
+                data[pointer] = data[pointer] + 1
+            }
+        } else if kind == "-" {
+            if data[pointer] == 0 {
+                data[pointer] = 255
+            } else {
+                data[pointer] = data[pointer] - 1
+            }
+        } else if kind == ">" {
+            if pointer == 255 {
+                pointer = 0
+            } else {
+                pointer = pointer + 1
+            }
+            if !data.keys().has(pointer) {
+                data[pointer] = 0
+            }
+        } else if kind == "<" {
+            if pointer == 0 {
+                pointer = 255
+            } else {
+                pointer = pointer - 1
+            }
+            if !data.keys().has(pointer) {
+                data[pointer] = 0
+            }
+        } else if kind == "." {
+            print(data[pointer].chr())
+        } else if kind == "," {
+            k = input().chars()
+            if k.length == 0 {
+                v = 0
+            } else {
+                v = k[0].ord()[0]
+            }
+            data[pointer] = v
+        } else if kind == "[" {
+            if data[pointer] == 0 {
+                i = node[1]
+            }
+        } else if kind == "]" {
+            if data[pointer] != 0 {
+                i = node[1]
+            }
+        }
+
+        i = i + 1
+    }
+    return [data, pointer]
 }
 
-parse(input())
+res = run(parse(input("Enter brainf code: ")))
+println()
+println("Stack: " + res[0])
+println("Pointer: " + res[1])

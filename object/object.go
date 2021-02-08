@@ -419,6 +419,10 @@ func HashObject(obj BaseObject) (key HashKey, ok bool) {
 	switch obj.Type() {
 	case INTEGER:
 		return HashKey{Type: obj.Type(), HashedKey: uint64(obj.Value().(int))}, true
+	case FLOAT:
+		h := fnv.New64a()
+		_, _ = h.Write([]byte(fmt.Sprintf("%f", obj.Value().(float64))))
+		return HashKey{Type: obj.Type(), HashedKey: h.Sum64()}, true
 	case STRING:
 		h := fnv.New64a()
 		_, _ = h.Write([]byte(obj.Value().(string)))
@@ -432,6 +436,8 @@ func HashObject(obj BaseObject) (key HashKey, ok bool) {
 		}
 
 		return HashKey{Type: obj.Type(), HashedKey: val}, true
+	case NULL:
+		return HashKey{Type: obj.Type(), HashedKey: uint64(0)}, true
 	default:
 		return HashKey{}, false
 	}

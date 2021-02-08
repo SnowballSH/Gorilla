@@ -674,6 +674,19 @@ func init() {
 			},
 			[][]string{},
 		),
+		"has": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				ok := false
+				for _, val := range self.Value().([]BaseObject) {
+					if val.Type() == args[0].Type() && val.Inspect() == args[0].Inspect() {
+						ok = true
+						break
+					}
+				}
+				return NewBool(ok, line)
+			},
+			[][]string{{ANY}},
+		),
 	}
 
 	HashBuiltins = map[string]BaseObject{
@@ -713,6 +726,39 @@ func init() {
 				{ANY},
 				{ANY},
 			},
+		),
+		"values": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				k := self.InternalValue.(map[HashKey]*HashValue)
+				var values []BaseObject
+				for _, v := range k {
+					values = append(values, v.Value)
+				}
+				return NewArray(values, line)
+			},
+			[][]string{},
+		),
+		"keys": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				k := self.InternalValue.(map[HashKey]*HashValue)
+				var keys []BaseObject
+				for _, v := range k {
+					keys = append(keys, v.Key)
+				}
+				return NewArray(keys, line)
+			},
+			[][]string{},
+		),
+		"items": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				k := self.InternalValue.(map[HashKey]*HashValue)
+				var keys []BaseObject
+				for _, v := range k {
+					keys = append(keys, NewArray([]BaseObject{v.Key, v.Value}, line))
+				}
+				return NewArray(keys, line)
+			},
+			[][]string{},
 		),
 	}
 
@@ -785,6 +831,17 @@ func init() {
 				return NULLOBJ
 			},
 			[][]string{{INTEGER}},
+		),
+
+		"hash": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				value, ok := HashObject(args[0])
+				if !ok {
+					return NewError(fmt.Sprintf("Type '%s' is not hashable", args[0].Type()), line)
+				}
+				return NewFloat(float64(value.HashedKey), line)
+			},
+			[][]string{{ANY}},
 		),
 
 		"null":            NULLOBJ,
