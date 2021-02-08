@@ -636,6 +636,33 @@ func init() {
 			[][]string{},
 		),
 
+		"toFloat": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				res, err := strconv.ParseFloat(self.Value().(string), 64)
+				if err != nil {
+					return NewError(fmt.Sprintf("'%s' is not a valid float", self.Value().(string)), line)
+				}
+				return NewFloat(res, line)
+			},
+			[][]string{},
+		),
+
+		"isInt": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				_, err := strconv.Atoi(self.Value().(string))
+				return NewBool(err == nil, line)
+			},
+			[][]string{},
+		),
+
+		"isFloat": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				_, err := strconv.ParseFloat(self.Value().(string), 64)
+				return NewBool(err == nil, line)
+			},
+			[][]string{},
+		),
+
 		"ords": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
 				r := []rune(self.Value().(string))

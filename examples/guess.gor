@@ -1,0 +1,26 @@
+# Guessing game in Gorilla
+
+use "random"
+
+number = random.intRange(100) + 1
+
+run = true
+while run {
+    guess = input("Guess a number between 1 and 100: ")
+
+    if !guess.isInt() {
+        println("Your input is not an integer!")
+        next
+    }
+
+    guess = guess.toInt()
+
+    if guess > number
+        println("Guess smaller!")
+    else if guess < number
+        println("Guess larger!")
+    else {
+        println("You guess the correct number!")
+        run = false
+    }
+}
