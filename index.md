@@ -1,37 +1,22 @@
-## Welcome to GitHub Pages
+# Welcome to the Gorilla Programming Language!
 
-You can use the [editor on GitHub](https://github.com/SnowballSH/Gorilla/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+## What is Gorilla?
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+Gorilla is a tiny, dynamically typed, flexible programming language, written in [Golang](https://golang.org/)
 
-### Markdown
+Gorilla is built to make simple, flexible, well-understood programs in a relatively fast way.
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+## Why should I use Gorilla?
 
-```markdown
-Syntax highlighted code block
+- It is **gorilla-crawling-blaze-ish fast** compared to other dynamic, interpreted languages
+    - According to a fibonacci benchmark, Gorilla is **36% faster** than [Python](https://www.python.org/)
+    - Gorilla is compiled into [Gorilla Bytecode](https://github.com/SnowballSH/Gorilla/blob/master/code/code.go#L6-L100)
+- It is **dynamic and flexible**
+    - You don't have to worry about all those semicolons or modules anymore!
+    - Gorilla has Python/Ruby style assignment expression: `name = value`, which looks clean
+    - Gorilla also has concise operators like `array <- item`, which obviously puts `item` to the end of `array`
+- While it is dynamic, you can write type-safe code
+    - 99% of Gorilla's builtin functions are type-safe
+    - Gorilla has builtin support for type annotations and assertions for functions
 
-# Header 1
-## Header 2
-### Header 3
 
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/SnowballSH/Gorilla/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
