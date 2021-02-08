@@ -23,9 +23,7 @@ Gorilla is built to make simple, flexible, well-understood programs in a relativ
 
 ##### Warning: gorilla is still not production-ready, and it still contains some bugs, please report them if you found one!
 
-<br>
-
-There are 3 ways to set up Gorilla:
+### There are 3 ways to set up Gorilla:
 
 1. If you are on **Windows 10** (and you trust I don't spread viruses), [download the latest binary executable](https://github.com/SnowballSH/Gorilla/releases)
 2. Try **Online**: [Gorilla Playground](https://snowballsh.me/Gorilla-Playground/) (made using Web Assembly)
