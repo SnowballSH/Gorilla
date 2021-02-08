@@ -57,6 +57,7 @@ func (vm *VM) Run() object.BaseObject {
 
 			if obj.Type() == object.FUNCTION {
 				obj.(*object.Object).InternalValue.(*object.FunctionValue).FreeEnv = vm.Frame.Env
+				obj.(*object.Object).CallFunc = RunFunc(obj.(*object.Object), vm)
 			}
 
 			vm.push(obj)
@@ -95,54 +96,10 @@ func (vm *VM) Run() object.BaseObject {
 
 			// Call function
 			vv := val.(*object.Object)
-			if val.Type() == object.FUNCTION {
-				vv.CallFunc = func(env *object.Environment, self *object.Object, args []object.BaseObject, line int) object.BaseObject {
-					fstr := vv.Value().(*object.FunctionValue)
-
-					if len(args) != len(fstr.Params) {
-						return object.NewError(
-							fmt.Sprintf("Argument amount mismatch: Expected %d, got %d", len(fstr.Params), len(args)),
-							line,
-						)
-					}
-
-					newframe := NewFrame(fstr.Bytecodes, fstr.Constants, fstr.Messages)
-					newframe.Env = object.NewEnclosedEnvironment(env)
-
-					for name, free := range fstr.FreeEnv.Store {
-						newframe.Env.Set(name, free)
-					}
-
-					for i, vvv := range fstr.Params {
-						newframe.Env.Set(vvv, args[i])
-					}
-
-					newframe.LastFrame = vm.Frame
-					vm.Frame = newframe
-
-					e := vm.Run()
-					if e != nil {
-						return e
-					}
-
-					last := vm.Frame.LastPopped
-
-					vm.Frame = vm.Frame.LastFrame
-
-					if last == nil {
-						return object.NULLOBJ
-					}
-
-					if isError(last) {
-						return last
-					}
-					return last
-				}
-			}
 
 			ret := vv.Call(vm.Frame.Env, prt, arguments, line)
 
-			if isError(ret) {
+			if IsError(ret) {
 				return ret
 			}
 
@@ -310,6 +267,55 @@ func prependObj(x []object.BaseObject, y object.BaseObject) []object.BaseObject 
 	return x
 }
 
-func isError(obj object.BaseObject) bool {
+func IsError(obj object.BaseObject) bool {
 	return obj.Type() == object.ERROR
+}
+
+func RunFunc(vv *object.Object, vmm *VM) func(env *object.Environment, self *object.Object, args []object.BaseObject, line int) object.BaseObject {
+	if vv.Type() != object.FUNCTION {
+		return vv.Call
+	}
+
+	return func(env *object.Environment, self *object.Object, args []object.BaseObject, line int) object.BaseObject {
+		fstr := vv.Value().(*object.FunctionValue)
+
+		if len(args) != len(fstr.Params) {
+			return object.NewError(
+				fmt.Sprintf("Argument amount mismatch: Expected %d, got %d", len(fstr.Params), len(args)),
+				line,
+			)
+		}
+
+		newframe := NewFrame(fstr.Bytecodes, fstr.Constants, fstr.Messages)
+		newframe.Env = object.NewEnclosedEnvironment(env)
+
+		for name, free := range fstr.FreeEnv.Store {
+			newframe.Env.Set(name, free)
+		}
+
+		for i, vvv := range fstr.Params {
+			newframe.Env.Set(vvv, args[i])
+		}
+
+		newframe.LastFrame = vmm.Frame
+		vmm.Frame = newframe
+
+		e := vmm.Run()
+		if e != nil {
+			return e
+		}
+
+		last := vmm.Frame.LastPopped
+
+		vmm.Frame = vmm.Frame.LastFrame
+
+		if last == nil {
+			return object.NULLOBJ
+		}
+
+		if IsError(last) {
+			return last
+		}
+		return last
+	}
 }

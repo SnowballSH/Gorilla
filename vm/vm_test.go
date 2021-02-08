@@ -8,7 +8,7 @@ import (
 
 func assertStack(t *testing.T, vm *VM, stack []object.BaseObject, result object.BaseObject) {
 	err := vm.Run()
-	if err != nil && isError(err) {
+	if err != nil && IsError(err) {
 		t.Errorf("VM ERROR: %s", err.Inspect())
 		return
 	}
