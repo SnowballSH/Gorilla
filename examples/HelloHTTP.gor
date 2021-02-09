@@ -7,11 +7,29 @@ http.get(
     fn(writer, request) writer.write("Hello, world!")
 )
 
+let gorillaString = "<div style=\"text-align: center\"><button onclick=\"alert(`You clicked me!`)\"><h1>
+Hello, Gorilla!</h1></button></div>"
+
 http.get(
     "/gorilla",
-    fn(writer, request) writer.write("Hello, gorilla!")
+    fn(writer, request) writer.write(gorillaString)
 )
+
+http.get(
+    "/headers",
+    fn(writer, request) {
+        i = 0
+        request = request.header
+        println(type(request))
+        while i < request.keys().length() {
+            writer.write("Header " + i + "-> " + request.keys()[i] + " = " + request.values()[i] + "\n")
+            i = i + 1
+        }
+    }
+)
+
+println("Listening on :3000")
 
 http.serve(":3000")
 
-# Try going to localhost://3000 and localhost://3000/gorilla and see the effect!
+# Try going to localhost:3000 and localhost:3000/gorilla and see the effect!

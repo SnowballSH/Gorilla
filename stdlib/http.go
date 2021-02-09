@@ -1,9 +1,12 @@
 package stdlib
 
 import (
+	"Gorilla/config"
 	"Gorilla/object"
 	"fmt"
+	"hash/fnv"
 	"net/http"
+	"os"
 )
 
 // Http server
@@ -26,10 +29,14 @@ var HttpNamespace = object.NewNameSpace("http", map[string]object.BaseObject{
 				return object.NewError(fmt.Sprintf("'http.get' function requires a function with 2 parameters. got %d", amount), line)
 			}
 			fn := func(writer http.ResponseWriter, request *http.Request) {
-				fnc.Call(env, nil, []object.BaseObject{
+				res := fnc.Call(env, nil, []object.BaseObject{
 					NewWriter(writer, line),
 					NewRequest(request, line),
 				}, line)
+				if res.Type() == object.ERROR {
+					_, _ = fmt.Fprintln(config.OUT, " Runtime Error (while serving):\n\t"+res.Inspect())
+					os.Exit(2)
+				}
 			}
 
 			http.HandleFunc(args[0].Value().(string), fn)
@@ -40,21 +47,43 @@ var HttpNamespace = object.NewNameSpace("http", map[string]object.BaseObject{
 })
 
 const (
-	RequestType = "http.request"
+	RequestType = "http.Request"
 )
 
 func rqt(self object.BaseObject) string {
-	return fmt.Sprintf("file.Writer '%p'", self.Value())
+	return fmt.Sprintf("http.Reqeust '%p'", self.Value())
 }
 
 func NewRequest(value *http.Request, line int) object.BaseObject {
+	header := map[object.HashKey]*object.HashValue{}
+	for s, v := range value.Header {
+		h := fnv.New64a()
+		_, _ = h.Write([]byte(s))
+
+		var bm []object.BaseObject
+		for _, l := range v {
+			bm = append(bm, object.NewString(l, line))
+		}
+
+		header[object.HashKey{Type: object.STRING, HashedKey: h.Sum64()}] = &object.HashValue{
+			Key:   object.NewString(s, line),
+			Value: object.NewArray(bm, line),
+		}
+	}
+
+	headerobj := object.NewHash(header, line)
+
 	return object.NewObject(
 		RequestType,
 		value,
 		rqt,
 		rqt,
 		line,
-		map[string]object.BaseObject{},
+		map[string]object.BaseObject{
+			"method": object.NewString(value.Method, line),
+			"proto":  object.NewString(value.Proto, line),
+			"header": headerobj,
+		},
 		nil,
 		nil,
 	)
