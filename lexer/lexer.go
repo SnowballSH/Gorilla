@@ -28,7 +28,6 @@ func (l *Lexer) NextToken() token.Token {
 			l.readChar()
 		}
 		l.readChar()
-		l.lineCount++
 		return l.NextToken()
 	case '=':
 		if l.peekChar() == '=' {
@@ -152,7 +151,23 @@ func (l *Lexer) NextToken() token.Token {
 
 	case '"':
 		tok.Type = token.STRING
-		x, ok := l.readString()
+		x, ok := l.readString('"')
+		if !ok {
+			tok = l.newToken(token.ILLEGAL, l.ch)
+		}
+		tok.Literal = x
+
+	case '\'':
+		tok.Type = token.STRING
+		x, ok := l.readString('\'')
+		if !ok {
+			tok = l.newToken(token.ILLEGAL, l.ch)
+		}
+		tok.Literal = x
+
+	case '`':
+		tok.Type = token.STRING
+		x, ok := l.readRawString('`')
 		if !ok {
 			tok = l.newToken(token.ILLEGAL, l.ch)
 		}
@@ -237,7 +252,7 @@ func (l *Lexer) readNumber() ([]rune, bool) {
 	return l.input[position:l.position], isInt
 }
 
-func (l *Lexer) readString() (string, bool) {
+func (l *Lexer) readString(c rune) (string, bool) {
 	var res []rune
 	for {
 		l.readChar()
@@ -257,6 +272,8 @@ func (l *Lexer) readString() (string, bool) {
 				res = append(res, '"')
 			case '\'':
 				res = append(res, '\'')
+			case '`':
+				res = append(res, '`')
 			case 'v':
 				res = append(res, '\v')
 			case 'a':
@@ -268,7 +285,37 @@ func (l *Lexer) readString() (string, bool) {
 			}
 			continue
 		}
-		if l.ch == '"' {
+		if l.ch == '\r' {
+			if l.peekChar() == '\n' {
+				l.readChar()
+			}
+			l.lineCount++
+		} else if l.ch == '\n' {
+			l.lineCount++
+		}
+		if l.ch == c {
+			return string(res), true
+		}
+		if l.ch == rune(0) {
+			return "", false
+		}
+		res = append(res, l.ch)
+	}
+}
+
+func (l *Lexer) readRawString(c rune) (string, bool) {
+	var res []rune
+	for {
+		l.readChar()
+		if l.ch == '\r' {
+			if l.peekChar() == '\n' {
+				l.readChar()
+			}
+			l.lineCount++
+		} else if l.ch == '\n' {
+			l.lineCount++
+		}
+		if l.ch == c {
 			return string(res), true
 		}
 		if l.ch == rune(0) {

@@ -7,8 +7,8 @@ http.get(
     fn(writer, request) writer.write("Hello, world!")
 )
 
-let gorillaString = "<div style=\"text-align: center\"><button onclick=\"alert(`You clicked me!`)\"><h1>
-Hello, Gorilla!</h1></button></div>"
+let gorillaString = `<div style="text-align: center"><button onclick="alert('You clicked me!')"><h1>
+Hello, Gorilla!</h1></button></div>`
 
 http.get(
     "/gorilla",
@@ -17,14 +17,10 @@ http.get(
 
 http.get(
     "/headers",
-    fn(writer, request) {
-        i = 0
-        headers = request.header
-        headers.each(fn(key, value) {
-            writer.write("Header " + i + "-> " + key + " = " + value + "\n")
-            i = i + 1
+    fn(writer, request)
+        request.header.each(fn(key, value) {
+            writer.write("$ " + key + " = " + value + "\n")
         })
-    }
 )
 
 println("Listening on http://localhost:3000/")
@@ -32,3 +28,24 @@ println("Listening on http://localhost:3000/")
 http.serve(":3000")
 
 # Try going to localhost:3000 and localhost:3000/gorilla and see the effect!
+
+# /headers displays the request headers (unordered)
+
+# Example:
+
+`
+ $ Accept-Encoding = ["gzip, deflate, br"]
+ $ Connection = ["keep-alive"]
+ $ Accept = ["text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9"]
+ $ Cache-Control = ["max-age=0"]
+ $ Sec-Fetch-Mode = ["navigate"]
+ $ Cookie = ["Idea-9f9d52e6=5744077b-acf1-499a-b2e2-1bd549df1c81"]
+ $ Sec-Fetch-Site = ["none"]
+ $ Accept-Language = ["en-US,en;q=0.9,zh-CN;q=0.8,zh;q=0.7"]
+ $ Sec-Ch-Ua = [""Chromium";v="88", "Google Chrome";v="88", ";Not A Brand";v="99""]
+ $ Upgrade-Insecure-Requests = ["1"]
+ $ User-Agent = ["Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.146 Safari/537.36"]
+ $ Sec-Fetch-Dest = ["document"]
+ $ Sec-Fetch-User = ["?1"]
+ $ Sec-Ch-Ua-Mobile = ["?0"]
+`
