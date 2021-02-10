@@ -19,16 +19,15 @@ http.get(
     "/headers",
     fn(writer, request) {
         i = 0
-        request = request.header
-        println(type(request))
-        while i < request.length() {
-            writer.write("Header " + i + "-> " + request.keys()[i] + " = " + request.values()[i] + "\n")
+        headers = request.header
+        headers.each(fn(key, value) {
+            writer.write("Header " + i + "-> " + key + " = " + value + "\n")
             i = i + 1
-        }
+        })
     }
 )
 
-println("Listening on :3000")
+println("Listening on http://localhost:3000/")
 
 http.serve(":3000")
 

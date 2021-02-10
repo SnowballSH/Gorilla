@@ -959,6 +959,40 @@ func init() {
 			},
 			[][]string{},
 		),
+
+		"each": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				fnv := args[0].Value().(*FunctionValue)
+				fn := args[0]
+				amountParams := len(fnv.Params)
+				if amountParams == 0 {
+					for range self.Value().(map[HashKey]*HashValue) {
+						res := fn.Call(env, nil, []BaseObject{}, line)
+						if res.Type() == ERROR {
+							return res
+						}
+					}
+				} else if amountParams == 1 {
+					for _, val := range self.Value().(map[HashKey]*HashValue) {
+						res := fn.Call(env, nil, []BaseObject{val.Key}, line)
+						if res.Type() == ERROR {
+							return res
+						}
+					}
+				} else if amountParams == 2 {
+					for _, val := range self.Value().(map[HashKey]*HashValue) {
+						res := fn.Call(env, nil, []BaseObject{val.Key, val.Value}, line)
+						if res.Type() == ERROR {
+							return res
+						}
+					}
+				} else {
+					return NewError(fmt.Sprintf("Hash.each function expects a function with 0 to 2 parameters, got %d", amountParams), line)
+				}
+				return self
+			},
+			[][]string{{FUNCTION}},
+		),
 	}
 
 	GlobalBuiltins = map[string]BaseObject{

@@ -28,6 +28,7 @@ func (l *Lexer) NextToken() token.Token {
 			l.readChar()
 		}
 		l.readChar()
+		l.lineCount++
 		return l.NextToken()
 	case '=':
 		if l.peekChar() == '=' {
