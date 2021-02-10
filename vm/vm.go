@@ -58,6 +58,9 @@ func (vm *VM) Run() object.BaseObject {
 			if obj.Type() == object.FUNCTION {
 				obj.(*object.Object).InternalValue.(*object.FunctionValue).FreeEnv = vm.Frame.Env
 				obj.(*object.Object).CallFunc = RunFunc(obj.(*object.Object), vm)
+			} else if obj.Type() == object.MACRO {
+				obj.(*object.Object).InternalValue.(*object.FunctionValue).FreeEnv = vm.Frame.Env
+				obj.(*object.Object).CallFunc = RunDo(obj.(*object.Object), vm)
 			}
 
 			vm.push(obj)
@@ -156,7 +159,7 @@ func (vm *VM) Run() object.BaseObject {
 				return e
 			}
 
-			vm.Frame.Env.Set(name, val)
+			vm.Frame.Env.Set(name, val, vm.Frame.Macro)
 			vm.push(val)
 
 		case code.Jump:
@@ -237,7 +240,7 @@ func (vm *VM) Run() object.BaseObject {
 			if !ok {
 				return object.NewError(fmt.Sprintf("Module not found: %s", name), line)
 			}
-			vm.Frame.Env.Set(name, lib)
+			object.GlobalBuiltins[name] = lib
 
 		default:
 			return object.NewError(fmt.Sprintf("bytecode not supported: %d", bytecode), 0)
@@ -290,11 +293,11 @@ func RunFunc(vv *object.Object, vmm *VM) func(env *object.Environment, self *obj
 		newframe.Env = object.NewEnclosedEnvironment(env)
 
 		for name, free := range fstr.FreeEnv.Store {
-			newframe.Env.Set(name, free)
+			newframe.Env.Set(name, free, false)
 		}
 
 		for i, vvv := range fstr.Params {
-			newframe.Env.Set(vvv, args[i])
+			newframe.Env.Set(vvv, args[i], false)
 		}
 
 		newframe.LastFrame = vmm.Frame
@@ -308,6 +311,54 @@ func RunFunc(vv *object.Object, vmm *VM) func(env *object.Environment, self *obj
 		last := vmm.Frame.LastPopped
 
 		vmm.Frame = vmm.Frame.LastFrame
+
+		if last == nil {
+			return object.NULLOBJ
+		}
+
+		if IsError(last) {
+			return last
+		}
+		return last
+	}
+}
+
+func RunDo(vv *object.Object, vmm *VM) func(env *object.Environment, self *object.Object, args []object.BaseObject, line int) object.BaseObject {
+	if vv.Type() != object.MACRO {
+		return vv.Call
+	}
+
+	return func(env *object.Environment, self *object.Object, args []object.BaseObject, line int) object.BaseObject {
+		fstr := vv.Value().(*object.FunctionValue)
+
+		if len(args) != len(fstr.Params) {
+			return object.NewError(
+				fmt.Sprintf("Argument amount mismatch: Expected %d, got %d", len(fstr.Params), len(args)),
+				line,
+			)
+		}
+
+		newframe := NewFrame(fstr.Bytecodes, fstr.Constants, fstr.Messages)
+		newframe.Macro = true
+		newframe.Env = env
+
+		for i, vvv := range fstr.Params {
+			newframe.Env.Free[vvv] = args[i]
+		}
+
+		newframe.LastFrame = vmm.Frame
+		vmm.Frame = newframe
+
+		e := vmm.Run()
+		if e != nil {
+			return e
+		}
+
+		last := vmm.Frame.LastPopped
+
+		vmm.Frame = vmm.Frame.LastFrame
+
+		vmm.Frame.Env.Free = map[string]object.BaseObject{}
 
 		if last == nil {
 			return object.NULLOBJ

@@ -20,6 +20,7 @@ type Frame struct {
 	Env *object.Environment
 
 	LastFrame *Frame
+	Macro     bool
 }
 
 func NewFrame(bytecodes []code.Opcode, constants []object.BaseObject, messages []object.Message) *Frame {
@@ -34,6 +35,7 @@ func NewFrame(bytecodes []code.Opcode, constants []object.BaseObject, messages [
 		LastPopped:   nil,
 		Env:          e,
 		LastFrame:    nil,
+		Macro:        false,
 	}
 
 	return f

@@ -65,9 +65,11 @@ const (
 	ELSE         = "ELSE"
 	RETURN       = "RETURN"
 
-	WHILE = "WHILE"
-	BREAK = "BREAK"
-	NEXT  = "next"
+	WHILE   = "WHILE"
+	FOREACH = "FOREACH"
+	DO      = "DO"
+	BREAK   = "BREAK"
+	NEXT    = "next"
 
 	USE = "USE"
 )
@@ -79,18 +81,20 @@ type Token struct {
 }
 
 var keywords = map[string]TType{
-	"fn":     FUNCTION,
-	"func":   STMTFUNCTION,
-	"let":    LET,
-	"true":   TRUE,
-	"false":  FALSE,
-	"if":     IF,
-	"else":   ELSE,
-	"return": RETURN,
-	"while":  WHILE,
-	"break":  BREAK,
-	"next":   NEXT,
-	"use":    USE,
+	"fn":      FUNCTION,
+	"func":    STMTFUNCTION,
+	"let":     LET,
+	"true":    TRUE,
+	"false":   FALSE,
+	"if":      IF,
+	"else":    ELSE,
+	"return":  RETURN,
+	"while":   WHILE,
+	"foreach": FOREACH,
+	"do":      DO,
+	"break":   BREAK,
+	"next":    NEXT,
+	"use":     USE,
 }
 
 func LookupIdent(ident string) TType {

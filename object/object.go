@@ -15,6 +15,7 @@ const (
 
 	BUILTINFUNCTION = "Builtin Function"
 	FUNCTION        = "Function"
+	MACRO           = "Macro"
 
 	INTEGER = "Integer"
 	FLOAT   = "Float"
@@ -344,6 +345,27 @@ func NewFunction(
 		},
 		func(self BaseObject) string {
 			return fmt.Sprintf("Function [%p]", self)
+		},
+		line,
+		map[string]BaseObject{},
+		nil, // in vm
+		nil,
+	)
+	return o
+}
+
+func NewMacro(
+	value *FunctionValue,
+	line int,
+) *Object {
+	o := NewObject(
+		MACRO,
+		value,
+		func(self BaseObject) string {
+			return "Macro"
+		},
+		func(self BaseObject) string {
+			return fmt.Sprintf("Macro [%p]", self)
 		},
 		line,
 		map[string]BaseObject{},

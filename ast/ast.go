@@ -126,6 +126,37 @@ func (us *UseStatement) String() string {
 	return out.String()
 }
 
+type DoExpression struct {
+	Token  token.Token // the 'do' token
+	Params []*Identifier
+	Block  *BlockStatement
+}
+
+func (ds *DoExpression) expressionNode() {}
+
+func (ds *DoExpression) TokenLiteral() string { return ds.Token.Literal }
+
+func (ds *DoExpression) String() string {
+	var out bytes.Buffer
+
+	out.WriteString(ds.TokenLiteral())
+
+	var params []string
+	for _, p := range ds.Params {
+		params = append(params, p.String())
+	}
+
+	out.WriteString("(")
+	out.WriteString(strings.Join(params, ", "))
+	out.WriteString(") ")
+
+	out.WriteString(ds.Block.String())
+
+	out.WriteString(";")
+
+	return out.String()
+}
+
 type BreakStatement struct {
 	Token token.Token
 }
@@ -216,9 +247,13 @@ func (bs *BlockStatement) TokenLiteral() string { return bs.Token.Literal }
 func (bs *BlockStatement) String() string {
 	var out bytes.Buffer
 
+	out.WriteString("{\n")
+
 	for _, s := range bs.Statements {
 		out.WriteString(s.String())
 	}
+
+	out.WriteString("\n}")
 
 	return out.String()
 }
@@ -373,7 +408,6 @@ func (we *WhileExpression) expressionNode() {}
 // TokenLiteral
 func (we *WhileExpression) TokenLiteral() string { return we.Token.Literal }
 
-// String returns a stringified version of the AST for debugging
 func (we *WhileExpression) String() string {
 	var out bytes.Buffer
 
@@ -397,7 +431,6 @@ func (ae *AssignmentExpression) expressionNode() {}
 // TokenLiteral
 func (ae *AssignmentExpression) TokenLiteral() string { return ae.Token.Literal }
 
-// String returns a stringified version of the AST for debugging
 func (ae *AssignmentExpression) String() string {
 	var out bytes.Buffer
 
@@ -426,7 +459,6 @@ func (ae *IndexAssignmentExpression) expressionNode() {}
 // TokenLiteral
 func (ae *IndexAssignmentExpression) TokenLiteral() string { return ae.Token.Literal }
 
-// String returns a stringified version of the AST for debugging
 func (ae *IndexAssignmentExpression) String() string {
 	var out bytes.Buffer
 
@@ -457,7 +489,6 @@ func (ae *AttrAssignmentExpression) expressionNode() {}
 // TokenLiteral
 func (ae *AttrAssignmentExpression) TokenLiteral() string { return ae.Token.Literal }
 
-// String returns a stringified version of the AST for debugging
 func (ae *AttrAssignmentExpression) String() string {
 	var out bytes.Buffer
 
@@ -484,10 +515,8 @@ type FunctionLiteral struct {
 
 func (fl *FunctionLiteral) expressionNode() {}
 
-// TokenLiteral prints the literal value of the token associated with this node
 func (fl *FunctionLiteral) TokenLiteral() string { return fl.Token.Literal }
 
-// String returns a stringified version of the AST for debugging
 func (fl *FunctionLiteral) String() string {
 	var out bytes.Buffer
 
@@ -505,20 +534,16 @@ func (fl *FunctionLiteral) String() string {
 	return out.String()
 }
 
-// CallExpression represents a call expression and holds the function to be
-// called as well as the arguments to be passed to that function
 type CallExpression struct {
 	Token     token.Token // The '(' token
-	Function  Expression  // Identifier or FunctionLiteral
+	Function  Expression
 	Arguments []Expression
 }
 
 func (ce *CallExpression) expressionNode() {}
 
-// TokenLiteral prints the literal value of the token associated with this node
 func (ce *CallExpression) TokenLiteral() string { return ce.Token.Literal }
 
-// String returns a stringified version of the AST for debugging
 func (ce *CallExpression) String() string {
 	var out bytes.Buffer
 
@@ -544,10 +569,8 @@ type GetAttr struct {
 
 func (ge *GetAttr) expressionNode() {}
 
-// TokenLiteral prints the literal value of the token associated with this node
 func (ge *GetAttr) TokenLiteral() string { return ge.Token.Literal }
 
-// String returns a stringified version of the AST for debugging
 func (ge *GetAttr) String() string {
 	var out bytes.Buffer
 
@@ -576,10 +599,8 @@ type ArrayLiteral struct {
 
 func (al *ArrayLiteral) expressionNode() {}
 
-// TokenLiteral prints the literal value of the token associated with this node
 func (al *ArrayLiteral) TokenLiteral() string { return al.Token.Literal }
 
-// String returns a stringified version of the AST for debugging
 func (al *ArrayLiteral) String() string {
 	var out bytes.Buffer
 
@@ -603,10 +624,8 @@ type IndexExpression struct {
 
 func (ie *IndexExpression) expressionNode() {}
 
-// TokenLiteral prints the literal value of the token associated with this node
 func (ie *IndexExpression) TokenLiteral() string { return ie.Token.Literal }
 
-// String returns a stringified version of the AST for debugging
 func (ie *IndexExpression) String() string {
 	var out bytes.Buffer
 

@@ -162,10 +162,16 @@ func (c *BytecodeCompiler) Compile(node ast.Node) error {
 		c.emit(code.MakeHash)
 
 	case *ast.FunctionLiteral:
-		c.makeFunc(node)
+		e := c.makeFunc(node)
+		if e != nil {
+			return e
+		}
 
 	case *ast.FunctionStmt:
-		c.makeStmtFunc(node)
+		e := c.makeStmtFunc(node)
+		if e != nil {
+			return e
+		}
 
 	case *ast.InfixExpression:
 		name := ""
@@ -428,18 +434,23 @@ func (c *BytecodeCompiler) Compile(node ast.Node) error {
 		c.addMessage(node.Token.Line)
 		c.emit(code.Import)
 
+	case *ast.DoExpression:
+		e := c.makeDo(node)
+		if e != nil {
+			return e
+		}
+
 	default:
 		panic("Node not supported: " + node.TokenLiteral() + " | " + node.String())
 	}
 	return nil
 }
 
-func (c *BytecodeCompiler) makeFunc(node *ast.FunctionLiteral) {
+func (c *BytecodeCompiler) makeFunc(node *ast.FunctionLiteral) error {
 	newc := NewBytecodeCompiler()
 	err := newc.Compile(node.Body)
 	if err != nil {
-		c.addMessage(c.addConstant(object.NewError(err.Error(), node.Token.Line)))
-		c.emit(code.LoadConstant)
+		return err
 	} else {
 		var prms []string
 		for _, v := range node.Parameters {
@@ -455,14 +466,37 @@ func (c *BytecodeCompiler) makeFunc(node *ast.FunctionLiteral) {
 			}, node.Token.Line)))
 		c.emit(code.LoadConstant)
 	}
+	return nil
 }
 
-func (c *BytecodeCompiler) makeStmtFunc(node *ast.FunctionStmt) {
+func (c *BytecodeCompiler) makeDo(node *ast.DoExpression) error {
+	newc := NewBytecodeCompiler()
+	err := newc.Compile(node.Block)
+	if err != nil {
+		return err
+	} else {
+		var prms []string
+		for _, v := range node.Params {
+			prms = append(prms, v.Value)
+		}
+
+		c.addMessage(c.addConstant(object.NewMacro(
+			&object.FunctionValue{
+				Constants: newc.Constants,
+				Bytecodes: newc.Bytecodes,
+				Messages:  newc.Messages,
+				Params:    prms,
+			}, node.Token.Line)))
+		c.emit(code.LoadConstant)
+	}
+	return nil
+}
+
+func (c *BytecodeCompiler) makeStmtFunc(node *ast.FunctionStmt) error {
 	newc := NewBytecodeCompiler()
 	err := newc.Compile(node.Body)
 	if err != nil {
-		c.addMessage(c.addConstant(object.NewError(err.Error(), node.Token.Line)))
-		c.emit(code.LoadConstant)
+		return err
 	} else {
 		var prms []string
 		for _, v := range node.Parameters {
@@ -481,4 +515,5 @@ func (c *BytecodeCompiler) makeStmtFunc(node *ast.FunctionStmt) {
 		c.addMessage(node.Name)
 		c.emit(code.Pop)
 	}
+	return nil
 }

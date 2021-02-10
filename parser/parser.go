@@ -89,6 +89,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerPrefix(token.FUNCTION, p.parseFunctionLiteral)
 
 	p.registerPrefix(token.WHILE, p.parseWhileExpression)
+	p.registerPrefix(token.DO, p.parseDoExpression)
 
 	p.registerPrefix(token.LPAREN, p.parseGroupedExpression)
 
@@ -329,11 +330,12 @@ func (p *Parser) parseFunctionStatement() *ast.FunctionStmt {
 
 	lit.Name = p.curToken.Literal
 
-	if !p.expectPeek(token.LPAREN) {
-		return nil
+	if p.peekTokenIs(token.LPAREN) {
+		p.nextToken()
+		lit.Parameters = p.parseFunctionParameters()
+	} else {
+		lit.Parameters = []*ast.Identifier{}
 	}
-
-	lit.Parameters = p.parseFunctionParameters()
 
 	p.nextToken()
 
@@ -536,11 +538,12 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 func (p *Parser) parseFunctionLiteral() ast.Expression {
 	lit := &ast.FunctionLiteral{Token: p.curToken}
 
-	if !p.expectPeek(token.LPAREN) {
-		return nil
+	if p.peekTokenIs(token.LPAREN) {
+		p.nextToken()
+		lit.Parameters = p.parseFunctionParameters()
+	} else {
+		lit.Parameters = []*ast.Identifier{}
 	}
-
-	lit.Parameters = p.parseFunctionParameters()
 
 	p.nextToken()
 	res := p.parseBlockStatement()
@@ -717,4 +720,26 @@ func (p *Parser) parseHashLiteral() ast.Expression {
 	}
 
 	return hash
+}
+
+func (p *Parser) parseDoExpression() ast.Expression {
+	lit := &ast.DoExpression{Token: p.curToken}
+
+	if p.peekTokenIs(token.LPAREN) {
+		p.nextToken()
+		lit.Params = p.parseFunctionParameters()
+	} else {
+		lit.Params = []*ast.Identifier{}
+	}
+
+	p.nextToken()
+
+	res := p.parseBlockStatement()
+	if res != nil {
+		lit.Block = res
+	} else {
+		return nil
+	}
+
+	return lit
 }
