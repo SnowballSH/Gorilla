@@ -5,7 +5,7 @@ func parse(code) {
 
     code = code.chars()
 
-    while i < code.length() {
+    code.length().times do (i) {
         chr = code[i]
         if chr == "+" || chr == "-" || chr == ">" || chr == "<" || chr == "." || chr == "," {
             result <- [chr, null]
@@ -21,8 +21,6 @@ func parse(code) {
             result[last][1] = i
             result <- [chr, last]
         }
-
-        i = i + 1
     }
 
     result

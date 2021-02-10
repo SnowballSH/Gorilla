@@ -335,6 +335,33 @@ func init() {
 			},
 			[][]string{},
 		),
+
+		"times": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				fnv := args[0].Value().(*FunctionValue)
+				fn := args[0]
+				amountParams := len(fnv.Params)
+				if amountParams == 0 {
+					for i := 0; i < self.Value().(int); i++ {
+						res := fn.Call(env, nil, []BaseObject{}, line)
+						if res.Type() == ERROR {
+							return res
+						}
+					}
+				} else if amountParams == 1 {
+					for i := 0; i < self.Value().(int); i++ {
+						res := fn.Call(env, nil, []BaseObject{NewInteger(i, line)}, line)
+						if res.Type() == ERROR {
+							return res
+						}
+					}
+				} else {
+					return NewError(fmt.Sprintf("Integer.times function expects a macro with 0 or 1 parameters, got %d", amountParams), line)
+				}
+				return self
+			},
+			[][]string{{MACRO}},
+		),
 	}
 
 	FloatBuiltins = map[string]BaseObject{
@@ -874,11 +901,11 @@ func init() {
 						}
 					}
 				} else {
-					return NewError(fmt.Sprintf("Array.each function expects a function with 0 or 1 parameters, got %d", amountParams), line)
+					return NewError(fmt.Sprintf("Array.each function expects a macro with 0 or 1 parameters, got %d", amountParams), line)
 				}
 				return self
 			},
-			[][]string{{FUNCTION}},
+			[][]string{{MACRO}},
 		),
 	}
 
@@ -987,11 +1014,11 @@ func init() {
 						}
 					}
 				} else {
-					return NewError(fmt.Sprintf("Hash.each function expects a function with 0 to 2 parameters, got %d", amountParams), line)
+					return NewError(fmt.Sprintf("Hash.each function expects a macro with 0 to 2 parameters, got %d", amountParams), line)
 				}
 				return self
 			},
-			[][]string{{FUNCTION}},
+			[][]string{{MACRO}},
 		),
 	}
 

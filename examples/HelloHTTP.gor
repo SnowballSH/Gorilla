@@ -18,9 +18,8 @@ http.get(
 http.get(
     "/headers",
     fn(writer, request)
-        request.header.each(fn(key, value) {
+        request.header.each do(key, value)
             writer.write("$ " + key + " = " + value + "\n")
-        })
 )
 
 println("Listening on http://localhost:3000/")

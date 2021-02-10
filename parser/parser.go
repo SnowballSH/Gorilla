@@ -51,6 +51,8 @@ var precedences = map[token.TType]int{
 	token.AND: AND,
 
 	token.LPAREN:   CALL,
+	token.DO:       CALL,
+	token.FUNCTION: CALL,
 	token.DOT:      DOT,
 	token.LBRACKET: INDEX,
 }
@@ -118,6 +120,8 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.LBRACKET, p.parseIndexExpression)
 
 	p.registerInfix(token.LPAREN, p.parseCallExpression)
+	p.registerInfix(token.DO, p.parseCallOneExpression)
+	p.registerInfix(token.FUNCTION, p.parseCallOneExpression)
 	p.registerInfix(token.DOT, p.parseGetAttr)
 
 	p.registerInfix(token.LARR, p.parseInfixExpression)
@@ -592,6 +596,12 @@ func (p *Parser) parseFunctionParameters() []*ast.Identifier {
 func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 	exp := &ast.CallExpression{Token: p.curToken, Function: function}
 	exp.Arguments = p.parseCallArguments()
+	return exp
+}
+
+func (p *Parser) parseCallOneExpression(function ast.Expression) ast.Expression {
+	exp := &ast.CallExpression{Token: p.curToken, Function: function}
+	exp.Arguments = []ast.Expression{p.parseExpression(LOWEST)}
 	return exp
 }
 
