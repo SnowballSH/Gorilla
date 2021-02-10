@@ -708,13 +708,31 @@ func init() {
 	ArrayBuiltins = map[string]BaseObject{
 		"add": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				arr := CopyObject(self)
 				for _, v := range args[0].Value().([]BaseObject) {
-					self.InternalValue = append(self.InternalValue.([]BaseObject), v)
+					arr.InternalValue = append(arr.InternalValue.([]BaseObject), v)
 				}
-				return self
+				return arr
 			},
 			[][]string{
 				{ARRAY},
+			},
+		),
+		"mul": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				i := 0
+				a := args[0].Value().(int)
+				arr := NewArray([]BaseObject{}, line)
+				for i < a {
+					for _, v := range self.Value().([]BaseObject) {
+						arr.InternalValue = append(arr.InternalValue.([]BaseObject), v)
+					}
+					i++
+				}
+				return arr
+			},
+			[][]string{
+				{INTEGER},
 			},
 		),
 
@@ -807,6 +825,61 @@ func init() {
 			},
 			[][]string{{ANY}},
 		),
+
+		"map": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				fnv := args[0].Value().(*FunctionValue)
+				fn := args[0]
+				amountParams := len(fnv.Params)
+				if amountParams == 0 {
+					for i := range self.Value().([]BaseObject) {
+						res := fn.Call(env, nil, []BaseObject{}, line)
+						if res.Type() == ERROR {
+							return res
+						}
+						self.Value().([]BaseObject)[i] = res
+					}
+				} else if amountParams == 1 {
+					for i, val := range self.Value().([]BaseObject) {
+						res := fn.Call(env, nil, []BaseObject{val}, line)
+						if res.Type() == ERROR {
+							return res
+						}
+						self.Value().([]BaseObject)[i] = res
+					}
+				} else {
+					return NewError(fmt.Sprintf("Array.map function expects a function with 0 or 1 parameters, got %d", amountParams), line)
+				}
+				return self
+			},
+			[][]string{{FUNCTION}},
+		),
+		"each": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				fnv := args[0].Value().(*FunctionValue)
+				fn := args[0]
+				amountParams := len(fnv.Params)
+				if amountParams == 0 {
+					for range self.Value().([]BaseObject) {
+						res := fn.Call(env, nil, []BaseObject{}, line)
+						if res.Type() == ERROR {
+							return res
+						}
+					}
+				} else if amountParams == 1 {
+					for _, val := range self.Value().([]BaseObject) {
+						res := fn.Call(env, nil, []BaseObject{val}, line)
+						if res.Type() == ERROR {
+							return res
+						}
+					}
+				} else {
+					return NewError(fmt.Sprintf("Array.each function expects a function with 0 or 1 parameters, got %d", amountParams), line)
+				}
+				return self
+			},
+			[][]string{{FUNCTION}},
+		),
 	}
 
 	HashBuiltins = map[string]BaseObject{
@@ -877,6 +950,12 @@ func init() {
 					keys = append(keys, NewArray([]BaseObject{v.Key, v.Value}, line))
 				}
 				return NewArray(keys, line)
+			},
+			[][]string{},
+		),
+		"length": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewInteger(len(self.InternalValue.(map[HashKey]*HashValue)), line)
 			},
 			[][]string{},
 		),

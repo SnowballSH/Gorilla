@@ -21,7 +21,7 @@ http.get(
         i = 0
         request = request.header
         println(type(request))
-        while i < request.keys().length() {
+        while i < request.length() {
             writer.write("Header " + i + "-> " + request.keys()[i] + " = " + request.values()[i] + "\n")
             i = i + 1
         }
