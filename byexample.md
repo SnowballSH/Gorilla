@@ -1,5 +1,7 @@
 ## Learn Gorilla by Examples
 
+<br>
+
 ### Greeting
 
 Gorilla Version: 0.4.0-alpha+
@@ -44,6 +46,10 @@ greet("Sam")
 ```
 
 Feel free to modify and try other things out!
+
+<br>
+
+---
 
 <br>
 
@@ -134,3 +140,74 @@ while run {
     }
 }
 ```
+
+<br>
+
+---
+
+<br>
+
+### Simple HTTP server
+
+Gorilla Version: 0.4.0+
+
+Must be on local system!
+
+It is **extremely simple** to create a HTTP server in Gorilla:
+
+```rust
+use "http"
+
+http.get(
+    "/",
+    fn(writer, request) writer.write("Hello, world!")
+)
+
+http.serve(":3000")
+```
+
+That's it! Done!
+
+After running the code, go to [localhost:3000/](http://localhost:3000/) to see the Hello World greeting from your Gorilla HTTP server!
+
+<br>
+
+A more complex example:
+
+```rust
+use "http"
+
+http.get(
+    "/",
+    fn(writer, request) writer.write("Hello, world!")
+)
+
+let gorillaString = `<div style="text-align: center"><button onclick="alert('You clicked me!')"><h1>
+Hello, Gorilla!</h1></button></div>`
+
+http.get(
+    "/gorilla",
+    fn(writer, request) writer.write(gorillaString)
+)
+
+http.get(
+    "/headers",
+    fn(writer, request)
+        request.header.each do(key, value)
+            writer.write("$ " + key + " = " + value + "\n")
+)
+
+println("Listening on http://localhost:3000/")
+
+http.serve(":3000")
+```
+
+The above code creates 3 pages: `/`, `/gorilla`, and `/headers`
+
+`/` is the same as before
+
+`/gorilla` shows a kind-of-beautiful button, showing that doing CSS in Gorilla is possible
+
+`/headers` prettily prints headers from the request
+
+See the full example [here](https://github.com/SnowballSH/Gorilla/blob/master/examples/HelloHTTP.gor)
