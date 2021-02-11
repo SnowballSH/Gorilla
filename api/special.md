@@ -49,8 +49,9 @@ abc(1, 2, 3)
 
 a better-looking code with this special syntax:
 
-```rust
+```ruby
 [1, 2, 3].each
     do(i)
         println(i ** 2)
+# A lot better
 ```
