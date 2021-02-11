@@ -20,10 +20,10 @@ func abc() {
 	c()
 }
 
-func doA
+func doA()
     a()
 
-func doB b()
+func doB() b()
 
 if 1 == 2
     println("NO WAY!")

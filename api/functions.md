@@ -7,7 +7,7 @@ There are two kinds of functions in Gorilla
 Syntax:
 
 ```ruby
-FunctionStatement ::= "func" identifier parameters? block
+FunctionStatement ::= "func" identifier parameters block
 ```
 
 Syntax in code:
@@ -17,7 +17,7 @@ func FunctionName(arg1, arg2, arg3) {
     do.something1(arg1 + arg2 + arg3)
     do.something2(arg1 * arg2 * arg3)
 }
-func NoArgument
+func NoArgument()
 	do.something()
 ```
 
