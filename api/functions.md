@@ -42,3 +42,5 @@ fn doo.something
 #### `Function Statement` is a statement while `Function Literal` is an expression
 
 `func name(){}` is the same as `name = fn(){}`
+
+[**back**](https://snowballsh.github.io/Gorilla/api)

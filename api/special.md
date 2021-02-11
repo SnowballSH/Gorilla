@@ -56,3 +56,5 @@ a better-looking code with this special syntax:
         println(i ** 2)
 # A lot better
 ```
+
+[**back**](https://snowballsh.github.io/Gorilla/api)
