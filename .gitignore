@@ -4,3 +4,6 @@
 *.wasm
 *.exe
 /wasm/
+gorilla-darwin-amd64
+gorilla-linux-amd64
+gorilla-windows-amd64.exe
