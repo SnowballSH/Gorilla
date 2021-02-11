@@ -19,6 +19,13 @@ Gorilla is built to make simple, flexible, well-understood programs in a relativ
     - 99% of Gorilla's builtin functions are **type-safe**
     - Gorilla has **builtin support** for type annotations and assertions for functions
 
+### [Learn Gorilla by Examples](https://snowballsh.github.io/Gorilla/byexample)
+### [Gorilla Language Reference](https://snowballsh.github.io/Gorilla/api)
+
+<br>
+
+---
+
 <br>
 
 ## Setting Up Gorilla
@@ -49,3 +56,4 @@ println("Hello, world!")
 <br>
 
 ### [Learn Gorilla by Examples](https://snowballsh.github.io/Gorilla/byexample)
+### [Gorilla Language Reference](https://snowballsh.github.io/Gorilla/api)
