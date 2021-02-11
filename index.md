@@ -55,5 +55,5 @@ println("Hello, world!")
 
 <br>
 
-### [Learn Gorilla by Examples](https://snowballsh.github.io/Gorilla/byexample)
-### [Gorilla Language Reference](https://snowballsh.github.io/Gorilla/api)
+- ### [Learn Gorilla by Examples](https://snowballsh.github.io/Gorilla/byexample)
+- ### [Gorilla Language Reference](https://snowballsh.github.io/Gorilla/api)
