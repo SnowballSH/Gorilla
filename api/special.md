@@ -15,9 +15,9 @@ which means it is valid to not have `{}` if you only have **one** statement.
 
 ```go
 func abc() {
-	a()
-	b()
-	c()
+    a()
+    b()
+    c()
 }
 
 func doA()
@@ -39,7 +39,8 @@ functionCall ::= expression "(" expression? ("," expression)* ")"
              |   functionLiteral
 ```
 
-when the function only has 1 parameter, and you want to input an argument, you don't have to write `()` around the `do` or `fn` keywords.
+when the function only has 1 parameter, and you want to input an argument, you don't have to write `()` around the `do`
+or `fn` keywords.
 
 ```ruby
 abc(1, 2, 3)

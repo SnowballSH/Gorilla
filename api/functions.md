@@ -14,11 +14,11 @@ Syntax in code:
 
 ```go
 func FunctionName(arg1, arg2, arg3) {
-    do.something1(arg1 + arg2 + arg3)
-    do.something2(arg1 * arg2 * arg3)
+    doo.something1(arg1 + arg2 + arg3)
+    doo.something2(arg1 * arg2 * arg3)
 }
 func NoArgument()
-	do.something()
+    doo.something()
 ```
 
 ### Function Literal
@@ -33,10 +33,10 @@ Syntax in code:
 
 ```rust
 fn(arg1, arg2, arg3) {
-    do.something1(arg1 + arg2 + arg3)
-    do.something2(arg1 * arg2 * arg3)
+    doo.something1(arg1 + arg2 + arg3)
+    doo.something2(arg1 * arg2 * arg3)
 }
-fn do.something
+fn doo.something
 ```
 
 #### `Function Statement` is a statement while `Function Literal` is an expression
