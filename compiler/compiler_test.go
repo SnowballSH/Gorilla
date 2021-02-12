@@ -1,10 +1,10 @@
 package compiler
 
 import (
-	"Gorilla/code"
-	"Gorilla/lexer"
-	"Gorilla/object"
-	"Gorilla/parser"
+	"github.com/SnowballSH/Gorilla/code"
+	"github.com/SnowballSH/Gorilla/lexer"
+	"github.com/SnowballSH/Gorilla/object"
+	"github.com/SnowballSH/Gorilla/parser"
 	"strconv"
 	"testing"
 )

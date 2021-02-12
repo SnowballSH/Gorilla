@@ -1,9 +1,9 @@
 package object
 
 import (
-	"Gorilla/config"
 	"bufio"
 	"fmt"
+	"github.com/SnowballSH/Gorilla/config"
 	"io"
 	"os"
 	"strings"

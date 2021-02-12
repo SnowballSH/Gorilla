@@ -1,8 +1,8 @@
 package vm
 
 import (
-	"Gorilla/code"
-	"Gorilla/object"
+	"github.com/SnowballSH/Gorilla/code"
+	"github.com/SnowballSH/Gorilla/object"
 )
 
 type Frame struct {

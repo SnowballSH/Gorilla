@@ -1,8 +1,8 @@
 package object
 
 import (
-	"Gorilla/code"
 	"fmt"
+	"github.com/SnowballSH/Gorilla/code"
 	"hash/fnv"
 	"strconv"
 	"strings"

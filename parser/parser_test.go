@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"Gorilla/ast"
-	"Gorilla/lexer"
+	"github.com/SnowballSH/Gorilla/ast"
+	"github.com/SnowballSH/Gorilla/lexer"
 )
 
 func TestLetStatements(t *testing.T) {

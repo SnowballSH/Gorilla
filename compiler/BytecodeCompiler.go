@@ -1,10 +1,10 @@
 package compiler
 
 import (
-	"Gorilla/ast"
-	"Gorilla/code"
-	"Gorilla/object"
 	"fmt"
+	"github.com/SnowballSH/Gorilla/ast"
+	"github.com/SnowballSH/Gorilla/code"
+	"github.com/SnowballSH/Gorilla/object"
 )
 
 type MCCombo struct {

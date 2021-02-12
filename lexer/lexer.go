@@ -1,6 +1,6 @@
 package lexer
 
-import "Gorilla/token"
+import "github.com/SnowballSH/Gorilla/token"
 
 type Lexer struct {
 	input        []rune

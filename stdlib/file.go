@@ -1,8 +1,8 @@
 package stdlib
 
 import (
-	"Gorilla/object"
 	"fmt"
+	"github.com/SnowballSH/Gorilla/object"
 	"io"
 )
 

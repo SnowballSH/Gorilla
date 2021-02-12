@@ -1,10 +1,10 @@
 package vm
 
 import (
-	"Gorilla/code"
-	"Gorilla/object"
-	"Gorilla/stdlib"
 	"fmt"
+	"github.com/SnowballSH/Gorilla/code"
+	"github.com/SnowballSH/Gorilla/object"
+	"github.com/SnowballSH/Gorilla/stdlib"
 )
 
 type VM struct {

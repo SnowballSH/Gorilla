@@ -1,12 +1,12 @@
 package main
 
 import (
-	"Gorilla/compiler"
-	"Gorilla/lexer"
-	"Gorilla/parser"
-	"Gorilla/repl"
-	"Gorilla/vm"
 	"fmt"
+	"github.com/SnowballSH/Gorilla/compiler"
+	"github.com/SnowballSH/Gorilla/lexer"
+	"github.com/SnowballSH/Gorilla/parser"
+	"github.com/SnowballSH/Gorilla/repl"
+	"github.com/SnowballSH/Gorilla/vm"
 	"github.com/alecthomas/kong"
 	"io"
 	"io/ioutil"

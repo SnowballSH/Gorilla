@@ -1,9 +1,9 @@
 package stdlib
 
 import (
-	"Gorilla/config"
-	"Gorilla/object"
 	"fmt"
+	"github.com/SnowballSH/Gorilla/config"
+	"github.com/SnowballSH/Gorilla/object"
 	"hash/fnv"
 	"net/http"
 	"os"

@@ -1,7 +1,7 @@
 package stdlib
 
 import (
-	"Gorilla/object"
+	"github.com/SnowballSH/Gorilla/object"
 	"math/rand"
 	"time"
 )

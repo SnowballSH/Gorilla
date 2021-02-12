@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"strconv"
 
-	"Gorilla/ast"
-	"Gorilla/lexer"
-	"Gorilla/token"
+	"github.com/SnowballSH/Gorilla/ast"
+	"github.com/SnowballSH/Gorilla/lexer"
+	"github.com/SnowballSH/Gorilla/token"
 )
 
 type (

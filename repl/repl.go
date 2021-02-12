@@ -1,14 +1,14 @@
 package repl
 
 import (
-	"Gorilla/compiler"
-	"Gorilla/config"
-	"Gorilla/lexer"
-	"Gorilla/object"
-	"Gorilla/parser"
-	"Gorilla/vm"
 	"bufio"
 	"fmt"
+	"github.com/SnowballSH/Gorilla/compiler"
+	"github.com/SnowballSH/Gorilla/config"
+	"github.com/SnowballSH/Gorilla/lexer"
+	"github.com/SnowballSH/Gorilla/object"
+	"github.com/SnowballSH/Gorilla/parser"
+	"github.com/SnowballSH/Gorilla/vm"
 	"io"
 	"strings"
 )

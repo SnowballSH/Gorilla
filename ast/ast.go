@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"strings"
 
-	"Gorilla/token"
+	"github.com/SnowballSH/Gorilla/token"
 )
 
 // Node defines an interface for all nodes in the AST.
