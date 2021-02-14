@@ -84,7 +84,13 @@ func (l *Lexer) NextToken() token.Token {
 		tok = l.newToken(token.XOR, l.ch)
 
 	case '.':
-		tok = l.newToken(token.DOT, l.ch)
+		if l.peekChar() == '.' {
+			ch := l.ch
+			l.readChar()
+			tok = token.Token{Type: token.DOUBLEDOTS, Literal: string(ch) + string(l.ch), Line: l.lineCount}
+		} else {
+			tok = l.newToken(token.DOT, l.ch)
+		}
 
 	case '!':
 		if l.peekChar() == '=' {

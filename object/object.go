@@ -26,6 +26,8 @@ const (
 	NULL    = "Null"
 
 	NAMESPACE = "Namespace"
+
+	INTRANGE = "Int Range"
 )
 
 // Every Gorilla Object implements this
@@ -451,6 +453,36 @@ func NewNameSpace(
 		nf,
 		0,
 		value,
+		nil,
+		nil,
+	)
+}
+
+type IntRangeValue struct {
+	start int
+	end   int
+}
+
+func irf(self BaseObject) string {
+	v := self.Value().(*IntRangeValue)
+	return fmt.Sprintf("Integer Range %d to %d", v.start, v.end)
+}
+
+// Base INTRANGE Type
+func NewIntRange(
+	start int,
+	end int,
+) *Object {
+	return NewObject(
+		INTRANGE,
+		&IntRangeValue{
+			start: start,
+			end:   end,
+		},
+		irf,
+		irf,
+		0,
+		IntRangeBuiltins,
 		nil,
 		nil,
 	)

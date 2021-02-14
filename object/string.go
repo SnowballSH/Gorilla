@@ -2,6 +2,7 @@ package object
 
 import (
 	"fmt"
+	"github.com/SnowballSH/Gorilla/helper"
 	"strconv"
 	"strings"
 	"unicode/utf8"
@@ -26,17 +27,54 @@ func StingMethods() {
 		"getIndex": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
 				k := self.InternalValue.(string)
-				idx := args[0].Value().(int)
-				if idx < 0 {
-					idx = utf8.RuneCountInString(k) + idx
+				w := utf8.RuneCountInString(k)
+
+				if args[0].Type() == INTEGER {
+					idx := args[0].Value().(int)
+					if idx < 0 {
+						idx += w
+					}
+					if w <= idx || idx < 0 {
+						return NewError(fmt.Sprintf("String Index %d out of range on length %d", args[0].Value().(int), len(k)), line)
+					}
+					return NewString(string([]rune(k)[idx]), line)
+				} else /* INTRANGE */ {
+					v := args[0].Value().(*IntRangeValue)
+					start := v.start
+					end := v.end
+
+					if start < 0 {
+						start += w
+					}
+					if end < 0 {
+						end += w
+					}
+
+					if w <= start || start < 0 {
+						return NewError(fmt.Sprintf("String Index %d out of range on length %d", v.start, len(k)), line)
+					}
+					if w <= end || end < 0 {
+						return NewError(fmt.Sprintf("String Index %d out of range on length %d", v.end, len(k)), line)
+					}
+
+					var reverse = false
+
+					if start > end {
+						reverse = true
+						start, end = end, start
+					}
+
+					val := string([]rune(k)[start : end+1])
+
+					if reverse {
+						val = helper.ReverseString(val)
+					}
+
+					return NewString(val, line)
 				}
-				if utf8.RuneCountInString(k) <= idx || idx < 0 {
-					return NewError(fmt.Sprintf("String Index %d out of range on length %d", args[0].Value().(int), len(k)), line)
-				}
-				return NewString(string([]rune(k)[idx]), line)
 			},
 			[][]string{
-				{INTEGER},
+				{INTEGER, INTRANGE},
 			},
 		),
 

@@ -116,6 +116,7 @@ var (
 	StringBuiltins     map[string]BaseObject
 	ArrayBuiltins      map[string]BaseObject
 	HashBuiltins       map[string]BaseObject
+	IntRangeBuiltins   map[string]BaseObject
 
 	NULLOBJ BaseObject
 )

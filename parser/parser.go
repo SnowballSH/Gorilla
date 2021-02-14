@@ -18,6 +18,7 @@ const (
 	_ int = iota
 	LOWEST
 	ARR // <-
+	RANGE
 	OR
 	AND
 	EQUALS      // ==
@@ -44,6 +45,8 @@ var precedences = map[token.TType]int{
 	token.SLASH:    PRODUCT,
 	token.ASTERISK: PRODUCT,
 	token.MOD:      PRODUCT,
+
+	token.DOUBLEDOTS: RANGE,
 
 	token.POW: POWER,
 
@@ -109,6 +112,8 @@ func New(l *lexer.Lexer) *Parser {
 
 	p.registerInfix(token.AND, p.parseInfixExpression)
 	p.registerInfix(token.OR, p.parseInfixExpression)
+
+	p.registerInfix(token.DOUBLEDOTS, p.parseInfixExpression)
 
 	p.registerInfix(token.EQ, p.parseInfixExpression)
 	p.registerInfix(token.NEQ, p.parseInfixExpression)

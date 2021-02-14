@@ -43,6 +43,8 @@ const (
 	LARR = "<-"
 	RARR = "->"
 
+	DOUBLEDOTS = ".."
+
 	// Delimiters
 	COMMA     = ","
 	SEMICOLON = "; or newline"

@@ -74,17 +74,56 @@ func ArrayMethods() {
 		"getIndex": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
 				k := self.InternalValue.([]BaseObject)
-				idx := args[0].Value().(int)
-				if idx < 0 {
-					idx = len(k) + idx
+				w := len(k)
+
+				if args[0].Type() == INTEGER {
+					idx := args[0].Value().(int)
+					if idx < 0 {
+						idx += w
+					}
+					if w <= idx || idx < 0 {
+						return NewError(fmt.Sprintf("Array Index %d out of range on length %d", args[0].Value().(int), len(k)), line)
+					}
+					return k[idx]
+				} else /* INTRANGE */ {
+					v := args[0].Value().(*IntRangeValue)
+					start := v.start
+					end := v.end
+
+					if start < 0 {
+						start += w
+					}
+					if end < 0 {
+						end += w
+					}
+
+					if w <= start || start < 0 {
+						return NewError(fmt.Sprintf("String Index %d out of range on length %d", v.start, len(k)), line)
+					}
+					if w <= end || end < 0 {
+						return NewError(fmt.Sprintf("String Index %d out of range on length %d", v.end, len(k)), line)
+					}
+
+					var reverse = false
+
+					if start > end {
+						reverse = true
+						start, end = end, start
+					}
+
+					val := k[start : end+1]
+
+					if reverse {
+						for i, j := 0, len(val)-1; i < j; i, j = i+1, j-1 {
+							val[i], val[j] = val[j], val[i]
+						}
+					}
+
+					return NewArray(val, line)
 				}
-				if len(k) <= idx || idx < 0 {
-					return NewError(fmt.Sprintf("Array Index %d out of range on length %d", args[0].Value().(int), len(k)), line)
-				}
-				return k[idx]
 			},
 			[][]string{
-				{INTEGER},
+				{INTEGER, INTRANGE},
 			},
 		),
 		"setIndex": NewBuiltinFunction(

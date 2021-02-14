@@ -117,6 +117,16 @@ func IntMethods() {
 				{FLOAT, INTEGER},
 			},
 		),
+
+		"to": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewIntRange(self.Value().(int), args[0].Value().(int))
+			},
+			[][]string{
+				{INTEGER},
+			},
+		),
+
 		"eq": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
 				v, ok := args[0].Value().(int)
