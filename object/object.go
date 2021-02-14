@@ -294,10 +294,10 @@ func NewString(
 		STRING,
 		value,
 		func(self BaseObject) string {
-			return fmt.Sprintf("%s", self.Value().(string))
+			return self.Value().(string)
 		},
 		func(self BaseObject) string {
-			return fmt.Sprintf("\"%s\"", self.Value().(string))
+			return "`" + self.Value().(string) + "`"
 		},
 		line,
 		StringBuiltins,
