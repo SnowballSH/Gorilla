@@ -31,5 +31,16 @@ func IntRangeMethods() {
 			},
 			[][]string{{MACRO}},
 		),
+		"toArray": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				var res []BaseObject
+				vv := self.Value().(*IntRangeValue)
+				for i := vv.start; i <= vv.end; i++ {
+					res = append(res, NewInteger(i, line))
+				}
+				return NewArray(res, line)
+			},
+			[][]string{},
+		),
 	}
 }

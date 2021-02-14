@@ -114,9 +114,14 @@ func ArrayMethods() {
 					val := k[start : end+1]
 
 					if reverse {
-						for i, j := 0, len(val)-1; i < j; i, j = i+1, j-1 {
-							val[i], val[j] = val[j], val[i]
+						var a []BaseObject
+						for _, v := range val {
+							a = append(a, v)
 						}
+						for i, j := 0, len(a)-1; i < j; i, j = i+1, j-1 {
+							a[i], a[j] = a[j], a[i]
+						}
+						val = a
 					}
 
 					return NewArray(val, line)
@@ -244,6 +249,21 @@ func ArrayMethods() {
 				return self
 			},
 			[][]string{{MACRO}},
+		),
+
+		"reverse": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				val := self.Value().([]BaseObject)
+				var a []BaseObject
+				for _, v := range val {
+					a = append(a, v)
+				}
+				for i, j := 0, len(a)-1; i < j; i, j = i+1, j-1 {
+					a[i], a[j] = a[j], a[i]
+				}
+				return NewArray(a, line)
+			},
+			[][]string{},
 		),
 	}
 }

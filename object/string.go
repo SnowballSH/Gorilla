@@ -19,7 +19,11 @@ func StingMethods() {
 
 		"mul": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
-				return NewString(strings.Repeat(self.Value().(string), args[0].Value().(int)), line)
+				v := args[0].Value().(int)
+				if v < 0 {
+					return NewError("String.mul method expected a positive argument, got %d", v)
+				}
+				return NewString(strings.Repeat(self.Value().(string), v), line)
 			},
 			[][]string{{INTEGER}},
 		),
@@ -190,6 +194,13 @@ func StingMethods() {
 				return NewBool(strings.Contains(self.Value().(string), args[0].Value().(string)), line)
 			},
 			[][]string{{STRING}},
+		),
+
+		"reverse": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewString(helper.ReverseString(self.Value().(string)), line)
+			},
+			[][]string{},
 		),
 	}
 }

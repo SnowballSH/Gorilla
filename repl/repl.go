@@ -26,22 +26,36 @@ func Start(in io.Reader, out io.Writer) {
 
 	var prompt = PROMPT1
 
+	var line = 0
+
+	var indent = 0
+
 	for {
 		text := ""
 
 		for {
-			_, _ = io.WriteString(out, prompt)
+			line++
 
-			if len(text) > 1 {
+			if len(text) > 0 {
 				ts := strings.TrimSpace(text)
 				st := ts[len(ts)-1]
 				if st == '{' ||
 					st == '[' ||
 					st == '(' ||
 					st == ',' {
-					_, _ = io.WriteString(out, "\t")
+					indent++
+				}
+				if st == '}' ||
+					st == ']' ||
+					st == ')' {
+					indent--
 				}
 			}
+
+			if indent < 0 {
+				indent = 0
+			}
+			_, _ = io.WriteString(out, fmt.Sprintf("%03d%s%s", line, prompt, strings.Repeat("   ", indent)))
 
 			scanned := scanner.Scan()
 			if !scanned {
@@ -66,6 +80,8 @@ func Start(in io.Reader, out io.Writer) {
 			}
 			break
 		}
+
+		indent = 0
 
 		prompt = PROMPT1
 

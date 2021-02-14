@@ -30,3 +30,12 @@ func ReverseString(s string) string {
 	}
 	return string(rv)
 }
+
+func ReverseBOA(val []interface{}) []interface{} {
+	var a []interface{}
+	copy(a, val)
+	for i, j := 0, len(a)-1; i < j; i, j = i+1, j-1 {
+		a[i], a[j] = a[j], a[i]
+	}
+	return val
+}
