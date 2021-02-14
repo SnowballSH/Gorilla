@@ -1,6 +1,9 @@
 package object
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 func ArrayMethods() {
 	ArrayBuiltins = map[string]BaseObject{
@@ -113,8 +116,10 @@ func ArrayMethods() {
 		"has": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
 				ok := false
+				t := args[0].Type()
+				is := args[0].Inspect()
 				for _, val := range self.Value().([]BaseObject) {
-					if val.Type() == args[0].Type() && val.Inspect() == args[0].Inspect() {
+					if val.Type() == t && val.Inspect() == is {
 						ok = true
 						break
 					}
@@ -122,6 +127,29 @@ func ArrayMethods() {
 				return NewBool(ok, line)
 			},
 			[][]string{{ANY}},
+		),
+
+		"join": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				js := ", "
+				if len(args) > 1 {
+					return NewError(
+						fmt.Sprintf("Argument amount mismatch: Expected 0 or 1, got %d", len(args)),
+						line,
+					)
+				}
+				if len(args) == 1 {
+					js = args[0].Inspect()
+				}
+
+				var ss []string
+				for _, v := range self.Value().([]BaseObject) {
+					ss = append(ss, v.Inspect())
+				}
+
+				return NewString(strings.Join(ss, js), line)
+			},
+			nil,
 		),
 
 		"map": NewBuiltinFunction(

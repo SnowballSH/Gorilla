@@ -125,5 +125,33 @@ func StingMethods() {
 			},
 			[][]string{},
 		),
+
+		"cut": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewString(strings.Trim(self.Value().(string), args[0].Value().(string)), line)
+			},
+			[][]string{{STRING}},
+		),
+
+		"upper": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewString(strings.ToUpper(self.Value().(string)), line)
+			},
+			[][]string{},
+		),
+
+		"lower": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewString(strings.ToLower(self.Value().(string)), line)
+			},
+			[][]string{},
+		),
+
+		"has": NewBuiltinFunction(
+			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
+				return NewBool(strings.Contains(self.Value().(string), args[0].Value().(string)), line)
+			},
+			[][]string{{STRING}},
+		),
 	}
 }

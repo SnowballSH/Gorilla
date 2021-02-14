@@ -93,19 +93,27 @@ func GlobalFunctions() {
 		),
 
 		// Experimental
-		"createClass": NewBuiltinFunction(
+		"makeObject": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
-				hash := args[1].Value().(map[HashKey]*HashValue)
-				v := NewHash(hash, line)
-				v.TT = "$" + args[0].Value().(string)
-
-				for _, vv := range hash {
-					v.Methods[vv.Key.Inspect()] = vv.Value
-				}
+				t := args[0].Value().(string)
+				v := NewObject(
+					"$"+t,
+					nil,
+					func(self BaseObject) string {
+						return "Custom Object Type '" + t + "'"
+					},
+					func(self BaseObject) string {
+						return "Custom Object Type '" + t + "'"
+					},
+					line,
+					map[string]BaseObject{},
+					nil,
+					nil,
+				)
 
 				return v
 			},
-			[][]string{{STRING}, {HASH}},
+			[][]string{{STRING}},
 		),
 
 		"null":            NULLOBJ,

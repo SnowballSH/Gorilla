@@ -34,11 +34,21 @@ func init() {
 
 		"and": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
-				res, res1, err := getTwoBool(self, args[0].(*Object), env, line)
+				res, err := GetOneTruthy(self, env, line)
 				if err != nil {
 					return err
 				}
-				return NewBool(res && res1, line)
+				if !res {
+					return self
+				}
+				res, err = GetOneTruthy(args[0].(*Object), env, line)
+				if err != nil {
+					return err
+				}
+				if !res {
+					return self
+				}
+				return args[0]
 			},
 			[][]string{
 				{ANY},
@@ -47,11 +57,14 @@ func init() {
 
 		"or": NewBuiltinFunction(
 			func(self *Object, env *Environment, args []BaseObject, line int) BaseObject {
-				res, res1, err := getTwoBool(self, args[0].(*Object), env, line)
+				res, err := GetOneTruthy(self, env, line)
 				if err != nil {
 					return err
 				}
-				return NewBool(res || res1, line)
+				if res {
+					return self
+				}
+				return args[0]
 			},
 			[][]string{
 				{ANY},
