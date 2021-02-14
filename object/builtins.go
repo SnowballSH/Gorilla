@@ -104,6 +104,8 @@ func init() {
 	ArrayMethods()
 	HashMethod()
 
+	IntRangeMethods()
+
 	GlobalFunctions()
 }
 
