@@ -37,7 +37,7 @@ Gorilla is built to make simple, flexible, well-understood programs in a relativ
 ### There are 3 ways to set up Gorilla:
 
 1. If you are on **Windows 10** (and you trust I don't spread viruses), [download the latest binary executable](https://github.com/SnowballSH/Gorilla/releases)
-2. Try **Online**: [Gorilla Playground](https://snowballsh.me/Gorilla-Playground/) (made using Web Assembly)
+2. Try **Online**: [Gorilla Playground](https://snowballsh.me/Gorilla-Playground/)
 3. Download [Golang](https://golang.org/) (recommend v1.5), `git pull https://github.com/SnowballSH/Gorilla` and `go build`
 
 <br>
