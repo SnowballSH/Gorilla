@@ -2,6 +2,13 @@
 
 # Gorilla Programming Language
 
+---
+
+## NEWS:
+Gorilla is no longer in active development. I am currently creating a even faster language for specific uses. Stay tuned!
+
+---
+
 ## Gorilla is a tiny, dynamically typed, flexible programming language
 
 ### The minimized executable size is only about 2 MB!
