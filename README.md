@@ -5,7 +5,7 @@
 ---
 
 ## NEWS:
-Gorilla is no longer in active development. I am currently creating a even faster language for specific uses. Stay tuned!
+Gorilla 0.x is no longer in active development. Gorilla 1.0 is in-progress with blazingly-fast runtime. Stay tuned!
 
 ---
 
