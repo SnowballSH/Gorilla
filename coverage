@@ -1,0 +1,22 @@
+mode: set
+github.com/SnowballSH/Gorilla/parser/lexer.go:19.36,28.2 1 1
+github.com/SnowballSH/Gorilla/parser/lexer.go:30.36,35.14 3 1
+github.com/SnowballSH/Gorilla/parser/lexer.go:62.2,63.12 2 1
+github.com/SnowballSH/Gorilla/parser/lexer.go:36.11,37.73 1 1
+github.com/SnowballSH/Gorilla/parser/lexer.go:40.3,41.18 2 1
+github.com/SnowballSH/Gorilla/parser/lexer.go:42.12,43.27 1 1
+github.com/SnowballSH/Gorilla/parser/lexer.go:53.3,54.18 2 1
+github.com/SnowballSH/Gorilla/parser/lexer.go:56.12,59.18 3 1
+github.com/SnowballSH/Gorilla/parser/lexer.go:37.73,39.4 1 1
+github.com/SnowballSH/Gorilla/parser/lexer.go:43.27,50.4 3 1
+github.com/SnowballSH/Gorilla/parser/lexer.go:50.9,52.4 1 1
+github.com/SnowballSH/Gorilla/parser/lexer.go:66.58,73.2 1 1
+github.com/SnowballSH/Gorilla/parser/lexer.go:75.34,76.34 1 1
+github.com/SnowballSH/Gorilla/parser/lexer.go:76.34,78.3 1 1
+github.com/SnowballSH/Gorilla/parser/lexer.go:81.28,84.32 3 1
+github.com/SnowballSH/Gorilla/parser/lexer.go:84.32,86.3 1 1
+github.com/SnowballSH/Gorilla/parser/lexer.go:86.8,88.3 1 1
+github.com/SnowballSH/Gorilla/parser/lexer.go:91.33,93.2 1 1
+github.com/SnowballSH/Gorilla/parser/lexer.go:95.39,96.39 1 1
+github.com/SnowballSH/Gorilla/parser/lexer.go:96.39,98.3 1 1
+github.com/SnowballSH/Gorilla/parser/lexer.go:98.8,100.3 1 1
