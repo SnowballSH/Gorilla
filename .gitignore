@@ -1,0 +1,22 @@
+.idea/
+*.iml
+*.out
+*.wasm
+*.exe
+/wasm/
+gorilla-darwin-amd64
+gorilla-linux-amd64
+gorilla-windows-amd64.exe
+
+
+# Added by cargo
+
+/target
+
+
+# Added by cargo
+#
+# already existing elements were commented out
+
+#/target
+Cargo.lock
