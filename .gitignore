@@ -12,6 +12,7 @@ gorilla-windows-amd64.exe
 # Added by cargo
 
 /target
+/vm/target
 
 
 # Added by cargo
@@ -19,4 +20,4 @@ gorilla-windows-amd64.exe
 # already existing elements were commented out
 
 #/target
-Cargo.lock
+vm/Cargo.lock
