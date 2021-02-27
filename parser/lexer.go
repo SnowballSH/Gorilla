@@ -39,28 +39,62 @@ func (l *Lexer) next() token.Token {
 		}
 		l.readChar()
 		return l.next()
+
 	case '\r':
 		if l.peekChar() == '\n' {
-			ch := l.ch
 			l.readChar()
 			tok = l.newToken(
-				token.Terminator,
-				string(ch)+string(l.ch),
+				token.Newline,
+				"\r\n",
 			)
 		} else {
-			tok = l.newToken(token.Terminator, string(l.ch))
+			tok = l.newToken(token.Newline, "\n")
 		}
 		l.linePlace++
 		l.charPlace = 0
 
 	case '\n':
-		tok = l.newToken(token.Terminator, string(l.ch))
+		tok = l.newToken(token.Newline, "\n")
 		l.linePlace++
 		l.charPlace = 0
+
+	case ';':
+		tok = l.newToken(token.Semicolon, ";")
+	case '=':
+		tok = l.newToken(token.Eq, "=")
+
+	default:
+		if l.isNumber() {
+			tok = l.readNumber()
+		} else if l.isLetter() || l.ch == '$' {
+			tok = l.readIden()
+		} else {
+			tok = l.newToken(token.Illegal, string(l.ch))
+		}
 	}
 
 	l.readChar()
 	return tok
+}
+
+func (l *Lexer) readNumber() token.Token {
+	x := string(l.ch)
+	for l.peekIsNumber() {
+		l.readChar()
+		x += string(l.ch)
+	}
+
+	return l.newToken(token.Integer, x)
+}
+
+func (l *Lexer) readIden() token.Token {
+	x := string(l.ch)
+	for l.peekIsLetter() || l.peekIsNumber() {
+		l.readChar()
+		x += string(l.ch)
+	}
+
+	return l.newToken(token.Iden, x)
 }
 
 func (l *Lexer) newToken(t string, s string) token.Token {
@@ -70,6 +104,24 @@ func (l *Lexer) newToken(t string, s string) token.Token {
 		Char:    l.charPlace,
 		Line:    l.linePlace,
 	}
+}
+
+func (l *Lexer) isLetter() bool {
+	return ('A' <= l.ch && l.ch <= 'Z') || ('a' <= l.ch && l.ch <= 'z') || l.ch == '_'
+}
+
+func (l *Lexer) isNumber() bool {
+	return '0' <= l.ch && l.ch <= '9'
+}
+
+func (l *Lexer) peekIsLetter() bool {
+	p := l.peekChar()
+	return ('A' <= p && p <= 'Z') || ('a' <= p && p <= 'z') || p == '_'
+}
+
+func (l *Lexer) peekIsNumber() bool {
+	p := l.peekChar()
+	return '0' <= p && p <= '9'
 }
 
 func (l *Lexer) skipWhitespace() {

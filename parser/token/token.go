@@ -8,6 +8,12 @@ type Token struct {
 }
 
 const (
-	Integer    = "Integer"
-	Terminator = "Terminator"
+	Integer = "Integer"
+	Iden    = "Identifier"
+
+	Semicolon = ";"
+	Eq        = "="
+
+	Newline = "Newline"
+	Illegal = "Illegal"
 )
