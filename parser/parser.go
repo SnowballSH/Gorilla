@@ -1,4 +1,3 @@
 package parser
 
-type Parser struct {
-}
+type Parser struct{}
