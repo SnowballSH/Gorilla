@@ -14,6 +14,12 @@ const (
 	Semicolon = ";"
 	Eq        = "="
 
+	Plus  = "+"
+	Minus = "-"
+	Star  = "*"
+	Slash = "/"
+
 	Newline = "Newline"
 	Illegal = "Illegal"
+	EOF     = "End of file"
 )

@@ -1,0 +1,20 @@
+package errors
+
+import (
+	"github.com/stretchr/testify/assert"
+	"strings"
+	"testing"
+)
+
+func TestMakeError(t *testing.T) {
+	code := `
+print()
+print )
+`
+
+	assert.Equal(t, strings.TrimSpace(`
+print )
+      ^
+Invalid syntax
+`), MakeError(code, "Invalid syntax", 1, 7, 1))
+}

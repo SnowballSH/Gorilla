@@ -63,6 +63,18 @@ func (l *Lexer) next() token.Token {
 	case '=':
 		tok = l.newToken(token.Eq, "=")
 
+	case '+':
+		tok = l.newToken(token.Plus, "+")
+	case '-':
+		tok = l.newToken(token.Minus, "-")
+	case '*':
+		tok = l.newToken(token.Star, "*")
+	case '/':
+		tok = l.newToken(token.Slash, "/")
+
+	case 0:
+		tok = l.newToken(token.EOF, string(byte(0)))
+
 	default:
 		if l.isNumber() {
 			tok = l.readNumber()

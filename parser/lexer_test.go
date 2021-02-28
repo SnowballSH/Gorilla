@@ -140,6 +140,30 @@ func TestMisc(t *testing.T) {
 	assert.Equal(t, "1", n.Literal)
 }
 
+func TestBinOp(t *testing.T) {
+	lexer := NewLexer("+-*/")
+	var n token.Token
+
+	n = lexer.next()
+	assert.Equal(t, token.Plus, n.Type)
+	assert.Equal(t, "+", n.Literal)
+
+	n = lexer.next()
+	assert.Equal(t, token.Minus, n.Type)
+	assert.Equal(t, "-", n.Literal)
+
+	n = lexer.next()
+	assert.Equal(t, token.Star, n.Type)
+	assert.Equal(t, "*", n.Literal)
+
+	n = lexer.next()
+	assert.Equal(t, token.Slash, n.Type)
+	assert.Equal(t, "/", n.Literal)
+
+	n = lexer.next()
+	assert.Equal(t, token.EOF, n.Type)
+}
+
 func TestIllegal(t *testing.T) {
 	lexer := NewLexer("✔\rΣ")
 	assert.Equal(t, 3, lexer.inputLength)
