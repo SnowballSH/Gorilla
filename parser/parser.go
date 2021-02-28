@@ -1,3 +1,6 @@
 package parser
 
-type Parser struct{}
+var precedence = map[string][2]int{}
+
+type Parser struct {
+}

@@ -20,4 +20,4 @@ gorilla-windows-amd64.exe
 # already existing elements were commented out
 
 #/target
-vm/Cargo.lock
+Cargo.lock
