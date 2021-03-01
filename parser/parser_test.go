@@ -19,6 +19,10 @@ func TestSimpleParse(t *testing.T) {
 	var n *string = nil
 	assert.Equal(t, n, p.error)
 	assert.Equal(t, "65500;", res[0].String())
+}
+
+func TestError(t *testing.T) {
+	var p *Parser
 
 	p = NewParser(NewLexer("65500 123"))
 	p.Parse()
@@ -34,5 +38,13 @@ Expected newline or ;, got 123
 99999999999999999999999
 ^
 Could not parse '99999999999999999999999' as 64-bit integer
+`), *p.error)
+
+	p = NewParser(NewLexer("✔"))
+	p.Parse()
+	assert.Equal(t, strings.TrimSpace(`
+✔
+^
+Unexpected '✔'
 `), *p.error)
 }

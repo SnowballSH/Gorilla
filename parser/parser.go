@@ -5,6 +5,7 @@ import (
 	"github.com/SnowballSH/Gorilla/parser/ast"
 	"github.com/SnowballSH/Gorilla/parser/token"
 	"strconv"
+	"unicode/utf8"
 )
 
 var infixPrecedence = map[string][2]byte{
@@ -56,8 +57,9 @@ func (p *Parser) report(why string) {
 	err := errors.MakeError(
 		string(p.l.input),
 		why,
-		p.cur.Line, p.cur.Char, len(p.cur.Literal))
+		p.cur.Line, p.cur.Char, utf8.RuneCountInString(p.cur.Literal))
 	p.error = &err
+	panic(errors.PARSINGERROR{})
 }
 
 /* ... */
@@ -65,20 +67,23 @@ func (p *Parser) report(why string) {
 func (p *Parser) Parse() []ast.Node {
 	var program []ast.Node
 
+	defer func() {
+		if r := recover(); r != nil {
+			if _, ok := r.(errors.PARSINGERROR); !ok {
+				panic(r)
+			}
+		}
+	}()
+
 	p.skipNL()
 	for !p.curIs(token.EOF) {
 		stmt := p.ParseStatement()
-		if stmt != nil {
-			program = append(program, stmt)
-		} else {
-			return nil
-		}
+		program = append(program, stmt)
 
 		p.next()
 
 		if !p.curIs(token.Newline) && !p.curIs(token.Semicolon) && !p.curIs(token.EOF) {
 			p.report("Expected newline or ;, got " + p.cur.Literal)
-			return nil
 		}
 
 		p.skipNL()
@@ -97,9 +102,6 @@ func (p *Parser) ParseStatement() ast.Statement {
 func (p *Parser) ParseExpressionStatement() ast.Statement {
 	stmt := &ast.ExpressionStatement{Tk: p.cur}
 	stmt.Es = p.ParseExpression()
-	if stmt.Es == nil {
-		return nil
-	}
 	return stmt
 }
 
@@ -109,7 +111,6 @@ func (p *Parser) ParseExpression() ast.Expression {
 		x, e := strconv.ParseInt(p.cur.Literal, 10, 64)
 		if e != nil {
 			p.report("Could not parse '" + p.cur.Literal + "' as 64-bit integer")
-			return nil
 		}
 
 		return &ast.Integer{
@@ -117,7 +118,8 @@ func (p *Parser) ParseExpression() ast.Expression {
 			Tk:    p.cur,
 		}
 	default:
-		panic("error")
+		p.report("Unexpected '" + p.cur.Literal + "'")
+		panic(errors.PARSINGERROR{})
 	}
 }
 

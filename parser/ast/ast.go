@@ -7,7 +7,6 @@ import (
 
 type Node interface {
 	String() string
-	Token() token.Token
 }
 
 type Statement interface {
@@ -28,14 +27,7 @@ type ExpressionStatement struct {
 }
 
 func (e ExpressionStatement) String() string {
-	if e.Es != nil {
-		return e.Es.String() + ";"
-	}
-	return ""
-}
-
-func (e ExpressionStatement) Token() token.Token {
-	return e.Tk
+	return e.Es.String() + ";"
 }
 
 func (e ExpressionStatement) s() {}
@@ -51,10 +43,6 @@ func (i Integer) String() string {
 	return fmt.Sprintf("%d", i.Value)
 }
 
-func (i Integer) Token() token.Token {
-	return i.Tk
-}
-
 func (i Integer) e() {}
 
 type Infix struct {
@@ -66,10 +54,6 @@ type Infix struct {
 
 func (i Infix) String() string {
 	return fmt.Sprintf("(%s %s %s)", i.Left.String(), i.Op.Literal, i.Right.String())
-}
-
-func (i Infix) Token() token.Token {
-	return i.Tk
 }
 
 func (i Infix) e() {}
