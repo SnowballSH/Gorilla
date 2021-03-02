@@ -10,6 +10,10 @@ func TestNewParser(t *testing.T) {
 	p := NewParser(NewLexer("123 abc"))
 	assert.Equal(t, "123", p.cur.Literal)
 	assert.Equal(t, "abc", p.peek.Literal)
+
+	p = NewParser(NewLexer(""))
+	assert.Equal(t, rune(0), p.l.ch)
+	assert.Equal(t, 0, p.l.inputLength)
 }
 
 func TestSimpleParse(t *testing.T) {
@@ -19,6 +23,27 @@ func TestSimpleParse(t *testing.T) {
 	var n *string = nil
 	assert.Equal(t, n, p.error)
 	assert.Equal(t, "65500;", res[0].String())
+}
+
+func TestParseBinOp(t *testing.T) {
+	p := NewParser(NewLexer("2 + 3\n3 * 4"))
+	res := p.Parse()
+	assert.Equal(t, 2, len(res))
+
+	assert.Equal(t, "(2 + 3);", res[0].String())
+	assert.Equal(t, "(3 * 4);", res[1].String())
+
+	p = NewParser(NewLexer("2 + 3 * 4"))
+	res = p.Parse()
+	assert.Equal(t, 1, len(res))
+
+	assert.Equal(t, "(2 + (3 * 4));", res[0].String())
+
+	p = NewParser(NewLexer("2 / 3 - 4"))
+	res = p.Parse()
+	assert.Equal(t, 1, len(res))
+
+	assert.Equal(t, "((2 / 3) - 4);", res[0].String())
 }
 
 func TestError(t *testing.T) {

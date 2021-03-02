@@ -17,10 +17,16 @@ type Lexer struct {
 }
 
 func NewLexer(input string) *Lexer {
+	var ch rune
+	if utf8.RuneCountInString(input) == 0 {
+		ch = 0
+	} else {
+		ch = []rune(input)[0]
+	}
 	return &Lexer{
 		input:       []rune(input),
 		inputLength: utf8.RuneCountInString(input),
-		ch:          []rune(input)[0],
+		ch:          ch,
 		position:    0,
 		charPlace:   1,
 		linePlace:   0,

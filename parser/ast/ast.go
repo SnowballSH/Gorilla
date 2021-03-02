@@ -49,7 +49,6 @@ type Infix struct {
 	Left  Node
 	Right Node
 	Op    token.Token
-	Tk    token.Token
 }
 
 func (i Infix) String() string {

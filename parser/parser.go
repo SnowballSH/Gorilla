@@ -59,7 +59,7 @@ func (p *Parser) report(why string) {
 		why,
 		p.cur.Line, p.cur.Char, utf8.RuneCountInString(p.cur.Literal))
 	p.error = &err
-	panic(errors.PARSINGERROR{})
+	panic(errors.PARSINGERROR(0))
 }
 
 /* ... */
@@ -101,11 +101,40 @@ func (p *Parser) ParseStatement() ast.Statement {
 
 func (p *Parser) ParseExpressionStatement() ast.Statement {
 	stmt := &ast.ExpressionStatement{Tk: p.cur}
-	stmt.Es = p.ParseExpression()
+	stmt.Es = p.ParseExpression(0)
 	return stmt
 }
 
-func (p *Parser) ParseExpression() ast.Expression {
+func (p *Parser) ParseExpression(pr byte) ast.Expression {
+	left := p.ParseAtom()
+
+	for !p.peekIs(token.EOF) {
+		op := p.peek
+		prs, ok := infixPrecedence[op.Type]
+		if !ok {
+			break
+		}
+
+		if prs[0] < pr {
+			break
+		}
+
+		p.next()
+		p.next()
+
+		right := p.ParseExpression(prs[1])
+
+		left = &ast.Infix{
+			Left:  left,
+			Right: right,
+			Op:    op,
+		}
+	}
+
+	return left
+}
+
+func (p *Parser) ParseAtom() ast.Expression {
 	switch p.cur.Type {
 	case token.Integer:
 		x, e := strconv.ParseInt(p.cur.Literal, 10, 64)
@@ -119,10 +148,6 @@ func (p *Parser) ParseExpression() ast.Expression {
 		}
 	default:
 		p.report("Unexpected '" + p.cur.Literal + "'")
-		panic(errors.PARSINGERROR{})
+		return nil
 	}
-}
-
-func (p *Parser) parseInfixExpr() ast.Node {
-	panic(0)
 }

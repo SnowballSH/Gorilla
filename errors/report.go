@@ -4,8 +4,7 @@ import (
 	"strings"
 )
 
-type PARSINGERROR struct {
-}
+type PARSINGERROR byte
 
 func MakeError(code, why string, line, char, e int) string {
 	return strings.Split(strings.ReplaceAll(strings.TrimSpace(code), "\r", ""), "\n")[line] +
