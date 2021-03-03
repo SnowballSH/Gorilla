@@ -21,7 +21,7 @@ func TestSimpleParse(t *testing.T) {
 	res := p.Parse()
 	assert.Equal(t, 1, len(res))
 	var n *string = nil
-	assert.Equal(t, n, p.error)
+	assert.Equal(t, n, p.Error)
 	assert.Equal(t, "65500;", res[0].String())
 }
 
@@ -44,6 +44,12 @@ func TestParseBinOp(t *testing.T) {
 	assert.Equal(t, 1, len(res))
 
 	assert.Equal(t, "((2 / 3) - 4);", res[0].String())
+
+	p = NewParser(NewLexer("3 * 9 + 4 - 5 * 6 * 999"))
+	res = p.Parse()
+	assert.Equal(t, 1, len(res))
+
+	assert.Equal(t, "(((3 * 9) + 4) - ((5 * 6) * 999));", res[0].String())
 }
 
 func TestError(t *testing.T) {
@@ -52,24 +58,30 @@ func TestError(t *testing.T) {
 	p = NewParser(NewLexer("65500 123"))
 	p.Parse()
 	assert.Equal(t, strings.TrimSpace(`
+Error in line 1:
+
 65500 123
       ^
 Expected newline or ;, got 123
-`), *p.error)
+`), *p.Error)
 
 	p = NewParser(NewLexer("99999999999999999999999"))
 	p.Parse()
 	assert.Equal(t, strings.TrimSpace(`
+Error in line 1:
+
 99999999999999999999999
 ^
 Could not parse '99999999999999999999999' as 64-bit integer
-`), *p.error)
+`), *p.Error)
 
 	p = NewParser(NewLexer("✔"))
 	p.Parse()
 	assert.Equal(t, strings.TrimSpace(`
+Error in line 1:
+
 ✔
 ^
 Unexpected '✔'
-`), *p.error)
+`), *p.Error)
 }

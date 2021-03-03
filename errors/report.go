@@ -1,12 +1,13 @@
 package errors
 
 import (
+	"fmt"
 	"strings"
 )
 
 type PARSINGERROR byte
 
 func MakeError(code, why string, line, char, e int) string {
-	return strings.Split(strings.ReplaceAll(strings.TrimSpace(code), "\r", ""), "\n")[line] +
+	return fmt.Sprintf("Error in line %d:\n\n", line+1) + strings.Split(strings.ReplaceAll(strings.TrimSpace(code), "\r", ""), "\n")[line] +
 		"\n" + strings.Repeat(" ", char-e) + "^" + "\n" + why
 }

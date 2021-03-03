@@ -18,7 +18,7 @@ var infixPrecedence = map[string][2]byte{
 
 type Parser struct {
 	l     *Lexer
-	error *string
+	Error *string
 
 	cur  token.Token
 	peek token.Token
@@ -27,7 +27,7 @@ type Parser struct {
 func NewParser(l *Lexer) *Parser {
 	p := &Parser{
 		l:     l,
-		error: nil,
+		Error: nil,
 	}
 	p.next()
 	p.next()
@@ -58,7 +58,7 @@ func (p *Parser) report(why string) {
 		string(p.l.input),
 		why,
 		p.cur.Line, p.cur.Char, utf8.RuneCountInString(p.cur.Literal))
-	p.error = &err
+	p.Error = &err
 	panic(errors.PARSINGERROR(0))
 }
 

@@ -13,6 +13,8 @@ print )
 `
 
 	assert.Equal(t, strings.TrimSpace(`
+Error in line 2:
+
 print )
       ^
 Invalid syntax
