@@ -78,6 +78,11 @@ func (l *Lexer) next() token.Token {
 	case '/':
 		tok = l.newToken(token.Slash, "/")
 
+	case '(':
+		tok = l.newToken(token.LParen, "(")
+	case ')':
+		tok = l.newToken(token.RParen, ")")
+
 	case 0:
 		tok = l.newToken(token.EOF, string(byte(0)))
 

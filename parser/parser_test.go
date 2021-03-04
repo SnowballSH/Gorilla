@@ -50,6 +50,26 @@ func TestParseBinOp(t *testing.T) {
 	assert.Equal(t, 1, len(res))
 
 	assert.Equal(t, "(((3 * 9) + 4) - ((5 * 6) * 999));", res[0].String())
+
+	p = NewParser(NewLexer("3 * (9 + 4) - 5 * (6 * 999)"))
+	res = p.Parse()
+	assert.Equal(t, 1, len(res))
+
+	assert.Equal(t, "((3 * (9 + 4)) - (5 * (6 * 999)));", res[0].String())
+}
+
+func TestVar(t *testing.T) {
+	p := NewParser(NewLexer("$abc * 3"))
+	res := p.Parse()
+	assert.Equal(t, "($abc * 3);", res[0].String())
+
+	p = NewParser(NewLexer("a = 1"))
+	res = p.Parse()
+	assert.Equal(t, "(a = 1);", res[0].String())
+
+	p = NewParser(NewLexer("2 + a = (2 + 3) * 7"))
+	res = p.Parse()
+	assert.Equal(t, "(2 + (a = ((2 + 3) * 7)));", res[0].String())
 }
 
 func TestError(t *testing.T) {
@@ -83,5 +103,15 @@ Error in line 1:
 ✔
 ^
 Unexpected '✔'
+`), *p.Error)
+
+	p = NewParser(NewLexer("(\n1"))
+	p.Parse()
+	assert.Equal(t, strings.TrimSpace(`
+Error in line 2:
+
+1
+^
+Expected ')', got '1'
 `), *p.Error)
 }

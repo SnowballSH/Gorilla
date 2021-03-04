@@ -19,6 +19,9 @@ const (
 	Star  = "*"
 	Slash = "/"
 
+	LParen = "("
+	RParen = ")"
+
 	Newline = "Newline"
 	Illegal = "Illegal"
 	EOF     = "End of file"

@@ -39,11 +39,34 @@ type Integer struct {
 	Tk    token.Token
 }
 
-func (i Integer) String() string {
+func (i *Integer) String() string {
 	return fmt.Sprintf("%d", i.Value)
 }
 
-func (i Integer) e() {}
+func (i *Integer) e() {}
+
+type GetVar struct {
+	Name string
+	Tk   token.Token
+}
+
+func (g *GetVar) String() string {
+	return g.Name
+}
+
+func (*GetVar) e() {}
+
+type SetVar struct {
+	Name  string
+	Value Expression
+	Tk    token.Token
+}
+
+func (s *SetVar) String() string {
+	return fmt.Sprintf("(%s = %s)", s.Name, s.Value)
+}
+
+func (*SetVar) e() {}
 
 type Infix struct {
 	Left  Node
@@ -51,8 +74,8 @@ type Infix struct {
 	Op    token.Token
 }
 
-func (i Infix) String() string {
+func (i *Infix) String() string {
 	return fmt.Sprintf("(%s %s %s)", i.Left.String(), i.Op.Literal, i.Right.String())
 }
 
-func (i Infix) e() {}
+func (i *Infix) e() {}

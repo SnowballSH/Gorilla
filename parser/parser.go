@@ -106,6 +106,7 @@ func (p *Parser) ParseExpressionStatement() ast.Statement {
 }
 
 func (p *Parser) ParseExpression(pr byte) ast.Expression {
+	p.skipNL()
 	left := p.ParseAtom()
 
 	for !p.peekIs(token.EOF) {
@@ -146,8 +147,36 @@ func (p *Parser) ParseAtom() ast.Expression {
 			Value: x,
 			Tk:    p.cur,
 		}
+	case token.Iden:
+		return p.ParseIden()
+	case token.LParen:
+		p.next()
+		r := p.ParseExpression(0)
+		if !p.peekIs(token.RParen) {
+			p.report("Expected ')', got '" + p.cur.Literal + "'")
+		}
+		p.next()
+		return r
 	default:
 		p.report("Unexpected '" + p.cur.Literal + "'")
 		return nil
+	}
+}
+
+func (p *Parser) ParseIden() ast.Expression {
+	p.skipNL()
+	if p.peekIs(token.Eq) {
+		x := p.cur
+		p.next()
+		p.next()
+		return &ast.SetVar{
+			Name:  x.Literal,
+			Value: p.ParseExpression(0),
+			Tk:    x,
+		}
+	}
+	return &ast.GetVar{
+		Name: p.cur.Literal,
+		Tk:   p.cur,
 	}
 }
