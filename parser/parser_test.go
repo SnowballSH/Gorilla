@@ -82,7 +82,7 @@ Error in line 1:
 
 65500 123
       ^
-Expected newline or ;, got 123
+Expected newline or ;, got '123'
 `), *p.Error)
 
 	p = NewParser(NewLexer("99999999999999999999999"))

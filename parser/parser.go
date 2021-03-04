@@ -83,7 +83,7 @@ func (p *Parser) Parse() []ast.Node {
 		p.next()
 
 		if !p.curIs(token.Newline) && !p.curIs(token.Semicolon) && !p.curIs(token.EOF) {
-			p.report("Expected newline or ;, got " + p.cur.Literal)
+			p.report("Expected newline or ;, got '" + p.cur.Literal + "'")
 		}
 
 		p.skipNL()
