@@ -64,8 +64,8 @@ func (p *Parser) report(why string) {
 
 /* ... */
 
-func (p *Parser) Parse() []ast.Node {
-	var program []ast.Node
+func (p *Parser) Parse() []ast.Statement {
+	var program []ast.Statement
 
 	defer func() {
 		if r := recover(); r != nil {
