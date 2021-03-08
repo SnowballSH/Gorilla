@@ -6,35 +6,21 @@ import (
 	"github.com/SnowballSH/Gorilla/parser/ast"
 )
 
-type Compiler struct {
-	nodes []ast.Statement
-
-	channels []chan []byte
-
-	Result []byte
-}
-
-func NewCompiler(nodes []ast.Statement) *Compiler {
-	return &Compiler{
-		nodes:    nodes,
-		channels: []chan []byte{},
-		Result:   []byte{0x69},
-	}
-}
-
-func (c *Compiler) compile() (ok bool) {
-	for _, x := range c.nodes {
+func Compile(nodes []ast.Statement) (res []byte, ok bool) {
+	result := []byte{0x69}
+	var channels []chan []byte
+	for _, x := range nodes {
 		channel := make(chan []byte)
-		c.channels = append(c.channels, channel)
+		channels = append(channels, channel)
 		go func(w ast.Statement) {
 			compileNode(channel, w)
 		}(x)
 	}
-	for _, y := range c.channels {
+	for _, y := range channels {
 		val := <-y
-		c.Result = append(c.Result, val...)
+		result = append(result, val...)
 	}
-	return true
+	return result, true
 }
 
 func compileNode(channel chan []byte, node ast.Statement) {
