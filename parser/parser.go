@@ -69,9 +69,7 @@ func (p *Parser) Parse() []ast.Statement {
 
 	defer func() {
 		if r := recover(); r != nil {
-			if _, ok := r.(errors.PARSINGERROR); !ok {
-				panic(r)
-			}
+			errors.TestERR(r)
 		}
 	}()
 

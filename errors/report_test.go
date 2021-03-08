@@ -20,3 +20,9 @@ print )
 Invalid syntax
 `), MakeError(code, "Invalid syntax", 1, 7, 1))
 }
+
+func TestPanic(t *testing.T) {
+	assert.Panics(t, func() {
+		TestERR("")
+	})
+}
