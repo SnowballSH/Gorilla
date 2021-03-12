@@ -1,4 +1,4 @@
-package objects
+package runtime
 
 // Every Gorilla Object and Class inherits from this
 type BaseObject interface {

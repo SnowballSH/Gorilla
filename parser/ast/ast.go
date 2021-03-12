@@ -7,6 +7,7 @@ import (
 
 type Node interface {
 	String() string
+	Line() int
 }
 
 type Statement interface {
@@ -30,6 +31,10 @@ func (e ExpressionStatement) String() string {
 	return e.Es.String() + ";"
 }
 
+func (e ExpressionStatement) Line() int {
+	return e.Tk.Line
+}
+
 func (e ExpressionStatement) s() {}
 
 /* ... */
@@ -43,6 +48,10 @@ func (i *Integer) String() string {
 	return fmt.Sprintf("%d", i.Value)
 }
 
+func (i *Integer) Line() int {
+	return i.Tk.Line
+}
+
 func (i *Integer) e() {}
 
 type GetVar struct {
@@ -52,6 +61,10 @@ type GetVar struct {
 
 func (g *GetVar) String() string {
 	return g.Name
+}
+
+func (g *GetVar) Line() int {
+	return g.Tk.Line
 }
 
 func (*GetVar) e() {}
@@ -64,6 +77,10 @@ type SetVar struct {
 
 func (s *SetVar) String() string {
 	return fmt.Sprintf("(%s = %s)", s.Name, s.Value)
+}
+
+func (s *SetVar) Line() int {
+	return s.Tk.Line
 }
 
 func (*SetVar) e() {}
@@ -79,3 +96,7 @@ func (i *Infix) String() string {
 }
 
 func (i *Infix) e() {}
+
+func (i *Infix) Line() int {
+	return i.Op.Line
+}

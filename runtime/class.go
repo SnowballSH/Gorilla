@@ -1,4 +1,4 @@
-package objects
+package runtime
 
 // Defines a Class, or Type
 type RClass struct {

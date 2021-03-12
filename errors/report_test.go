@@ -25,4 +25,14 @@ func TestPanic(t *testing.T) {
 	assert.Panics(t, func() {
 		TestERR("")
 	})
+	assert.Panics(t, func() {
+		TestVMERR("")
+	})
+}
+
+func TestReport(t *testing.T) {
+	assert.Equal(t, &VMERROR{
+		message: "??",
+		line:    1,
+	}, MakeVMError("??", 1))
 }

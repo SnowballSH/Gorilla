@@ -1,4 +1,4 @@
-package objects
+package runtime
 
 import (
 	"github.com/stretchr/testify/assert"

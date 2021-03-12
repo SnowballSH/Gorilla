@@ -3,7 +3,10 @@ package grammar
 const (
 	Magic byte = 0x69
 
-	Integer byte = iota
+	Pop byte = iota
+	Advance
+
+	Integer
 	// Length of integer in unsigned leb128
 	// Followed by leb128
 

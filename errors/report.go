@@ -12,8 +12,26 @@ func MakeError(code, why string, line, char, e int) string {
 		"\n" + strings.Repeat(" ", char-e) + "^" + "\n" + why
 }
 
+type VMERROR struct {
+	message string
+	line    int
+}
+
+func MakeVMError(why string, l int) *VMERROR {
+	return &VMERROR{
+		message: why,
+		line:    l,
+	}
+}
+
 func TestERR(r interface{}) {
 	if _, ok := r.(PARSINGERROR); !ok {
+		panic(r)
+	}
+}
+
+func TestVMERR(r interface{}) {
+	if _, ok := r.(*VMERROR); !ok {
 		panic(r)
 	}
 }

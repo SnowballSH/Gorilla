@@ -9,55 +9,67 @@ import (
 
 func Compile(nodes []ast.Statement) (res []byte, ok bool) {
 	result := []byte{grammar.Magic}
-	var channels []chan []byte
+	lastLine := 0
+
 	for _, x := range nodes {
-		channel := make(chan []byte)
-		channels = append(channels, channel)
-		go func(w ast.Statement) {
-			compileNode(channel, w)
-		}(x)
-	}
-	for _, y := range channels {
-		val := <-y
-		result = append(result, val...)
+		r, l := compileNode(x, lastLine)
+		lastLine = l
+		result = append(result, r...)
 	}
 	return result, true
 }
 
-func compileNode(channel chan []byte, node ast.Node) {
+func compileNode(node ast.Node, lastLine int) ([]byte, int) {
+	var x []byte
+	for node.Line() > lastLine {
+		lastLine++
+		x = append(x, grammar.Advance)
+	}
+
 	switch v := node.(type) {
 	case *ast.ExpressionStatement:
-		compileExpr(channel, v.Es)
+		k, l := compileExpr(v.Es, lastLine)
+		lastLine = l
+		x = append(x, k...)
+		x = append(x, grammar.Pop)
 	}
+	return x, lastLine
 }
 
-func compileExpr(channel chan []byte, v ast.Expression) {
+func compileExpr(v ast.Expression, lastLine int) ([]byte, int) {
+	var w []byte
+
+	for v.Line() > lastLine {
+		lastLine++
+		w = append(w, grammar.Advance)
+	}
+
 	switch e := v.(type) {
 	case *ast.Integer:
-		w := []byte{grammar.Integer}
+		w = append(w, grammar.Integer)
+
 		l := leb128.AppendSleb128(nil, e.Value)
 		w = append(w, byte(len(l)))
 		w = append(w, l...)
-		channel <- w
 
 	case *ast.GetVar:
-		w := []byte{grammar.GetVar}
+		w = append(w, grammar.GetVar)
+
 		l := []byte(e.Name)
 		w = append(w, byte(len(l)))
 		w = append(w, l...)
-		channel <- w
 
 	case *ast.SetVar:
-		w := []byte{grammar.SetVar}
+		w = append(w, grammar.SetVar)
+
 		l := []byte(e.Name)
 		w = append(w, byte(len(l)))
 		w = append(w, l...)
 
-		ch := make(chan []byte)
-		go func() {
-			compileExpr(ch, e.Value)
-		}()
-		w = append(w, <-ch...)
-		channel <- w
+		x, o := compileExpr(e.Value, lastLine)
+		lastLine = o
+		w = append(w, x...)
 	}
+
+	return w, lastLine
 }
