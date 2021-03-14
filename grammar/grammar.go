@@ -5,6 +5,7 @@ const (
 
 	Pop byte = iota
 	Advance
+	Back
 
 	Integer
 	// Length of integer in unsigned leb128
@@ -15,7 +16,16 @@ const (
 	// String encoded in bytes
 
 	SetVar
+	// Expression on stack
 	// Length of name (string) in bytes
 	// String encoded in bytes
-	// Expression
+
+	GetInstance
+	// Expression on stack
+	// Length of name (string) in bytes
+	// String encoded in bytes
+
+	Call
+	// stack should be [arg3, arg2, arg1, numberOfArgs, callee]
+	// Will perform callee(arg1, arg2, arg3)
 )

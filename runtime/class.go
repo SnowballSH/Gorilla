@@ -31,19 +31,19 @@ func (R *RClass) InstanceVariableSet(s string, object BaseObject) BaseObject {
 	return R.Instances.set(s, object)
 }
 
-func (R *RClass) instanceVariables() *environment {
+func (R *RClass) InstanceVariables() *environment {
 	return R.Instances
 }
 
-func (R *RClass) setInstanceVariables(e *environment) {
+func (R *RClass) SetInstanceVariables(e *environment) {
 	R.Instances = e
 }
 
-func (R *RClass) isTruthy() bool {
+func (R *RClass) IsTruthy() bool {
 	return true
 }
 
-func (R *RClass) equalTo(object BaseObject) bool {
+func (R *RClass) EqualTo(object BaseObject) bool {
 	return object == R
 }
 

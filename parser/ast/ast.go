@@ -86,8 +86,8 @@ func (s *SetVar) Line() int {
 func (*SetVar) e() {}
 
 type Infix struct {
-	Left  Node
-	Right Node
+	Left  Expression
+	Right Expression
 	Op    token.Token
 }
 

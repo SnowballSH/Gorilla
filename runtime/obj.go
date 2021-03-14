@@ -8,10 +8,11 @@ type BaseObject interface {
 	Inspect() string
 	InstanceVariableGet(string) (BaseObject, bool)
 	InstanceVariableSet(string, BaseObject) BaseObject
-	instanceVariables() *environment
-	setInstanceVariables(*environment)
-	isTruthy() bool
-	equalTo(BaseObject) bool
+	InstanceVariables() *environment
+	SetInstanceVariables(*environment)
+
+	IsTruthy() bool
+	EqualTo(BaseObject) bool
 }
 
 // Object struct holds a normal object
@@ -49,18 +50,18 @@ func (o *Object) InstanceVariableSet(s string, object BaseObject) BaseObject {
 	return o.Instances.set(s, object)
 }
 
-func (o *Object) instanceVariables() *environment {
+func (o *Object) InstanceVariables() *environment {
 	return o.Instances
 }
 
-func (o *Object) setInstanceVariables(e *environment) {
+func (o *Object) SetInstanceVariables(e *environment) {
 	o.Instances = e
 }
 
-func (o *Object) isTruthy() bool {
+func (o *Object) IsTruthy() bool {
 	return o.IsTruthyFunc(o)
 }
 
-func (o *Object) equalTo(object BaseObject) bool {
+func (o *Object) EqualTo(object BaseObject) bool {
 	return o.EqualToFunc(o, object)
 }

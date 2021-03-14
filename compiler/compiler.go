@@ -7,69 +7,95 @@ import (
 	"github.com/SnowballSH/Gorilla/parser/ast"
 )
 
-func Compile(nodes []ast.Statement) (res []byte, ok bool) {
-	result := []byte{grammar.Magic}
-	lastLine := 0
-
-	for _, x := range nodes {
-		r, l := compileNode(x, lastLine)
-		lastLine = l
-		result = append(result, r...)
-	}
-	return result, true
+type Compiler struct {
+	result   []byte
+	lastLine int
 }
 
-func compileNode(node ast.Node, lastLine int) ([]byte, int) {
-	var x []byte
-	for node.Line() > lastLine {
-		lastLine++
-		x = append(x, grammar.Advance)
+func NewCompiler() *Compiler {
+	return &Compiler{
+		result:   []byte{grammar.Magic},
+		lastLine: 0,
 	}
+}
+
+func (c *Compiler) updateLine(line int) {
+	for line > c.lastLine {
+		c.lastLine++
+		c.emit(grammar.Advance)
+	}
+	for line < c.lastLine {
+		c.lastLine--
+		c.emit(grammar.Back)
+	}
+}
+
+func (c *Compiler) emit(b ...byte) {
+	c.result = append(c.result, b...)
+}
+
+func (c *Compiler) emitString(b string) {
+	c.emit(byte(len(b)))
+	c.emit([]byte(b)...)
+}
+
+func (c *Compiler) emitInt(b int64) {
+	l := leb128.AppendSleb128(nil, b)
+	c.emit(byte(len(l)))
+	c.emit(l...)
+}
+
+func (c *Compiler) Compile(nodes []ast.Statement) {
+	for _, x := range nodes {
+		c.compileNode(x)
+	}
+}
+
+func (c *Compiler) compileNode(node ast.Node) {
+	c.updateLine(node.Line())
 
 	switch v := node.(type) {
 	case *ast.ExpressionStatement:
-		k, l := compileExpr(v.Es, lastLine)
-		lastLine = l
-		x = append(x, k...)
-		x = append(x, grammar.Pop)
+		c.compileExpr(v.Es)
+		c.emit(grammar.Pop)
 	}
-	return x, lastLine
 }
 
-func compileExpr(v ast.Expression, lastLine int) ([]byte, int) {
-	var w []byte
-
-	for v.Line() > lastLine {
-		lastLine++
-		w = append(w, grammar.Advance)
-	}
+func (c *Compiler) compileExpr(v ast.Expression) {
+	c.updateLine(v.Line())
 
 	switch e := v.(type) {
 	case *ast.Integer:
-		w = append(w, grammar.Integer)
+		c.emit(grammar.Integer)
 
-		l := leb128.AppendSleb128(nil, e.Value)
-		w = append(w, byte(len(l)))
-		w = append(w, l...)
+		c.emitInt(e.Value)
 
 	case *ast.GetVar:
-		w = append(w, grammar.GetVar)
+		c.emit(grammar.GetVar)
 
-		l := []byte(e.Name)
-		w = append(w, byte(len(l)))
-		w = append(w, l...)
+		c.emitString(e.Name)
 
 	case *ast.SetVar:
-		w = append(w, grammar.SetVar)
+		c.compileExpr(e.Value)
 
-		l := []byte(e.Name)
-		w = append(w, byte(len(l)))
-		w = append(w, l...)
+		c.updateLine(e.Line())
 
-		x, o := compileExpr(e.Value, lastLine)
-		lastLine = o
-		w = append(w, x...)
+		c.emit(grammar.SetVar)
+
+		c.emitString(e.Name)
+
+	case *ast.Infix:
+		c.compileExpr(e.Right)
+		c.updateLine(e.Line())
+
+		c.emitInt(1)
+
+		c.compileExpr(e.Left)
+		c.updateLine(e.Line())
+
+		c.emitString(e.Op.Literal)
+		c.emit(grammar.GetInstance)
+
+		c.emit(grammar.Call)
 	}
-
-	return w, lastLine
 }
