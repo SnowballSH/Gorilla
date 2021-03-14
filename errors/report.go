@@ -13,14 +13,14 @@ func MakeError(code, why string, line, char, e int) string {
 }
 
 type VMERROR struct {
-	message string
-	line    int
+	Message string
+	Line    int
 }
 
 func MakeVMError(why string, l int) *VMERROR {
 	return &VMERROR{
-		message: why,
-		line:    l,
+		Message: why,
+		Line:    l,
 	}
 }
 

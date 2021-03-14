@@ -32,7 +32,7 @@ func TestPanic(t *testing.T) {
 
 func TestReport(t *testing.T) {
 	assert.Equal(t, &VMERROR{
-		message: "??",
-		line:    1,
+		Message: "??",
+		Line:    1,
 	}, MakeVMError("??", 1))
 }

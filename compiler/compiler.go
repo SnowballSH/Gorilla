@@ -8,13 +8,13 @@ import (
 )
 
 type Compiler struct {
-	result   []byte
+	Result   []byte
 	lastLine int
 }
 
 func NewCompiler() *Compiler {
 	return &Compiler{
-		result:   []byte{grammar.Magic},
+		Result:   []byte{grammar.Magic},
 		lastLine: 0,
 	}
 }
@@ -31,7 +31,7 @@ func (c *Compiler) updateLine(line int) {
 }
 
 func (c *Compiler) emit(b ...byte) {
-	c.result = append(c.result, b...)
+	c.Result = append(c.Result, b...)
 }
 
 func (c *Compiler) emitString(b string) {
@@ -88,14 +88,13 @@ func (c *Compiler) compileExpr(v ast.Expression) {
 		c.compileExpr(e.Right)
 		c.updateLine(e.Line())
 
-		c.emitInt(1)
-
 		c.compileExpr(e.Left)
 		c.updateLine(e.Line())
 
-		c.emitString(e.Op.Literal)
 		c.emit(grammar.GetInstance)
+		c.emitString(e.Op.Literal)
 
 		c.emit(grammar.Call)
+		c.emitInt(1)
 	}
 }
