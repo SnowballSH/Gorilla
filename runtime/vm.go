@@ -38,6 +38,7 @@ func NewVM(source []byte) *VM {
 func (vm *VM) MakeError(why string) {
 	x := errors.MakeVMError(why, vm.line)
 	vm.Error = x
+	panic(x)
 }
 
 func (vm *VM) push(obj BaseObject) {
@@ -88,7 +89,6 @@ func (vm *VM) Run() {
 
 	if length == 0 || vm.read() != grammar.Magic {
 		vm.MakeError("Not a valid Gorilla bytecode")
-		panic(vm.Error)
 	}
 
 	for vm.ip < length {
@@ -113,11 +113,28 @@ func (vm *VM) RunStatement() {
 		self := vm.pop()
 		g := vm.readString()
 		o, ok := self.InstanceVariableGet(g)
-		_ = o
 		if !ok {
 			vm.MakeError(fmt.Sprintf("Attribute '%s' does not exist on '%s' (class '%s')", g, self.ToString(), self.Class().Name))
-			panic(vm.Error)
 		}
-		//vm.push(o)
+		o.SetParent(self)
+		vm.push(o)
+
+	case grammar.Call:
+		amount := vm.readInt()
+
+		o := vm.pop()
+
+		var args []BaseObject
+		for i := int64(0); i < amount; i++ {
+			args = append(args, vm.pop())
+		}
+
+		val, err := o.Call(o, args...)
+
+		if err != nil {
+			vm.MakeError(err.Error())
+		}
+
+		vm.push(val)
 	}
 }

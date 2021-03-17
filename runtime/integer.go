@@ -4,7 +4,7 @@ import "fmt"
 
 var IntegerClass = MakeClassFromSuper("Integer", NumericClass)
 
-var intIns = newEnvironment()
+var intIns *environment
 
 func NewInteger(value int64) *Object {
 	return &Object{
@@ -12,10 +12,10 @@ func NewInteger(value int64) *Object {
 		Instances:     intIns,
 		InternalValue: value,
 		ToStringFunc: func(self *Object) string {
-			return fmt.Sprintf("%d", self.InternalValue)
+			return fmt.Sprintf("%d", self.InternalValue.(int64))
 		},
 		InspectFunc: func(self *Object) string {
-			return fmt.Sprintf("%d", self.InternalValue)
+			return fmt.Sprintf("%d", self.InternalValue.(int64))
 		},
 		IsTruthyFunc: func(self *Object) bool {
 			return self.InternalValue.(int64) != 0
@@ -31,5 +31,7 @@ func NewInteger(value int64) *Object {
 			}
 			return x == self.InternalValue.(int64)
 		},
+		CallFunc:  NotCallable,
+		ParentObj: nil,
 	}
 }

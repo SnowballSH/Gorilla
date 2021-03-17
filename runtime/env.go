@@ -2,13 +2,19 @@ package runtime
 
 import "sort"
 
+type storeType map[string]BaseObject
+
 func newEnvironment() *environment {
-	s := make(map[string]BaseObject)
+	s := make(storeType)
 	return &environment{store: s}
 }
 
+func newEnvironmentWithStore(store storeType) *environment {
+	return &environment{store: store}
+}
+
 type environment struct {
-	store map[string]BaseObject
+	store storeType
 }
 
 func (e *environment) get(name string) (BaseObject, bool) {
@@ -31,7 +37,7 @@ func (e *environment) names() []string {
 }
 
 func (e *environment) copy() *environment {
-	newEnv := make(map[string]BaseObject)
+	newEnv := make(storeType)
 	for key, value := range e.store {
 		newEnv[key] = value
 	}

@@ -38,6 +38,90 @@ func TestVMGetAttribute(t *testing.T) {
 	assert.Equal(t, errors.MakeVMError("Attribute '?' does not exist on '1' (class 'Integer')", 0), vm.Error)
 }
 
+func TestIntegerBinOp(t *testing.T) {
+	vm := NewVM([]byte{grammar.Magic,
+		grammar.Integer, 1, 0x03,
+		grammar.Integer, 1, 0x01,
+		grammar.GetInstance,
+		1, '*',
+		grammar.Call,
+		1, 0x01,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.Nil(t, vm.Error)
+	assert.Equal(t, vm.LastPopped.ToString(), "3")
+
+	vm = NewVM([]byte{grammar.Magic,
+		grammar.Integer, 1, 0x03,
+		grammar.Integer, 1, 0x06,
+		grammar.GetInstance,
+		1, '/',
+		grammar.Call,
+		1, 0x01,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.Nil(t, vm.Error)
+	assert.Equal(t, vm.LastPopped.ToString(), "2")
+
+	vm = NewVM([]byte{grammar.Magic,
+		grammar.Integer, 1, 0x00,
+		grammar.Integer, 1, 0x06,
+		grammar.GetInstance,
+		1, '/',
+		grammar.Call,
+		1, 0x01,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.NotNil(t, vm.Error)
+
+	vm = NewVM([]byte{grammar.Magic,
+		grammar.Integer, 1, 0x03,
+		grammar.Integer, 1, 0x06,
+		grammar.GetInstance,
+		1, '+',
+		grammar.Call,
+		1, 0x01,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.Nil(t, vm.Error)
+	assert.Equal(t, vm.LastPopped.ToString(), "9")
+
+	vm = NewVM([]byte{grammar.Magic,
+		grammar.Integer, 1, 0x03,
+		grammar.Integer, 1, 0x06,
+		grammar.GetInstance,
+		1, '-',
+		grammar.Call,
+		1, 0x01,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.Nil(t, vm.Error)
+	assert.Equal(t, vm.LastPopped.ToString(), "3")
+}
+
+func TestCall(t *testing.T) {
+	vm := NewVM([]byte{grammar.Magic,
+		grammar.Integer, 1, 0x03,
+		grammar.Call,
+		1, 0x00,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.NotNil(t, vm.Error)
+	assert.Equal(t, errors.MakeVMError("'3' is not callable", 0), vm.Error)
+}
+
 func TestVMError(t *testing.T) {
 	vm := NewVM([]byte{})
 	vm.Run()

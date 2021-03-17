@@ -47,6 +47,16 @@ func (R *RClass) EqualTo(object BaseObject) bool {
 	return object == R
 }
 
+func (R *RClass) Call(a BaseObject, b ...BaseObject) (BaseObject, error) {
+	return NotCallable(a, b...)
+}
+
+func (R *RClass) Parent() BaseObject {
+	return R.superClass
+}
+
+func (R *RClass) SetParent(_ BaseObject) {}
+
 // Helpers
 
 func MakeClass(

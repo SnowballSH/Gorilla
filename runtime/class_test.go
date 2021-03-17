@@ -21,4 +21,10 @@ func TestClass(t *testing.T) {
 	assert.Equal(t, class, class.Class())
 	assert.Equal(t, "Class 'Integer'", class.Value())
 	assert.Equal(t, "Class 'Integer'", class.Inspect())
+
+	assert.Equal(t, class.superClass, class.Parent())
+	class.SetParent(IntegerClass)
+
+	_, err := class.Call(class)
+	assert.NotNil(t, err)
 }
