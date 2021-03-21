@@ -3,7 +3,7 @@ package runtime
 import "fmt"
 
 func init() {
-	intIns = newEnvironmentWithStore(map[string]BaseObject{
+	intIns = NewEnvironmentWithStore(map[string]BaseObject{
 		"+": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
 			left := self.Parent().(*Object).InternalValue.(int64)
 			right := args[0].(*Object).InternalValue.(int64)

@@ -18,6 +18,8 @@ type VM struct {
 	Error *errors.VMERROR
 
 	LastPopped BaseObject
+
+	Environment *environment
 }
 
 func NewVM(source []byte) *VM {
@@ -32,6 +34,25 @@ func NewVM(source []byte) *VM {
 		Error: nil,
 
 		LastPopped: nil,
+
+		Environment: NewEnvironment(),
+	}
+}
+
+func NewVMWithStore(source []byte, env *environment) *VM {
+	return &VM{
+		source: source,
+		ip:     0,
+
+		line: 0,
+
+		stack: nil,
+
+		Error: nil,
+
+		LastPopped: nil,
+
+		Environment: NewEnvironmentWithStore(env.store),
 	}
 }
 
@@ -108,6 +129,20 @@ func (vm *VM) RunStatement() {
 
 	case grammar.Integer:
 		vm.push(NewInteger(vm.readInt()))
+
+	case grammar.GetVar:
+		name := vm.readString()
+		o, ok := vm.Environment.get(name)
+		if !ok {
+			vm.MakeError(fmt.Sprintf("Variable '%s' is not defined", name))
+		}
+		vm.push(o)
+
+	case grammar.SetVar:
+		name := vm.readString()
+		value := vm.pop()
+		vm.Environment.set(name, value)
+		vm.push(value)
 
 	case grammar.GetInstance:
 		self := vm.pop()

@@ -64,7 +64,7 @@ func MakeClass(
 ) *RClass {
 	return &RClass{
 		Name:       Name,
-		Instances:  newEnvironment(),
+		Instances:  NewEnvironment(),
 		superClass: nil,
 	}
 }
@@ -75,7 +75,7 @@ func MakeClassFromSuper(
 ) *RClass {
 	return &RClass{
 		Name:       Name,
-		Instances:  newEnvironment(),
+		Instances:  NewEnvironment(),
 		superClass: super,
 	}
 }

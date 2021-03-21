@@ -15,7 +15,7 @@ func TestObj(t *testing.T) {
 	assert.True(t, o)
 	assert.NotNil(t, x)
 	obj.InstanceVariables().names()
-	obj.SetInstanceVariables(newEnvironment())
+	obj.SetInstanceVariables(NewEnvironment())
 
 	assert.Nil(t, obj.Parent())
 	obj.SetParent(obj)

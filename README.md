@@ -14,14 +14,13 @@ Gorilla 1.0 is focusing on speed and safety. I am aiming for
 **If you are expecting a fully-working gorilla source code, visit
 the [0.x branch](https://github.com/SnowballSH/Gorilla/tree/0.x)**
 
-If you are a golang developer, and you know some basic runtime or parsing knowledge,
-you are more than welcome to contribute!
+If you are a golang developer, and you know some basic runtime or parsing knowledge, you are more than welcome to
+contribute!
 
 If you are not, feel free to create issues about what you are expecting.
 
-Gorilla 1.0 will have a big syntax and runtime change.
-The runtime will be similar to [Ruby](https://www.ruby-lang.org/), and syntax
-will be similar to [Coffeescript](https://coffeescript.org/) (without indentations). Stay tuned!
+Gorilla 1.0 will have a big syntax and runtime change. The runtime will be similar to [Ruby](https://www.ruby-lang.org/)
+, and syntax will be similar to [Coffeescript](https://coffeescript.org/) (without indentations). Stay tuned!
 
 ---
 

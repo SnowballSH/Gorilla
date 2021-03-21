@@ -14,6 +14,8 @@ func Start() {
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Println("Welcome to Gorilla repl. Type :quit to quit.")
 
+	env := runtime.NewEnvironment()
+
 	for {
 		fmt.Print("> ")
 		text, e := reader.ReadString('\n')
@@ -35,15 +37,17 @@ func Start() {
 		comp := compiler.NewCompiler()
 		comp.Compile(res)
 
-		vm := runtime.NewVM(comp.Result)
+		vm := runtime.NewVMWithStore(comp.Result, env)
 		vm.Run()
 		if vm.Error != nil {
 			fmt.Println(
-				fmt.Sprintf("Runtime Error:\n%s\n%s",
+				fmt.Sprintf("Runtime Error in line %d:\n| %s\n%s",
+					vm.Error.Line+1,
 					strings.Split(strings.ReplaceAll(text, "\r", ""), "\n")[vm.Error.Line], vm.Error.Message),
 			)
 			continue
 		}
+		env = vm.Environment
 		fmt.Println(vm.LastPopped.ToString())
 	}
 }

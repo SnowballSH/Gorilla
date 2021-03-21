@@ -4,7 +4,7 @@ import "fmt"
 
 var GoFuncClass = MakeClassFromSuper("Native Function", NumericClass)
 
-var goFuncIns = newEnvironment()
+var goFuncIns = NewEnvironment()
 
 func NewGoFunc(function CallFuncType) *Object {
 	return &Object{

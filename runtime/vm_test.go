@@ -109,6 +109,39 @@ func TestIntegerBinOp(t *testing.T) {
 	assert.Equal(t, vm.LastPopped.ToString(), "3")
 }
 
+func TestVMVariables(t *testing.T) {
+	vm := NewVM([]byte{grammar.Magic,
+		grammar.Integer, 1, 0x03,
+		grammar.SetVar, 3, 'a', 'b', 'c',
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.Nil(t, vm.Error)
+	assert.Equal(t, vm.LastPopped.ToString(), "3")
+
+	vm = NewVM([]byte{grammar.Magic,
+		grammar.Integer, 1, 0x03,
+		grammar.SetVar, 3, 'a', 'b', 'c',
+		grammar.Pop,
+		grammar.GetVar, 3, 'a', 'b', 'c',
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.Nil(t, vm.Error)
+	assert.Equal(t, vm.LastPopped.ToString(), "3")
+
+	vm = NewVMWithStore([]byte{grammar.Magic,
+		grammar.GetVar, 3, 'a', 'b', 'd', // undefined
+		grammar.Pop,
+	}, vm.Environment)
+	vm.Run()
+
+	assert.NotNil(t, vm.Error)
+	assert.Equal(t, errors.MakeVMError("Variable 'abd' is not defined", 0), vm.Error)
+}
+
 func TestCall(t *testing.T) {
 	vm := NewVM([]byte{grammar.Magic,
 		grammar.Integer, 1, 0x03,

@@ -17,7 +17,7 @@ func TestClass(t *testing.T) {
 	assert.False(t, class.EqualTo(NumericClass))
 	assert.True(t, class.IsTruthy())
 
-	class.SetInstanceVariables(newEnvironment())
+	class.SetInstanceVariables(NewEnvironment())
 	assert.Equal(t, class, class.Class())
 	assert.Equal(t, "Class 'Integer'", class.Value())
 	assert.Equal(t, "Class 'Integer'", class.Inspect())

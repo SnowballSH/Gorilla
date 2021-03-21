@@ -7,7 +7,7 @@ import (
 
 func TestEnv(t *testing.T) {
 	integer := NewInteger(56789)
-	env := newEnvironment()
+	env := NewEnvironment()
 	env.set("x", integer)
 	assert.Equal(t, 1, len(env.store))
 	v, o := env.get("x")

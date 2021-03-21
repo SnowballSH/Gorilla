@@ -4,12 +4,12 @@ import "sort"
 
 type storeType map[string]BaseObject
 
-func newEnvironment() *environment {
+func NewEnvironment() *environment {
 	s := make(storeType)
 	return &environment{store: s}
 }
 
-func newEnvironmentWithStore(store storeType) *environment {
+func NewEnvironmentWithStore(store storeType) *environment {
 	return &environment{store: store}
 }
 
