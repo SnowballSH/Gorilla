@@ -48,6 +48,6 @@ func Start() {
 			continue
 		}
 		env = vm.Environment
-		fmt.Println(vm.LastPopped.ToString())
+		fmt.Println(fmt.Sprintf("#=> %s", vm.LastPopped.Inspect()))
 	}
 }

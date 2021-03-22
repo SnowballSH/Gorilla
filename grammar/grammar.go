@@ -11,6 +11,9 @@ const (
 	// Length of integer in unsigned leb128
 	// Followed by leb128
 
+	String
+	// String in bytes
+
 	GetVar // name string
 
 	SetVar // name string

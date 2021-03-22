@@ -130,6 +130,9 @@ func (vm *VM) RunStatement() {
 	case grammar.Integer:
 		vm.push(NewInteger(vm.readInt()))
 
+	case grammar.String:
+		vm.push(NewString(vm.readString()))
+
 	case grammar.GetVar:
 		name := vm.readString()
 		o, ok := vm.Environment.get(name)
@@ -149,7 +152,7 @@ func (vm *VM) RunStatement() {
 		g := vm.readString()
 		o, ok := self.InstanceVariableGet(g)
 		if !ok {
-			vm.MakeError(fmt.Sprintf("Attribute '%s' does not exist on '%s' (class '%s')", g, self.ToString(), self.Class().Name))
+			vm.MakeError(fmt.Sprintf("Attribute '%s' does not exist on '%s' (class '%s')", g, self.Inspect(), self.Class().Name))
 		}
 		o.SetParent(self)
 		vm.push(o)

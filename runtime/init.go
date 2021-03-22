@@ -28,4 +28,12 @@ func init() {
 			return NewInteger(left / right), nil
 		}),
 	})
+
+	stringIns = NewEnvironmentWithStore(map[string]BaseObject{
+		"+": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
+			left := self.Parent().(*Object).InternalValue.(string)
+			right := args[0].(*Object).InternalValue.(string)
+			return NewString(left + right), nil
+		}),
+	})
 }

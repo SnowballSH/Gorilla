@@ -22,6 +22,18 @@ func TestBasicNumbers(t *testing.T) {
 	}, compiler.Result)
 }
 
+func TestBasicString(t *testing.T) {
+	compiler := NewCompiler()
+
+	compiler.Compile(parser.NewParser(parser.NewLexer("'AB\nCD'")).Parse())
+	assert.Equal(t, []byte{
+		grammar.Magic,
+		grammar.Advance,
+		grammar.Back,
+		grammar.String, 5, 'A', 'B', '\n', 'C', 'D', grammar.Pop,
+	}, compiler.Result)
+}
+
 func TestInfix(t *testing.T) {
 	compiler := NewCompiler()
 

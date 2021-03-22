@@ -70,6 +70,10 @@ func (c *Compiler) compileExpr(v ast.Expression) {
 
 		c.emitInt(e.Value)
 
+	case *ast.String:
+		c.emit(grammar.String)
+		c.emitString(e.Value)
+
 	case *ast.GetVar:
 		c.emit(grammar.GetVar)
 

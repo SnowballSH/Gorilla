@@ -83,6 +83,22 @@ func (l *Lexer) next() token.Token {
 	case ')':
 		tok = l.newToken(token.RParen, ")")
 
+	case '"':
+		x, ok := l.readString('"')
+		if !ok {
+			tok = l.newToken(token.Illegal, "\"")
+		} else {
+			tok = l.newToken(token.String, "\""+x+"\"")
+		}
+
+	case '\'':
+		x, ok := l.readString('\'')
+		if !ok {
+			tok = l.newToken(token.Illegal, "'")
+		} else {
+			tok = l.newToken(token.String, "'"+x+"'")
+		}
+
 	case 0:
 		tok = l.newToken(token.EOF, string(byte(0)))
 
@@ -160,6 +176,60 @@ func (l *Lexer) readChar() {
 		l.ch = 0
 	} else {
 		l.ch = l.input[l.position]
+	}
+}
+
+func (l *Lexer) readString(c rune) (string, bool) {
+	var res []rune
+	for {
+		l.readChar()
+
+		if l.ch == '\\' {
+			l.readChar()
+			switch l.ch {
+			case 'n':
+				res = append(res, '\n')
+			case 'r':
+				res = append(res, '\r')
+			case 't':
+				res = append(res, '\t')
+			case '\\':
+				res = append(res, '\\')
+			case '"':
+				res = append(res, '"')
+			case '\'':
+				res = append(res, '\'')
+			case '`':
+				res = append(res, '`')
+			case 'v':
+				res = append(res, '\v')
+			case 'a':
+				res = append(res, '\a')
+			case 'b':
+				res = append(res, '\b')
+			default:
+				res = append(res, l.ch)
+			}
+			continue
+		}
+		if l.ch == '\r' {
+			if l.peekChar() == '\n' {
+				res = append(res, l.ch)
+				l.readChar()
+			}
+			l.linePlace++
+			l.charPlace = 0
+		} else if l.ch == '\n' {
+			l.linePlace++
+			l.charPlace = 0
+		}
+		if l.ch == c {
+			return string(res), true
+		}
+		if l.ch == 0 {
+			return "", false
+		}
+		res = append(res, l.ch)
 	}
 }
 

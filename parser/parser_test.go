@@ -20,9 +20,14 @@ func TestSimpleParse(t *testing.T) {
 	p := NewParser(NewLexer("\n65500\n"))
 	res := p.Parse()
 	assert.Equal(t, 1, len(res))
-	var n *string = nil
-	assert.Equal(t, n, p.Error)
+	assert.Nil(t, p.Error)
 	assert.Equal(t, "65500;", res[0].String())
+
+	p = NewParser(NewLexer("'abcde'"))
+	res = p.Parse()
+	assert.Equal(t, 1, len(res))
+	assert.Nil(t, p.Error)
+	assert.Equal(t, "'abcde';", res[0].String())
 }
 
 func TestParseBinOp(t *testing.T) {

@@ -145,6 +145,11 @@ func (p *Parser) ParseAtom() ast.Expression {
 			Value: x,
 			Tk:    p.cur,
 		}
+	case token.String:
+		return &ast.String{
+			Value: p.cur.Literal[1 : len(p.cur.Literal)-1],
+			Tk:    token.Token{},
+		}
 	case token.Iden:
 		return p.ParseIden()
 	case token.LParen:

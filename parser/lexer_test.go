@@ -90,6 +90,43 @@ func TestInteger(t *testing.T) {
 	assert.Equal(t, "99", n.Literal)
 }
 
+func TestString(t *testing.T) {
+	lexer := NewLexer("'xyz' \"xy\r\nz\" \"xy\nz\" 'xyz")
+	var n token.Token
+
+	n = lexer.next()
+	assert.Equal(t, token.String, n.Type)
+	assert.Equal(t, 5, n.Char)
+	assert.Equal(t, 0, n.Line)
+	assert.Equal(t, "'xyz'", n.Literal)
+
+	n = lexer.next()
+	assert.Equal(t, token.String, n.Type)
+	assert.Equal(t, 2, n.Char)
+	assert.Equal(t, 1, n.Line)
+	assert.Equal(t, "\"xy\r\nz\"", n.Literal)
+
+	n = lexer.next()
+	assert.Equal(t, token.String, n.Type)
+	assert.Equal(t, 2, n.Char)
+	assert.Equal(t, 2, n.Line)
+	assert.Equal(t, "\"xy\nz\"", n.Literal)
+
+	n = lexer.next()
+	assert.Equal(t, token.Illegal, n.Type)
+
+	lexer = NewLexer(`"xyz`)
+
+	n = lexer.next()
+	assert.Equal(t, token.Illegal, n.Type)
+
+	lexer = NewLexer(`"\n\r\t\\\"\'` + "\\`" + `\v\a\b\?"`)
+
+	n = lexer.next()
+	assert.Equal(t, token.String, n.Type)
+	assert.Equal(t, "\"\n\r\t\\\"'`\v\a\b?\"", n.Literal)
+}
+
 func TestIden(t *testing.T) {
 	lexer := NewLexer("var\n$global0 _hello123")
 	var n token.Token

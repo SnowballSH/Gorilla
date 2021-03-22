@@ -9,7 +9,9 @@ type Token struct {
 
 const (
 	Integer = "Integer"
-	Iden    = "Identifier"
+	String  = "String"
+
+	Iden = "Identifier"
 
 	Semicolon = ";"
 	Eq        = "="

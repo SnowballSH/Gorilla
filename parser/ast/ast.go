@@ -54,6 +54,21 @@ func (i *Integer) Line() int {
 
 func (i *Integer) e() {}
 
+type String struct {
+	Value string
+	Tk    token.Token
+}
+
+func (s *String) String() string {
+	return fmt.Sprintf("'%s'", s.Value)
+}
+
+func (s *String) Line() int {
+	return s.Tk.Line
+}
+
+func (s *String) e() {}
+
 type GetVar struct {
 	Name string
 	Tk   token.Token
