@@ -51,9 +51,9 @@ func TestVMVariables(t *testing.T) {
 
 	vm = NewVM([]byte{grammar.Magic,
 		grammar.Integer, 1, 0x03,
-		grammar.SetVar, 3, 'a', 'b', 'c',
+		grammar.SetVar, 3, '$', 'b', 'c',
 		grammar.Pop,
-		grammar.GetVar, 3, 'a', 'b', 'c',
+		grammar.GetVar, 3, '$', 'b', 'c',
 		grammar.Pop,
 	})
 	vm.Run()

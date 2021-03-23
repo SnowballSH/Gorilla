@@ -137,6 +137,9 @@ func (vm *VM) RunStatement() {
 		name := vm.readString()
 		o, ok := vm.Environment.get(name)
 		if !ok {
+			o, ok = Global.get(name)
+		}
+		if !ok {
 			vm.MakeError(fmt.Sprintf("Variable '%s' is not defined", name))
 		}
 		vm.push(o)
@@ -144,7 +147,11 @@ func (vm *VM) RunStatement() {
 	case grammar.SetVar:
 		name := vm.readString()
 		value := vm.pop()
-		vm.Environment.set(name, value)
+		if len(name) >= 1 && name[0] == '$' {
+			Global.set(name, value)
+		} else {
+			vm.Environment.set(name, value)
+		}
 		vm.push(value)
 
 	case grammar.GetInstance:
