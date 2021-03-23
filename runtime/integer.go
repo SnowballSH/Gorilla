@@ -2,9 +2,14 @@ package runtime
 
 import "fmt"
 
-var IntegerClass = MakeClassFromSuper("Integer", NumericClass)
+var IntegerClass = MakeClassFromSuper("Integer", NumericClass,
+	func(self BaseObject, args ...BaseObject) (BaseObject, error) {
+		return GorillaToInteger(args[0])
+	})
 
 var intIns *environment
+
+var GorillaToInteger ConvertFuncType
 
 func NewInteger(value int64) *Object {
 	return &Object{

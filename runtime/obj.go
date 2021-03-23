@@ -91,6 +91,8 @@ func (o *Object) SetParent(parent BaseObject) {
 
 type CallFuncType func(self BaseObject, args ...BaseObject) (BaseObject, error)
 
+type ConvertFuncType func(x BaseObject) (*Object, error)
+
 var NotCallable = func(self BaseObject, args ...BaseObject) (BaseObject, error) {
 	return nil, fmt.Errorf(fmt.Sprintf("'%s' is not callable", self.ToString()))
 }

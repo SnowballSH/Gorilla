@@ -25,6 +25,6 @@ func TestClass(t *testing.T) {
 	assert.Equal(t, class.superClass, class.Parent())
 	class.SetParent(IntegerClass)
 
-	_, err := class.Call(class)
+	_, err := class.Call(nil, class)
 	assert.NotNil(t, err)
 }

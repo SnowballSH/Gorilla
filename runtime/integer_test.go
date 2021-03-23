@@ -90,4 +90,56 @@ func TestIntegerBinOp(t *testing.T) {
 
 	assert.Nil(t, vm.Error)
 	assert.Equal(t, vm.LastPopped.ToString(), "3")
+
+	vm = NewVM([]byte{grammar.Magic,
+		grammar.String, 1, '1',
+		grammar.Integer, 1, 0x01,
+		grammar.GetInstance,
+		1, '*',
+		grammar.Call,
+		1, 0x01,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.NotNil(t, vm.Error)
+
+	vm = NewVM([]byte{grammar.Magic,
+		grammar.String, 1, '1',
+		grammar.Integer, 1, 0x01,
+		grammar.GetInstance,
+		1, '/',
+		grammar.Call,
+		1, 0x01,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.NotNil(t, vm.Error)
+
+	vm = NewVM([]byte{grammar.Magic,
+		grammar.String, 1, '1',
+		grammar.Integer, 1, 0x01,
+		grammar.GetInstance,
+		1, '+',
+		grammar.Call,
+		1, 0x01,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.NotNil(t, vm.Error)
+
+	vm = NewVM([]byte{grammar.Magic,
+		grammar.String, 1, '1',
+		grammar.Integer, 1, 0x01,
+		grammar.GetInstance,
+		1, '-',
+		grammar.Call,
+		1, 0x01,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.NotNil(t, vm.Error)
 }

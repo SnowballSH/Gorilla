@@ -5,6 +5,8 @@ type RClass struct {
 	Name       string
 	Instances  *environment
 	superClass *RClass
+
+	NewFunc CallFuncType
 }
 
 func (R *RClass) Class() *RClass {
@@ -48,7 +50,7 @@ func (R *RClass) EqualTo(object BaseObject) bool {
 }
 
 func (R *RClass) Call(a BaseObject, b ...BaseObject) (BaseObject, error) {
-	return NotCallable(a, b...)
+	return R.NewFunc(a, b...)
 }
 
 func (R *RClass) Parent() BaseObject {
@@ -61,21 +63,25 @@ func (R *RClass) SetParent(_ BaseObject) {}
 
 func MakeClass(
 	Name string,
+	NewFunc CallFuncType,
 ) *RClass {
 	return &RClass{
 		Name:       Name,
 		Instances:  NewEnvironment(),
 		superClass: nil,
+		NewFunc:    NewFunc,
 	}
 }
 
 func MakeClassFromSuper(
 	Name string,
 	super *RClass,
+	NewFunc CallFuncType,
 ) *RClass {
 	return &RClass{
 		Name:       Name,
 		Instances:  NewEnvironment(),
 		superClass: super,
+		NewFunc:    NewFunc,
 	}
 }

@@ -1,3 +1,3 @@
 package runtime
 
-var NumericClass = MakeClass("Numeric")
+var NumericClass = MakeClass("Numeric", NotCallable)

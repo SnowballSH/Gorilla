@@ -5,9 +5,14 @@ import (
 	"unicode/utf8"
 )
 
-var StringClass = MakeClassFromSuper("String", NumericClass)
+var StringClass = MakeClassFromSuper("String", NumericClass,
+	func(self BaseObject, args ...BaseObject) (BaseObject, error) {
+		return GorillaToString(args[0])
+	})
 
 var stringIns *environment
+
+var GorillaToString ConvertFuncType
 
 func NewString(value string) *Object {
 	return &Object{
