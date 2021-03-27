@@ -29,7 +29,7 @@ func ExecuteGorillaBytecodeFromSource(bytecode []byte, source string) (*runtime.
 	return ExecuteGorillaBytecodeFromSourceAndEnv(bytecode, source, env)
 }
 
-// ExecuteGorillaBytecodeFromSource executes the bytecode and returns the last popped object (may be nil if no object is processed)
+// ExecuteGorillaBytecodeFromSourceAndEnv executes the bytecode and returns the last popped object (may be nil if no object is processed)
 // and the first runtime error. This method accepts a source argument and a env argument for better more customization.
 func ExecuteGorillaBytecodeFromSourceAndEnv(bytecode []byte, source string, env *runtime.Environment) (*runtime.VM, runtime.BaseObject, error) {
 	vm := runtime.NewVMWithStore(bytecode, env)
