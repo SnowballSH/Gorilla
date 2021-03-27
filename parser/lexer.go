@@ -5,6 +5,7 @@ import (
 	"unicode/utf8"
 )
 
+// Lexer is the tokenizer type
 type Lexer struct {
 	input       []rune
 	inputLength int
@@ -16,6 +17,7 @@ type Lexer struct {
 	linePlace int
 }
 
+// NewLexer creates a lexer from a string
 func NewLexer(input string) *Lexer {
 	var ch rune
 	if utf8.RuneCountInString(input) == 0 {
@@ -33,6 +35,7 @@ func NewLexer(input string) *Lexer {
 	}
 }
 
+// next() advances and returns the next token
 func (l *Lexer) next() token.Token {
 	l.skipWhitespace()
 
@@ -83,6 +86,9 @@ func (l *Lexer) next() token.Token {
 	case ')':
 		tok = l.newToken(token.RParen, ")")
 
+	case ',':
+		tok = l.newToken(token.Comma, ",")
+
 	case '"':
 		x, ok := l.readString('"')
 		if !ok {
@@ -100,7 +106,7 @@ func (l *Lexer) next() token.Token {
 		}
 
 	case 0:
-		tok = l.newToken(token.EOF, string(byte(0)))
+		tok = l.newToken(token.EOF, "\x00")
 
 	default:
 		if l.isNumber() {
@@ -116,6 +122,7 @@ func (l *Lexer) next() token.Token {
 	return tok
 }
 
+// readNumber() reads a number and returns the number token
 func (l *Lexer) readNumber() token.Token {
 	x := string(l.ch)
 	for l.peekIsNumber() {
@@ -126,6 +133,7 @@ func (l *Lexer) readNumber() token.Token {
 	return l.newToken(token.Integer, x)
 }
 
+// readIden() reads an identifier
 func (l *Lexer) readIden() token.Token {
 	x := string(l.ch)
 	for l.peekIsLetter() || l.peekIsNumber() {
@@ -136,6 +144,7 @@ func (l *Lexer) readIden() token.Token {
 	return l.newToken(token.Iden, x)
 }
 
+// newToken is a helper function to create a new token
 func (l *Lexer) newToken(t string, s string) token.Token {
 	return token.Token{
 		Type:    t,
@@ -145,30 +154,36 @@ func (l *Lexer) newToken(t string, s string) token.Token {
 	}
 }
 
+// isLetter is a helper function to determine whether the current character is a letter or _
 func (l *Lexer) isLetter() bool {
 	return ('A' <= l.ch && l.ch <= 'Z') || ('a' <= l.ch && l.ch <= 'z') || l.ch == '_'
 }
 
+// isNumber is a helper function to determine whether the current character is a number
 func (l *Lexer) isNumber() bool {
 	return '0' <= l.ch && l.ch <= '9'
 }
 
+// peekIsLetter is a helper function to determine whether the peek character is a letter or _
 func (l *Lexer) peekIsLetter() bool {
 	p := l.peekChar()
 	return ('A' <= p && p <= 'Z') || ('a' <= p && p <= 'z') || p == '_'
 }
 
+// peekIsNumber is a helper function to determine whether the peek character is a number
 func (l *Lexer) peekIsNumber() bool {
 	p := l.peekChar()
 	return '0' <= p && p <= '9'
 }
 
+// skipWhitespace skips newline and tabs and spaces
 func (l *Lexer) skipWhitespace() {
 	for l.ch == ' ' || l.ch == '\t' { // || l.ch == '\n' || l.ch == '\r'
 		l.readChar()
 	}
 }
 
+// readChar reads a character and advances
 func (l *Lexer) readChar() {
 	l.position++
 	l.charPlace++
@@ -179,6 +194,7 @@ func (l *Lexer) readChar() {
 	}
 }
 
+// readString reads a string with escapes
 func (l *Lexer) readString(c rune) (string, bool) {
 	var res []rune
 	for {
@@ -233,10 +249,12 @@ func (l *Lexer) readString(c rune) (string, bool) {
 	}
 }
 
+// peekChar peeks a character
 func (l *Lexer) peekChar() rune {
 	return l.peek(1)
 }
 
+// peek peeks an amount of characters
 func (l *Lexer) peek(amount int) rune {
 	if l.position+amount >= len(l.input) {
 		return 0

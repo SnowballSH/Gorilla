@@ -77,6 +77,46 @@ func TestVar(t *testing.T) {
 	assert.Equal(t, "(2 + (a = ((2 + 3) * 7)));", res[0].String())
 }
 
+func TestCall(t *testing.T) {
+	p := NewParser(NewLexer("$abc(1, 2, 3)"))
+	res := p.Parse()
+	assert.Equal(t, "($abc(1, 2, 3));", res[0].String())
+
+	p = NewParser(NewLexer("$abc(1, 2, 3,)"))
+	res = p.Parse()
+	assert.Equal(t, "($abc(1, 2, 3));", res[0].String())
+
+	p = NewParser(NewLexer("$abc(1 2)"))
+	p.Parse()
+	assert.Equal(t, strings.TrimSpace(`
+Error in line 1:
+
+$abc(1 2)
+       ^
+Expected ',', got '2'
+`), *p.Error)
+
+	p = NewParser(NewLexer("$abc(1"))
+	p.Parse()
+	assert.Equal(t, strings.TrimSpace(`
+Error in line 1:
+
+$abc(1
+      ^
+Expected ',', got End of File
+`), *p.Error)
+
+	p = NewParser(NewLexer("$abc("))
+	p.Parse()
+	assert.Equal(t, strings.TrimSpace(`
+Error in line 1:
+
+$abc(
+     ^
+Expected ')', got End of File
+`), *p.Error)
+}
+
 func TestError(t *testing.T) {
 	var p *Parser
 
@@ -116,7 +156,7 @@ Unexpected '✔'
 Error in line 2:
 
 1
-^
-Expected ')', got '1'
+ ^
+Expected ')', got End of File
 `), *p.Error)
 }

@@ -7,11 +7,13 @@ import (
 	"github.com/SnowballSH/Gorilla/parser/ast"
 )
 
+// Compiler is the base compiler struct
 type Compiler struct {
 	Result   []byte
 	lastLine int
 }
 
+// NewCompiler creates a compiler with Magic
 func NewCompiler() *Compiler {
 	return &Compiler{
 		Result:   []byte{grammar.Magic},
@@ -19,6 +21,7 @@ func NewCompiler() *Compiler {
 	}
 }
 
+// updateLine updates the line count using grammar.Advance and grammar.Back
 func (c *Compiler) updateLine(line int) {
 	for line > c.lastLine {
 		c.lastLine++
@@ -30,27 +33,33 @@ func (c *Compiler) updateLine(line int) {
 	}
 }
 
+// emit emits some bytes
 func (c *Compiler) emit(b ...byte) {
 	c.Result = append(c.Result, b...)
 }
 
+// emitString emits a string
 func (c *Compiler) emitString(b string) {
 	c.emit(byte(len(b)))
 	c.emit([]byte(b)...)
 }
 
+// emitInt emits an integer
 func (c *Compiler) emitInt(b int64) {
 	l := leb128.AppendSleb128(nil, b)
 	c.emit(byte(len(l)))
 	c.emit(l...)
 }
 
+// Compiler is the base compiling function.
+// This function compiles nodes into Result
 func (c *Compiler) Compile(nodes []ast.Statement) {
 	for _, x := range nodes {
 		c.compileNode(x)
 	}
 }
 
+// compileNode compiles a single node
 func (c *Compiler) compileNode(node ast.Node) {
 	c.updateLine(node.Line())
 
@@ -61,6 +70,7 @@ func (c *Compiler) compileNode(node ast.Node) {
 	}
 }
 
+// compilerExpr compiles an expression
 func (c *Compiler) compileExpr(v ast.Expression) {
 	c.updateLine(v.Line())
 
@@ -100,5 +110,21 @@ func (c *Compiler) compileExpr(v ast.Expression) {
 
 		c.emit(grammar.Call)
 		c.emitInt(1)
+
+	case *ast.Call:
+		for _, x := range reverse(e.Arguments) {
+			c.compileExpr(x)
+		}
+		c.compileExpr(e.Function)
+		c.emit(grammar.Call)
+		c.emitInt(int64(len(e.Arguments)))
 	}
+}
+
+func reverse(numbers []ast.Expression) []ast.Expression {
+	for i := 0; i < len(numbers)/2; i++ {
+		j := len(numbers) - i - 1
+		numbers[i], numbers[j] = numbers[j], numbers[i]
+	}
+	return numbers
 }

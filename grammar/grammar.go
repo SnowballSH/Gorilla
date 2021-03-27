@@ -1,28 +1,38 @@
 package grammar
 
 const (
+	// The Magic Number
 	Magic byte = 0x69
 
+	// Pops the stack
 	Pop byte = iota
+
+	// line++
 	Advance
+
+	// line--
 	Back
 
-	Integer
-	// Length of integer in unsigned leb128
+	// Length of integer in unsigned leb128;
 	// Followed by leb128
+	Integer
 
-	String
 	// String in bytes
+	String
 
-	GetVar // name string
+	// name string
+	GetVar
 
-	SetVar // name string
+	// name string;
 	// Expression on stack
+	SetVar
 
-	GetInstance // name string
+	// name string;
 	// Expression on stack
+	GetInstance
 
-	Call // numberOfArgs int
-	// [arg3, arg2, arg1, callee]
+	// numberOfArgs int;
+	// [arg3, arg2, arg1, callee];
 	// Will perform callee(arg1, arg2, arg3)
+	Call
 )

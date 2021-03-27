@@ -8,6 +8,7 @@ import (
 	"unicode/utf8"
 )
 
+// infixPrecedence is the precedence table for Gorilla
 var infixPrecedence = map[string][2]byte{
 	token.Plus:  {1, 2},
 	token.Minus: {1, 2},
@@ -16,6 +17,7 @@ var infixPrecedence = map[string][2]byte{
 	token.Slash: {3, 4},
 }
 
+// Parser is the base parsing struct
 type Parser struct {
 	l     *Lexer
 	Error *string
@@ -24,6 +26,7 @@ type Parser struct {
 	peek token.Token
 }
 
+// NewParser creates a parsing from a Lexer
 func NewParser(l *Lexer) *Parser {
 	p := &Parser{
 		l:     l,
@@ -34,25 +37,30 @@ func NewParser(l *Lexer) *Parser {
 	return p
 }
 
+// curIs determines whether the current token is the input
 func (p *Parser) curIs(t string) bool {
 	return p.cur.Type == t
 }
 
+// peekIs determines whether the peek token is the input
 func (p *Parser) peekIs(t string) bool {
 	return p.peek.Type == t
 }
 
+// next advances to the next token
 func (p *Parser) next() {
 	p.cur = p.peek
 	p.peek = p.l.next()
 }
 
+// skipNL skips all Newline
 func (p *Parser) skipNL() {
 	for p.curIs(token.Newline) {
 		p.next()
 	}
 }
 
+// report panics and reports an error
 func (p *Parser) report(why string) {
 	err := errors.MakeError(
 		string(p.l.input),
@@ -64,6 +72,7 @@ func (p *Parser) report(why string) {
 
 /* ... */
 
+// Parse is the main parsing function. Use this to get an array of Statements.
 func (p *Parser) Parse() []ast.Statement {
 	var program []ast.Statement
 
@@ -89,6 +98,7 @@ func (p *Parser) Parse() []ast.Statement {
 	return program
 }
 
+// ParseStatement parses a single statement
 func (p *Parser) ParseStatement() ast.Statement {
 	p.skipNL()
 	switch p.cur.Type {
@@ -97,12 +107,14 @@ func (p *Parser) ParseStatement() ast.Statement {
 	}
 }
 
+// ParseExpressionStatement parses an expression statement
 func (p *Parser) ParseExpressionStatement() ast.Statement {
 	stmt := &ast.ExpressionStatement{Tk: p.cur}
 	stmt.Es = p.ParseExpression(0)
 	return stmt
 }
 
+// ParseExpression parses an expression
 func (p *Parser) ParseExpression(pr byte) ast.Expression {
 	p.skipNL()
 	left := p.ParseAtom()
@@ -133,39 +145,89 @@ func (p *Parser) ParseExpression(pr byte) ast.Expression {
 	return left
 }
 
-func (p *Parser) ParseAtom() ast.Expression {
+// ParseAtom parses all literals
+func (p *Parser) ParseAtom() (res ast.Expression) {
 	switch p.cur.Type {
 	case token.Integer:
 		x, e := strconv.ParseInt(p.cur.Literal, 10, 64)
 		if e != nil {
-			p.report("Could not parse '" + p.cur.Literal + "' as 64-bit integer")
+			p.report("Could not parse " + processToken(p.cur.Literal) + " as 64-bit integer")
 		}
 
-		return &ast.Integer{
+		res = &ast.Integer{
 			Value: x,
 			Tk:    p.cur,
 		}
 	case token.String:
-		return &ast.String{
+		res = &ast.String{
 			Value: p.cur.Literal[1 : len(p.cur.Literal)-1],
 			Tk:    token.Token{},
 		}
 	case token.Iden:
-		return p.ParseIden()
+		res = p.ParseIden()
 	case token.LParen:
 		p.next()
 		r := p.ParseExpression(0)
 		if !p.peekIs(token.RParen) {
-			p.report("Expected ')', got '" + p.cur.Literal + "'")
+			p.next()
+			p.report("Expected ')', got " + processToken(p.cur.Literal) + "")
 		}
 		p.next()
-		return r
+		res = r
 	default:
-		p.report("Unexpected '" + p.cur.Literal + "'")
-		return nil
+		p.report("Unexpected " + processToken(p.cur.Literal) + "")
+		res = nil
 	}
+
+	if p.peek.Type == token.LParen {
+		var k token.Token
+
+		k = p.peek
+
+		p.next()
+
+		var args []ast.Expression
+
+		for p.peek.Type != token.EOF && p.peek.Type != token.RParen {
+			p.next()
+			p.skipNL()
+
+			args = append(args, p.ParseExpression(0))
+
+			if p.peek.Type == token.RParen {
+				break
+			}
+
+			if p.peek.Type != token.Comma {
+				p.next()
+				p.report("Expected ',', got " + processToken(p.cur.Literal) + "")
+				return
+			}
+
+			p.next()
+		}
+
+		if p.peek.Type == token.RParen {
+			k = p.peek
+			p.next()
+			p.next()
+		} else {
+			p.next()
+			p.report("Expected ')', got " + processToken(p.cur.Literal) + "")
+			return
+		}
+
+		res = &ast.Call{
+			Function:  res,
+			Arguments: args,
+			Tk:        k,
+		}
+	}
+
+	return
 }
 
+// ParseIden parses a variable name
 func (p *Parser) ParseIden() ast.Expression {
 	p.skipNL()
 	if p.peekIs(token.Eq) {
@@ -182,4 +244,13 @@ func (p *Parser) ParseIden() ast.Expression {
 		Name: p.cur.Literal,
 		Tk:   p.cur,
 	}
+}
+
+// processToken is a helper function for errors
+func processToken(s string) (ss string) {
+	ss = "'" + s + "'"
+	if s == "\x00" {
+		ss = "End of File"
+	}
+	return
 }

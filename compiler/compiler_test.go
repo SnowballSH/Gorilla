@@ -88,3 +88,15 @@ func TestVars(t *testing.T) {
 		grammar.GetVar, 3, '_', 'X', '0', grammar.Pop,
 	}, compiler.Result)
 }
+
+func TestCall(t *testing.T) {
+	compiler := NewCompiler()
+
+	compiler.Compile(parser.NewParser(parser.NewLexer("$ab12(1, 2)")).Parse())
+	assert.Equal(t, []byte{grammar.Magic,
+		grammar.Integer, 1, 2,
+		grammar.Integer, 1, 1,
+		grammar.GetVar, 5, '$', 'a', 'b', '1', '2',
+		grammar.Call, 1, 2,
+		grammar.Pop}, compiler.Result)
+}

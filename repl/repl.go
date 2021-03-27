@@ -41,7 +41,7 @@ func Start() {
 		vm.Run()
 		if vm.Error != nil {
 			fmt.Println(
-				fmt.Sprintf("Runtime Error in line %d:\n| %s\n%s",
+				fmt.Sprintf("Runtime Error in line %d:\n\n| %s\n%s",
 					vm.Error.Line+1,
 					strings.Split(strings.ReplaceAll(text, "\r", ""), "\n")[vm.Error.Line], vm.Error.Message),
 			)

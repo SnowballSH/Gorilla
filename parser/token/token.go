@@ -15,6 +15,7 @@ const (
 
 	Semicolon = ";"
 	Eq        = "="
+	Comma     = ","
 
 	Plus  = "+"
 	Minus = "-"

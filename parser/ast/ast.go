@@ -1,8 +1,10 @@
 package ast
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/SnowballSH/Gorilla/parser/token"
+	"strings"
 )
 
 type Node interface {
@@ -114,4 +116,32 @@ func (i *Infix) e() {}
 
 func (i *Infix) Line() int {
 	return i.Op.Line
+}
+
+type Call struct {
+	Function  Expression
+	Arguments []Expression
+	Tk        token.Token
+}
+
+func (c *Call) String() string {
+	var out bytes.Buffer
+
+	var args []string
+	for _, a := range c.Arguments {
+		args = append(args, a.String())
+	}
+
+	out.WriteString(c.Function.String())
+	out.WriteString("(")
+	out.WriteString(strings.Join(args, ", "))
+	out.WriteString(")")
+
+	return "(" + out.String() + ")"
+}
+
+func (c *Call) e() {}
+
+func (c *Call) Line() int {
+	return c.Tk.Line
 }
