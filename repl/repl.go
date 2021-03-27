@@ -3,8 +3,7 @@ package repl
 import (
 	"bufio"
 	"fmt"
-	"github.com/SnowballSH/Gorilla/compiler"
-	"github.com/SnowballSH/Gorilla/parser"
+	"github.com/SnowballSH/Gorilla/exports"
 	"github.com/SnowballSH/Gorilla/runtime"
 	"os"
 	"strings"
@@ -27,27 +26,18 @@ func Start() {
 			return
 		}
 
-		par := parser.NewParser(parser.NewLexer(text))
-		res := par.Parse()
-		if par.Error != nil {
-			fmt.Println("Syntax Error:\n" + *par.Error)
+		res, err := exports.CompileGorilla(text)
+
+		if err != nil {
+			fmt.Println(err.Error())
 			continue
 		}
 
-		comp := compiler.NewCompiler()
-		comp.Compile(res)
-
-		vm := runtime.NewVMWithStore(comp.Result, env)
-		vm.Run()
-		if vm.Error != nil {
-			fmt.Println(
-				fmt.Sprintf("Runtime Error in line %d:\n\n| %s\n%s",
-					vm.Error.Line+1,
-					strings.Split(strings.ReplaceAll(text, "\r", ""), "\n")[vm.Error.Line], vm.Error.Message),
-			)
-			continue
-		}
+		vm, lastPopped, err := exports.ExecuteGorillaBytecodeFromSourceAndEnv(res, text, env)
 		env = vm.Environment
-		fmt.Println(fmt.Sprintf("#=> %s", vm.LastPopped.Inspect()))
+
+		if lastPopped != nil {
+			fmt.Println(fmt.Sprintf("#=> %s", vm.LastPopped.Inspect()))
+		}
 	}
 }

@@ -17,7 +17,7 @@ func TestNewParser(t *testing.T) {
 }
 
 func TestSimpleParse(t *testing.T) {
-	p := NewParser(NewLexer("\n65500\n"))
+	p := NewParser(NewLexer("\n65500;\n"))
 	res := p.Parse()
 	assert.Equal(t, 1, len(res))
 	assert.Nil(t, p.Error)

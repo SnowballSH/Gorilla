@@ -94,6 +94,12 @@ func (p *Parser) Parse() []ast.Statement {
 		}
 
 		p.skipNL()
+
+		for p.curIs(token.Semicolon) {
+			p.next()
+		}
+
+		p.skipNL()
 	}
 	return program
 }
@@ -179,7 +185,7 @@ func (p *Parser) ParseAtom() (res ast.Expression) {
 		res = nil
 	}
 
-	if p.peek.Type == token.LParen {
+	if p.peekIs(token.LParen) {
 		var k token.Token
 
 		k = p.peek
@@ -194,11 +200,11 @@ func (p *Parser) ParseAtom() (res ast.Expression) {
 
 			args = append(args, p.ParseExpression(0))
 
-			if p.peek.Type == token.RParen {
+			if p.peekIs(token.RParen) {
 				break
 			}
 
-			if p.peek.Type != token.Comma {
+			if !p.peekIs(token.Comma) {
 				p.next()
 				p.report("Expected ',', got " + processToken(p.cur.Literal) + "")
 				return
@@ -207,7 +213,7 @@ func (p *Parser) ParseAtom() (res ast.Expression) {
 			p.next()
 		}
 
-		if p.peek.Type == token.RParen {
+		if p.peekIs(token.RParen) {
 			k = p.peek
 			p.next()
 			p.next()

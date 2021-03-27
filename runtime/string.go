@@ -10,7 +10,7 @@ var StringClass = MakeClassFromSuper("String", NumericClass,
 		return GorillaToString(args[0])
 	})
 
-var stringIns *environment
+var stringIns *Environment
 
 var GorillaToString ConvertFuncType
 

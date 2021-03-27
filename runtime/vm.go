@@ -19,7 +19,7 @@ type VM struct {
 
 	LastPopped BaseObject
 
-	Environment *environment
+	Environment *Environment
 }
 
 func NewVM(source []byte) *VM {
@@ -39,7 +39,7 @@ func NewVM(source []byte) *VM {
 	}
 }
 
-func NewVMWithStore(source []byte, env *environment) *VM {
+func NewVMWithStore(source []byte, env *Environment) *VM {
 	return &VM{
 		source: source,
 		ip:     0,

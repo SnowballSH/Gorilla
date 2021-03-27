@@ -4,30 +4,30 @@ import "sort"
 
 type storeType map[string]BaseObject
 
-func NewEnvironment() *environment {
+func NewEnvironment() *Environment {
 	s := make(storeType)
-	return &environment{store: s}
+	return &Environment{store: s}
 }
 
-func NewEnvironmentWithStore(store storeType) *environment {
-	return &environment{store: store}
+func NewEnvironmentWithStore(store storeType) *Environment {
+	return &Environment{store: store}
 }
 
-type environment struct {
+type Environment struct {
 	store storeType
 }
 
-func (e *environment) get(name string) (BaseObject, bool) {
+func (e *Environment) get(name string) (BaseObject, bool) {
 	obj, ok := e.store[name]
 	return obj, ok
 }
 
-func (e *environment) set(name string, val BaseObject) BaseObject {
+func (e *Environment) set(name string, val BaseObject) BaseObject {
 	e.store[name] = val
 	return val
 }
 
-func (e *environment) names() []string {
+func (e *Environment) names() []string {
 	var keys []string
 	for key := range e.store {
 		keys = append(keys, key)
@@ -36,10 +36,10 @@ func (e *environment) names() []string {
 	return keys
 }
 
-func (e *environment) copy() *environment {
+func (e *Environment) copy() *Environment {
 	newEnv := make(storeType)
 	for key, value := range e.store {
 		newEnv[key] = value
 	}
-	return &environment{store: newEnv}
+	return &Environment{store: newEnv}
 }

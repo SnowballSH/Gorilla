@@ -7,7 +7,7 @@ var IntegerClass = MakeClassFromSuper("Integer", NumericClass,
 		return GorillaToInteger(args[0])
 	})
 
-var intIns *environment
+var intIns *Environment
 
 var GorillaToInteger ConvertFuncType
 

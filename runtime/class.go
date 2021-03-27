@@ -3,7 +3,7 @@ package runtime
 // Defines a Class, or Type
 type RClass struct {
 	Name       string
-	Instances  *environment
+	Instances  *Environment
 	superClass *RClass
 
 	NewFunc CallFuncType
@@ -33,11 +33,11 @@ func (R *RClass) InstanceVariableSet(s string, object BaseObject) BaseObject {
 	return R.Instances.set(s, object)
 }
 
-func (R *RClass) InstanceVariables() *environment {
+func (R *RClass) InstanceVariables() *Environment {
 	return R.Instances
 }
 
-func (R *RClass) SetInstanceVariables(e *environment) {
+func (R *RClass) SetInstanceVariables(e *Environment) {
 	R.Instances = e
 }
 
