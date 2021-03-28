@@ -14,6 +14,6 @@ func TestGoFunc(t *testing.T) {
 	assert.Equal(t, "Native Function", f.ToString())
 	assert.Equal(t, fmt.Sprintf("Native Function %p", f), f.Inspect())
 	assert.True(t, f.IsTruthy())
-	assert.True(t, intIns.store["+"].EqualTo(intIns.store["+"]))
-	assert.False(t, intIns.store["+"].EqualTo(intIns.store["-"]))
+	assert.True(t, intIns.Store["+"].EqualTo(intIns.Store["+"]))
+	assert.False(t, intIns.Store["+"].EqualTo(intIns.Store["-"]))
 }

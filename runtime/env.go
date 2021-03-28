@@ -6,40 +6,40 @@ type storeType map[string]BaseObject
 
 func NewEnvironment() *Environment {
 	s := make(storeType)
-	return &Environment{store: s}
+	return &Environment{Store: s}
 }
 
 func NewEnvironmentWithStore(store storeType) *Environment {
-	return &Environment{store: store}
+	return &Environment{Store: store}
 }
 
 type Environment struct {
-	store storeType
+	Store storeType
 }
 
-func (e *Environment) get(name string) (BaseObject, bool) {
-	obj, ok := e.store[name]
+func (e *Environment) Get(name string) (BaseObject, bool) {
+	obj, ok := e.Store[name]
 	return obj, ok
 }
 
-func (e *Environment) set(name string, val BaseObject) BaseObject {
-	e.store[name] = val
+func (e *Environment) Set(name string, val BaseObject) BaseObject {
+	e.Store[name] = val
 	return val
 }
 
-func (e *Environment) names() []string {
+func (e *Environment) Names() []string {
 	var keys []string
-	for key := range e.store {
+	for key := range e.Store {
 		keys = append(keys, key)
 	}
 	sort.Strings(keys)
 	return keys
 }
 
-func (e *Environment) copy() *Environment {
+func (e *Environment) Copy() *Environment {
 	newEnv := make(storeType)
-	for key, value := range e.store {
+	for key, value := range e.Store {
 		newEnv[key] = value
 	}
-	return &Environment{store: newEnv}
+	return &Environment{Store: newEnv}
 }

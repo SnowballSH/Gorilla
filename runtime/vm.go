@@ -52,7 +52,7 @@ func NewVMWithStore(source []byte, env *Environment) *VM {
 
 		LastPopped: nil,
 
-		Environment: NewEnvironmentWithStore(env.store),
+		Environment: NewEnvironmentWithStore(env.Store),
 	}
 }
 
@@ -135,9 +135,9 @@ func (vm *VM) RunStatement() {
 
 	case grammar.GetVar:
 		name := vm.readString()
-		o, ok := vm.Environment.get(name)
+		o, ok := vm.Environment.Get(name)
 		if !ok {
-			o, ok = Global.get(name)
+			o, ok = Global.Get(name)
 		}
 		if !ok {
 			vm.MakeError(fmt.Sprintf("Variable '%s' is not defined", name))
@@ -148,9 +148,9 @@ func (vm *VM) RunStatement() {
 		name := vm.readString()
 		value := vm.pop()
 		if len(name) >= 1 && name[0] == '$' {
-			Global.set(name, value)
+			Global.Set(name, value)
 		} else {
-			vm.Environment.set(name, value)
+			vm.Environment.Set(name, value)
 		}
 		vm.push(value)
 

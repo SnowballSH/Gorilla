@@ -9,7 +9,7 @@ func TestClass(t *testing.T) {
 	xclass := &IntegerClass
 	class := *xclass
 	class.InstanceVariableSet("x", NewInteger(6))
-	assert.Equal(t, 1, len(class.InstanceVariables().names()))
+	assert.Equal(t, 1, len(class.InstanceVariables().Names()))
 	x, o := class.InstanceVariableGet("x")
 	assert.True(t, o)
 	assert.EqualValues(t, 6, x.Value())

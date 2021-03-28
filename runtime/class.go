@@ -26,11 +26,11 @@ func (R *RClass) Inspect() string {
 }
 
 func (R *RClass) InstanceVariableGet(s string) (BaseObject, bool) {
-	return R.Instances.get(s)
+	return R.Instances.Get(s)
 }
 
 func (R *RClass) InstanceVariableSet(s string, object BaseObject) BaseObject {
-	return R.Instances.set(s, object)
+	return R.Instances.Set(s, object)
 }
 
 func (R *RClass) InstanceVariables() *Environment {

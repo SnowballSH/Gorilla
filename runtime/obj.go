@@ -52,11 +52,11 @@ func (o *Object) Inspect() string {
 }
 
 func (o *Object) InstanceVariableGet(s string) (BaseObject, bool) {
-	return o.Instances.get(s)
+	return o.Instances.Get(s)
 }
 
 func (o *Object) InstanceVariableSet(s string, object BaseObject) BaseObject {
-	return o.Instances.set(s, object)
+	return o.Instances.Set(s, object)
 }
 
 func (o *Object) InstanceVariables() *Environment {

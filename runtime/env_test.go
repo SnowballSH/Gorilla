@@ -8,11 +8,11 @@ import (
 func TestEnv(t *testing.T) {
 	integer := NewInteger(56789)
 	env := NewEnvironment()
-	env.set("x", integer)
-	assert.Equal(t, 1, len(env.store))
-	v, o := env.get("x")
+	env.Set("x", integer)
+	assert.Equal(t, 1, len(env.Store))
+	v, o := env.Get("x")
 	assert.True(t, o)
 	assert.EqualValues(t, 56789, v.Value())
-	assert.Equal(t, 1, len(env.names()))
-	assert.Equal(t, 1, len(env.copy().copy().names()))
+	assert.Equal(t, 1, len(env.Names()))
+	assert.Equal(t, 1, len(env.Copy().Copy().Names()))
 }

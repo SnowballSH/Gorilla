@@ -36,7 +36,7 @@ func ExecuteGorillaBytecodeFromSourceAndEnv(bytecode []byte, source string, env 
 	vm.Run()
 	if vm.Error != nil {
 		return vm, nil, fmt.Errorf(
-			fmt.Sprintf("Runtime Error in line %d:\n\n| %s\n%s",
+			fmt.Sprintf("Runtime Error in line %d:\n| %s\n%s",
 				vm.Error.Line+1,
 				strings.Split(strings.ReplaceAll(source, "\r", ""), "\n")[vm.Error.Line], vm.Error.Message),
 		)
