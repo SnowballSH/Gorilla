@@ -2,6 +2,7 @@ package repl
 
 import (
 	"fmt"
+	"github.com/SnowballSH/Gorilla/config"
 	"github.com/SnowballSH/Gorilla/exports"
 	"github.com/SnowballSH/Gorilla/runtime"
 	"github.com/c-bata/go-prompt"
@@ -39,7 +40,7 @@ func Start() {
 	for {
 		text := prompt.Input("> ", func(document prompt.Document) []prompt.Suggest {
 			return completer(document, env)
-		})
+		}, prompt.OptionTitle("Gorilla "+config.VERSION))
 		text = strings.TrimSpace(text)
 		if text == ":quit" {
 			return

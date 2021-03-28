@@ -2,6 +2,7 @@ package runtime
 
 import (
 	"fmt"
+	"strings"
 	"unicode/utf8"
 )
 
@@ -12,7 +13,49 @@ var StringClass = MakeClassFromSuper("String", NumericClass,
 
 var stringIns *Environment
 
+func makeStringIns() {
+	stringIns = NewEnvironmentWithStore(map[string]BaseObject{
+		"+": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
+			ro, err := GorillaToString(args[0])
+			if err != nil {
+				return nil, err
+			}
+
+			left := self.Parent().(*Object).InternalValue.(string)
+			right := ro.InternalValue.(string)
+			return NewString(left + right), nil
+		}),
+
+		"*": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
+			ro, err := GorillaToInteger(args[0])
+			if err != nil {
+				return nil, err
+			}
+
+			left := self.Parent().(*Object).InternalValue.(string)
+			right := ro.InternalValue.(int64)
+			return NewString(strings.Repeat(left, int(right))), nil
+		}),
+	})
+}
+
 var GorillaToString ConvertFuncType
+
+func makeGorillaToString() {
+	GorillaToString = func(x BaseObject) (*Object, error) {
+		o, ok := x.(*Object)
+		if !ok {
+			return nil, fmt.Errorf("cannot convert non-object to String")
+		}
+
+		switch o.Class() {
+		case StringClass:
+			return o, nil
+		default:
+			return nil, fmt.Errorf("cannot convert %s to String", o.Class().Name)
+		}
+	}
+}
 
 func NewString(value string) *Object {
 	return &Object{
