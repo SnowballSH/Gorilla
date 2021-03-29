@@ -60,6 +60,13 @@ func (p *Parser) skipNL() {
 	}
 }
 
+// skipNLPeek skips all Newline in peek
+func (p *Parser) skipNLPeek() {
+	for p.peekIs(token.Newline) {
+		p.next()
+	}
+}
+
 // report panics and reports an error
 func (p *Parser) report(why string) {
 	err := errors.MakeError(
@@ -116,8 +123,83 @@ func (p *Parser) ParseStatement() ast.Statement {
 // ParseExpressionStatement parses an expression statement
 func (p *Parser) ParseExpressionStatement() ast.Statement {
 	stmt := &ast.ExpressionStatement{Tk: p.cur}
-	stmt.Es = p.ParseExpression(0)
+	var w ast.Expression
+
+	switch p.cur.Type {
+	case token.If:
+		w = p.ParseIfElse()
+	default:
+		w = p.ParseExpression(0)
+	}
+
+	stmt.Es = w
 	return stmt
+}
+
+// ParseBlock parses a block
+func (p *Parser) ParseBlock() *ast.Block {
+	if !p.curIs(token.LCurly) {
+		p.report("Expected '{', got " + processToken(p.cur.Literal))
+	}
+
+	var stmts = &ast.Block{Stmts: nil}
+
+	p.next()
+
+	p.skipNL()
+
+	for !p.curIs(token.RCurly) && !p.curIs(token.EOF) {
+		stmt := p.ParseStatement()
+		stmts.Stmts = append(stmts.Stmts, stmt)
+
+		p.next()
+
+		if !p.curIs(token.Newline) && !p.curIs(token.Semicolon) && !p.curIs(token.EOF) {
+			p.report("Expected newline or ;, got '" + p.cur.Literal + "'")
+		}
+
+		p.skipNL()
+
+		for p.curIs(token.Semicolon) {
+			p.next()
+		}
+
+		p.skipNL()
+	}
+
+	if !p.curIs(token.RCurly) {
+		p.report("Expected '}', got " + processToken(p.cur.Literal))
+	}
+
+	return stmts
+}
+
+// ParseIfElse parses an if, else expression
+func (p *Parser) ParseIfElse() *ast.IfElse {
+	tk := p.cur
+	p.next()
+	cond := p.ParseExpression(0)
+	p.next()
+	If := p.ParseBlock()
+
+	if p.peekIs(token.Else) {
+		p.next()
+		p.next()
+		Else := p.ParseBlock()
+		return &ast.IfElse{
+			Condition: cond,
+			If:        If,
+			Else:      Else,
+			Tk:        tk,
+		}
+	}
+
+	return &ast.IfElse{
+		Condition: cond,
+		If:        If,
+		Else:      &ast.Block{Stmts: nil},
+		Tk:        tk,
+	}
 }
 
 // ParseExpression parses an expression
@@ -176,12 +258,12 @@ func (p *Parser) ParseAtom() (res ast.Expression) {
 		r := p.ParseExpression(0)
 		if !p.peekIs(token.RParen) {
 			p.next()
-			p.report("Expected ')', got " + processToken(p.cur.Literal) + "")
+			p.report("Expected ')', got " + processToken(p.cur.Literal))
 		}
 		p.next()
 		res = r
 	default:
-		p.report("Unexpected " + processToken(p.cur.Literal) + "")
+		p.report("Unexpected " + processToken(p.cur.Literal))
 		res = nil
 	}
 
@@ -200,6 +282,8 @@ func (p *Parser) ParseAtom() (res ast.Expression) {
 
 			args = append(args, p.ParseExpression(0))
 
+			p.skipNLPeek()
+
 			if p.peekIs(token.RParen) {
 				break
 			}
@@ -211,14 +295,16 @@ func (p *Parser) ParseAtom() (res ast.Expression) {
 			}
 
 			p.next()
+
+			p.skipNLPeek()
 		}
 
-		if p.peekIs(token.RParen) {
-			k = p.peek
-			p.next()
+		p.next()
+		p.skipNL()
+		if p.curIs(token.RParen) {
+			k = p.cur
 			p.next()
 		} else {
-			p.next()
 			p.report("Expected ')', got " + processToken(p.cur.Literal) + "")
 			return
 		}

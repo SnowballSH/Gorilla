@@ -1,5 +1,6 @@
 package token
 
+// The base Token struct
 type Token struct {
 	Type    string
 	Literal string
@@ -10,6 +11,9 @@ type Token struct {
 const (
 	Integer = "Integer"
 	String  = "String"
+
+	If   = "if"
+	Else = "else"
 
 	Iden = "Identifier"
 
@@ -25,7 +29,16 @@ const (
 	LParen = "("
 	RParen = ")"
 
+	LCurly = "{"
+	RCurly = "}"
+
 	Newline = "Newline"
 	Illegal = "Illegal"
 	EOF     = "End of file"
 )
+
+// All Keywords
+var Keywords = map[string]string{
+	"if":   If,
+	"else": Else,
+}

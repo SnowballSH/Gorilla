@@ -126,6 +126,11 @@ func (vm *VM) RunStatement() {
 		vm.line--
 	case grammar.Pop:
 		vm.pop()
+	case grammar.Noop:
+		// Do nothing
+
+	case grammar.Null:
+		vm.push(Null)
 
 	case grammar.Integer:
 		vm.push(NewInteger(vm.readInt()))
@@ -181,5 +186,15 @@ func (vm *VM) RunStatement() {
 		}
 
 		vm.push(val)
+
+	case grammar.Jump:
+		where := vm.readInt()
+		vm.ip = int(where) + 1
+
+	case grammar.JumpIfFalse:
+		where := vm.readInt()
+		if vm.pop().IsTruthy() {
+			vm.ip = int(where) + 1
+		}
 	}
 }

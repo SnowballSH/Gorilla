@@ -7,6 +7,9 @@ const (
 	// Pops the stack
 	Pop byte = iota
 
+	// Do nothing
+	Noop
+
 	// line++
 	Advance
 
@@ -19,6 +22,9 @@ const (
 
 	// String in bytes
 	String
+
+	// Null
+	Null
 
 	// name string
 	GetVar
@@ -35,4 +41,11 @@ const (
 	// [arg3, arg2, arg1, callee];
 	// Will perform callee(arg1, arg2, arg3)
 	Call
+
+	// where int;
+	// Expression on stack
+	JumpIfFalse
+
+	// where int
+	Jump
 )

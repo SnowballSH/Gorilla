@@ -22,6 +22,18 @@ type Expression interface {
 	e()
 }
 
+type Block struct {
+	Stmts []Statement
+}
+
+func (b *Block) String() string {
+	x := "{"
+	for _, y := range b.Stmts {
+		x += "\n" + y.String()
+	}
+	return x + "\n}"
+}
+
 /* ... */
 
 type ExpressionStatement struct {
@@ -144,4 +156,21 @@ func (c *Call) e() {}
 
 func (c *Call) Line() int {
 	return c.Tk.Line
+}
+
+type IfElse struct {
+	Condition Expression
+	If        *Block
+	Else      *Block
+	Tk        token.Token
+}
+
+func (ie *IfElse) String() string {
+	return fmt.Sprintf("(if %s %s else %s)", ie.Condition.String(), ie.If.String(), ie.Else.String())
+}
+
+func (ie *IfElse) e() {}
+
+func (ie *IfElse) Line() int {
+	return ie.Tk.Line
 }

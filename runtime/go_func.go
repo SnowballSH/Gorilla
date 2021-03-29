@@ -2,14 +2,13 @@ package runtime
 
 import "fmt"
 
-var GoFuncClass = MakeClassFromSuper("Native Function", NumericClass, NotCallable)
+var GoFuncClass = MakeClassFromSuper("Native Function", NumericClass, NotCallable, goFuncIns)
 
 var goFuncIns = NewEnvironment()
 
 func NewGoFunc(function CallFuncType) *Object {
 	return &Object{
 		RClass:        GoFuncClass,
-		Instances:     goFuncIns,
 		InternalValue: nil,
 		ToStringFunc: func(self *Object) string {
 			return "Native Function"

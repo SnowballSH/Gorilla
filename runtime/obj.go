@@ -9,9 +9,7 @@ type BaseObject interface {
 	ToString() string
 	Inspect() string
 	InstanceVariableGet(string) (BaseObject, bool)
-	InstanceVariableSet(string, BaseObject) BaseObject
 	InstanceVariables() *Environment
-	SetInstanceVariables(*Environment)
 
 	IsTruthy() bool
 	EqualTo(BaseObject) bool
@@ -25,7 +23,6 @@ type BaseObject interface {
 // Object struct holds a normal object
 type Object struct {
 	RClass        *RClass
-	Instances     *Environment
 	InternalValue interface{}
 	ToStringFunc  func(self *Object) string
 	InspectFunc   func(self *Object) string
@@ -52,19 +49,11 @@ func (o *Object) Inspect() string {
 }
 
 func (o *Object) InstanceVariableGet(s string) (BaseObject, bool) {
-	return o.Instances.Get(s)
-}
-
-func (o *Object) InstanceVariableSet(s string, object BaseObject) BaseObject {
-	return o.Instances.Set(s, object)
+	return o.Class().GetInstance(s)
 }
 
 func (o *Object) InstanceVariables() *Environment {
-	return o.Instances
-}
-
-func (o *Object) SetInstanceVariables(e *Environment) {
-	o.Instances = e
+	return o.Class().InstanceVars
 }
 
 func (o *Object) IsTruthy() bool {

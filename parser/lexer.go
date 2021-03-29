@@ -86,6 +86,11 @@ func (l *Lexer) next() token.Token {
 	case ')':
 		tok = l.newToken(token.RParen, ")")
 
+	case '{':
+		tok = l.newToken(token.LCurly, "{")
+	case '}':
+		tok = l.newToken(token.RCurly, "}")
+
 	case ',':
 		tok = l.newToken(token.Comma, ",")
 
@@ -139,6 +144,10 @@ func (l *Lexer) readIden() token.Token {
 	for l.peekIsLetter() || l.peekIsNumber() {
 		l.readChar()
 		x += string(l.ch)
+	}
+
+	if k, ok := token.Keywords[x]; ok {
+		return l.newToken(k, x)
 	}
 
 	return l.newToken(token.Iden, x)

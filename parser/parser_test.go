@@ -77,12 +77,62 @@ func TestVar(t *testing.T) {
 	assert.Equal(t, "(2 + (a = ((2 + 3) * 7)));", res[0].String())
 }
 
+func TestBlock(t *testing.T) {
+	p := NewParser(NewLexer(`if 0 {`))
+	p.Parse()
+	assert.NotNil(t, p.Error)
+
+	p = NewParser(NewLexer(`if 0 }`))
+	p.Parse()
+	assert.NotNil(t, p.Error)
+
+	p = NewParser(NewLexer(`if 0 {0 0}`))
+	p.Parse()
+	assert.NotNil(t, p.Error)
+
+	p = NewParser(NewLexer(`if 0 {0;;;;}`))
+	p.Parse()
+	assert.Nil(t, p.Error)
+}
+
+func TestIfElse(t *testing.T) {
+	p := NewParser(NewLexer(`
+if 1 + 2 {
+	print("Hello");
+	3 + 1
+}
+`))
+	res := p.Parse()
+	assert.Equal(t, `(if (1 + 2) {
+(print('Hello'));
+(3 + 1);
+} else {
+});`, res[0].String())
+
+	p = NewParser(NewLexer(`
+if 1 + 2 {
+	print("Hello");
+	3 + 1
+} else {
+	k
+}
+`))
+	res = p.Parse()
+	assert.Equal(t, `(if (1 + 2) {
+(print('Hello'));
+(3 + 1);
+} else {
+k;
+});`, res[0].String())
+
+}
+
 func TestCall(t *testing.T) {
-	p := NewParser(NewLexer("$abc(1, 2, 3)"))
+	p := NewParser(NewLexer("$abc(1,\n 2, 3\n)"))
 	res := p.Parse()
 	assert.Equal(t, "($abc(1, 2, 3));", res[0].String())
 
-	p = NewParser(NewLexer("$abc(1, 2, 3,)"))
+	p = NewParser(NewLexer("$abc(1, 2, 3,\n)"))
 	res = p.Parse()
 	assert.Equal(t, "($abc(1, 2, 3));", res[0].String())
 

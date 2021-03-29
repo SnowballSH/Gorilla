@@ -10,12 +10,7 @@ func TestObj(t *testing.T) {
 	x, o := obj.InstanceVariableGet("x")
 	assert.False(t, o)
 	assert.Nil(t, x)
-	obj.InstanceVariableSet("x", NewInteger(8))
-	x, o = obj.InstanceVariableGet("x")
-	assert.True(t, o)
-	assert.NotNil(t, x)
 	obj.InstanceVariables().Names()
-	obj.SetInstanceVariables(NewEnvironment())
 
 	assert.Nil(t, obj.Parent())
 	obj.SetParent(obj)

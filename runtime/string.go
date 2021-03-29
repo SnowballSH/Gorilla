@@ -6,10 +6,7 @@ import (
 	"unicode/utf8"
 )
 
-var StringClass = MakeClassFromSuper("String", NumericClass,
-	func(self BaseObject, args ...BaseObject) (BaseObject, error) {
-		return GorillaToString(args[0])
-	})
+var StringClass *RClass
 
 var stringIns *Environment
 
@@ -37,6 +34,11 @@ func makeStringIns() {
 			return NewString(strings.Repeat(left, int(right))), nil
 		}),
 	})
+
+	StringClass = MakeClassFromSuper("String", NumericClass,
+		func(self BaseObject, args ...BaseObject) (BaseObject, error) {
+			return GorillaToString(args[0])
+		}, stringIns)
 }
 
 var GorillaToString ConvertFuncType
@@ -60,7 +62,6 @@ func makeGorillaToString() {
 func NewString(value string) *Object {
 	return &Object{
 		RClass:        StringClass,
-		Instances:     stringIns,
 		InternalValue: value,
 		ToStringFunc: func(self *Object) string {
 			return fmt.Sprintf("%s", self.InternalValue.(string))

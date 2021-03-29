@@ -34,21 +34,27 @@ func (c *Compiler) updateLine(line int) {
 }
 
 // emit emits some bytes
-func (c *Compiler) emit(b ...byte) {
+func (c *Compiler) emit(b ...byte) (pos int) {
+	pos = len(c.Result)
 	c.Result = append(c.Result, b...)
+	return
 }
 
 // emitString emits a string
-func (c *Compiler) emitString(b string) {
+func (c *Compiler) emitString(b string) int {
 	c.emit(byte(len(b)))
 	c.emit([]byte(b)...)
+
+	return len(b) + 1
 }
 
 // emitInt emits an integer
-func (c *Compiler) emitInt(b int64) {
+func (c *Compiler) emitInt(b int64) int {
 	l := leb128.AppendSleb128(nil, b)
 	c.emit(byte(len(l)))
 	c.emit(l...)
+
+	return len(l) + 1
 }
 
 // Compiler is the base compiling function.
@@ -118,6 +124,60 @@ func (c *Compiler) compileExpr(v ast.Expression) {
 		c.compileExpr(e.Function)
 		c.emit(grammar.Call)
 		c.emitInt(int64(len(e.Arguments)))
+
+	case *ast.IfElse:
+		c.compileExpr(e.Condition)
+
+		compi := &Compiler{
+			Result:   nil,
+			lastLine: c.lastLine,
+		}
+		compe := &Compiler{
+			Result:   nil,
+			lastLine: c.lastLine,
+		}
+
+		ci := make(chan bool)
+		ce := make(chan bool)
+
+		go func(ch chan bool) {
+			compi.Compile(e.If.Stmts)
+			ch <- true
+		}(ci)
+
+		go func(ch chan bool) {
+			compe.Compile(e.Else.Stmts)
+			ch <- true
+		}(ce)
+
+		<-ci
+		<-ce
+
+		if len(compi.Result) > 0 && compi.Result[len(compi.Result)-1] == grammar.Pop {
+			compi.Result[len(compi.Result)-1] = grammar.Noop
+		} else {
+			compi.emit(grammar.Null)
+		}
+
+		if len(compe.Result) > 0 && compe.Result[len(compe.Result)-1] == grammar.Pop {
+			compe.Result[len(compe.Result)-1] = grammar.Noop
+		} else {
+			compe.emit(grammar.Null)
+		}
+
+		compi.updateLine(v.Line())
+		compe.updateLine(v.Line())
+
+		c.emit(grammar.JumpIfFalse)
+
+		compi.emit(grammar.Jump)
+		compi.emitInt(int64(len(c.Result) + 2 + len(leb128.AppendSleb128(nil, int64(len(c.Result)+len(compi.Result)+1))) +
+			len(compi.Result) + len(compe.Result)))
+
+		c.emitInt(int64(len(c.Result) + len(compi.Result) + 1))
+
+		c.emit(compi.Result...)
+		c.emit(compe.Result...)
 	}
 }
 

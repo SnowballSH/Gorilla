@@ -1,6 +1,7 @@
 package runtime
 
 func init() {
+	makeNullIns()
 	makeIntIns()
 	makeStringIns()
 

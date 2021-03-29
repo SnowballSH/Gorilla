@@ -12,6 +12,7 @@ var Global *Environment
 func makeGlobal() {
 	Global = NewEnvironmentWithStore(map[string]BaseObject{
 		"$VERSION": NewString(config.VERSION),
+		"null":     Null,
 
 		"print": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
 			var w []string

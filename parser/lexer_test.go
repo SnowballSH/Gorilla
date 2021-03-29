@@ -154,6 +154,21 @@ func TestIden(t *testing.T) {
 	assert.Equal(t, "_hello123", n.Literal)
 }
 
+func TestKeyword(t *testing.T) {
+	lexer := NewLexer("if else")
+	var n token.Token
+
+	n = lexer.next()
+	assert.Equal(t, token.If, n.Type)
+	assert.Equal(t, 0, n.Line)
+	assert.Equal(t, "if", n.Literal)
+
+	n = lexer.next()
+	assert.Equal(t, token.Else, n.Type)
+	assert.Equal(t, 0, n.Line)
+	assert.Equal(t, "else", n.Literal)
+}
+
 func TestMisc(t *testing.T) {
 	lexer := NewLexer("a = 1")
 	var n token.Token

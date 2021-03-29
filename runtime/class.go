@@ -2,9 +2,12 @@ package runtime
 
 // Defines a Class, or Type
 type RClass struct {
-	Name       string
-	Instances  *Environment
-	superClass *RClass
+	Name      string
+	Instances *Environment
+
+	// For children
+	InstanceVars *Environment
+	superClass   *RClass
 
 	NewFunc CallFuncType
 }
@@ -29,16 +32,8 @@ func (R *RClass) InstanceVariableGet(s string) (BaseObject, bool) {
 	return R.Instances.Get(s)
 }
 
-func (R *RClass) InstanceVariableSet(s string, object BaseObject) BaseObject {
-	return R.Instances.Set(s, object)
-}
-
 func (R *RClass) InstanceVariables() *Environment {
 	return R.Instances
-}
-
-func (R *RClass) SetInstanceVariables(e *Environment) {
-	R.Instances = e
 }
 
 func (R *RClass) IsTruthy() bool {
@@ -59,17 +54,28 @@ func (R *RClass) Parent() BaseObject {
 
 func (R *RClass) SetParent(_ BaseObject) {}
 
+// GetInstance gets instance variables for its children
+func (R *RClass) GetInstance(s string) (BaseObject, bool) {
+	o, ok := R.InstanceVars.Get(s)
+	if !ok {
+		o, ok = R.superClass.InstanceVars.Get(s)
+	}
+	return o, ok
+}
+
 // Helpers
 
 func MakeClass(
 	Name string,
 	NewFunc CallFuncType,
+	InstanceVars *Environment,
 ) *RClass {
 	return &RClass{
-		Name:       Name,
-		Instances:  NewEnvironment(),
-		superClass: nil,
-		NewFunc:    NewFunc,
+		Name:         Name,
+		Instances:    NewEnvironment(),
+		InstanceVars: InstanceVars,
+		superClass:   nil,
+		NewFunc:      NewFunc,
 	}
 }
 
@@ -77,11 +83,13 @@ func MakeClassFromSuper(
 	Name string,
 	super *RClass,
 	NewFunc CallFuncType,
+	InstanceVars *Environment,
 ) *RClass {
 	return &RClass{
-		Name:       Name,
-		Instances:  NewEnvironment(),
-		superClass: super,
-		NewFunc:    NewFunc,
+		Name:         Name,
+		Instances:    NewEnvironment(),
+		InstanceVars: InstanceVars,
+		superClass:   super,
+		NewFunc:      NewFunc,
 	}
 }

@@ -2,10 +2,7 @@ package runtime
 
 import "fmt"
 
-var IntegerClass = MakeClassFromSuper("Integer", NumericClass,
-	func(self BaseObject, args ...BaseObject) (BaseObject, error) {
-		return GorillaToInteger(args[0])
-	})
+var IntegerClass *RClass
 
 var intIns *Environment
 
@@ -58,6 +55,11 @@ func makeIntIns() {
 			return NewInteger(left / right), nil
 		}),
 	})
+
+	IntegerClass = MakeClassFromSuper("Integer", NumericClass,
+		func(self BaseObject, args ...BaseObject) (BaseObject, error) {
+			return GorillaToInteger(args[0])
+		}, intIns)
 }
 
 var GorillaToInteger ConvertFuncType
@@ -81,7 +83,6 @@ func makeGorillaToInteger() {
 func NewInteger(value int64) *Object {
 	return &Object{
 		RClass:        IntegerClass,
-		Instances:     intIns,
 		InternalValue: value,
 		ToStringFunc: func(self *Object) string {
 			return fmt.Sprintf("%d", self.InternalValue.(int64))

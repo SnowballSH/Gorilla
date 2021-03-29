@@ -100,3 +100,53 @@ func TestCall(t *testing.T) {
 		grammar.Call, 1, 2,
 		grammar.Pop}, compiler.Result)
 }
+
+func TestIfElse(t *testing.T) {
+	compiler := NewCompiler()
+
+	p := parser.NewParser(parser.NewLexer(`if 1 {
+
+} else {5
+}
+1`))
+	res := p.Parse()
+
+	compiler.Compile(res)
+	assert.Equal(t, []byte{grammar.Magic,
+		grammar.Integer, 1, 1,
+		grammar.JumpIfFalse, 1, 10,
+		grammar.Null,
+		grammar.Jump, 1, 18,
+		grammar.Advance,
+		grammar.Advance,
+		grammar.Integer, 1, 5, grammar.Noop,
+		grammar.Back,
+		grammar.Back,
+		grammar.Pop,
+		grammar.Advance, grammar.Advance, grammar.Advance, grammar.Advance,
+		grammar.Integer, 1, 1, grammar.Pop,
+	}, compiler.Result)
+
+	compiler = NewCompiler()
+
+	p = parser.NewParser(parser.NewLexer(`if 1 {
+	5
+} else {
+}
+1`))
+	res = p.Parse()
+
+	compiler.Compile(res)
+	assert.Equal(t, []byte{grammar.Magic,
+		grammar.Integer, 1, 1,
+		grammar.JumpIfFalse, 1, 15,
+		grammar.Advance,
+		grammar.Integer, 1, 5, grammar.Noop,
+		grammar.Back,
+		grammar.Jump, 1, 16,
+		grammar.Null,
+		grammar.Pop,
+		grammar.Advance, grammar.Advance, grammar.Advance, grammar.Advance,
+		grammar.Integer, 1, 1, grammar.Pop,
+	}, compiler.Result)
+}

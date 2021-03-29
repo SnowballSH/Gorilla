@@ -6,13 +6,12 @@ import (
 	"github.com/SnowballSH/Gorilla/exports"
 	"github.com/SnowballSH/Gorilla/runtime"
 	"github.com/c-bata/go-prompt"
+	"github.com/fatih/color"
 	"strings"
 )
 
 func completer(d prompt.Document, env *runtime.Environment) []prompt.Suggest {
-	s := []prompt.Suggest{
-		{Text: ":quit", Description: "Quit the repl"},
-	}
+	var s []prompt.Suggest
 	for n, k := range env.Store {
 		s = append(s, prompt.Suggest{
 			Text:        n,
@@ -29,7 +28,12 @@ func completer(d prompt.Document, env *runtime.Environment) []prompt.Suggest {
 			Description: fmt.Sprintf("Global Variable, type '%s'", k.Class().Name),
 		})
 	}
-	return prompt.FilterHasPrefix(s, d.GetWordBeforeCursor(), true)
+
+	s = append(s, []prompt.Suggest{
+		{Text: ":quit", Description: "Quit the repl"},
+	}...)
+
+	return prompt.FilterHasPrefix(s, d.GetWordBeforeCursor(), false)
 }
 
 func Start() {
@@ -49,21 +53,21 @@ func Start() {
 		res, err := exports.CompileGorilla(text)
 
 		if err != nil {
-			fmt.Println(err.Error())
+			color.Red(err.Error())
 			continue
 		}
 
 		vm, lastPopped, err := exports.ExecuteGorillaBytecodeFromSourceAndEnv(res, text, env)
 
 		if err != nil {
-			fmt.Println(err.Error())
+			color.Red(err.Error())
 			continue
 		}
 
 		env = vm.Environment
 
 		if lastPopped != nil {
-			fmt.Println(fmt.Sprintf("#=> %s", vm.LastPopped.Inspect()))
+			color.Green(fmt.Sprintf("#=> %s", vm.LastPopped.Inspect()))
 		}
 	}
 }
