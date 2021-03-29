@@ -193,7 +193,7 @@ func (vm *VM) RunStatement() {
 
 	case grammar.JumpIfFalse:
 		where := vm.readInt()
-		if vm.pop().IsTruthy() {
+		if !vm.pop().IsTruthy() {
 			vm.ip = int(where) + 1
 		}
 	}

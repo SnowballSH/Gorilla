@@ -20,6 +20,7 @@ func TestClass(t *testing.T) {
 
 	assert.Equal(t, class.superClass, class.Parent())
 	class.SetParent(IntegerClass)
+	class.InstanceVariables()
 
 	_, err := class.Call(nil, class)
 	assert.NotNil(t, err)

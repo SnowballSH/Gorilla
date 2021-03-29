@@ -154,7 +154,7 @@ func (p *Parser) ParseBlock() *ast.Block {
 
 		p.next()
 
-		if !p.curIs(token.Newline) && !p.curIs(token.Semicolon) && !p.curIs(token.EOF) {
+		if !p.curIs(token.Newline) && !p.curIs(token.Semicolon) && !p.curIs(token.EOF) && !p.curIs(token.RCurly) {
 			p.report("Expected newline or ;, got '" + p.cur.Literal + "'")
 		}
 

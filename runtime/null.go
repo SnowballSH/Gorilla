@@ -6,7 +6,7 @@ import (
 
 var NullClass = MakeClassFromSuper("Null", NumericClass,
 	func(self BaseObject, args ...BaseObject) (BaseObject, error) {
-		return nil, fmt.Errorf("cannot convert %s to String", args[0].Class().Name)
+		return nil, fmt.Errorf("cannot convert %s to null", args[0].Class().Name)
 	}, nullIns)
 
 var nullIns *Environment

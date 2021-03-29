@@ -84,6 +84,42 @@ func TestCall(t *testing.T) {
 	assert.Equal(t, errors.MakeVMError("'3' is not callable", 0), vm.Error)
 }
 
+func TestIfElse(t *testing.T) {
+	vm := NewVM([]byte{grammar.Magic,
+		grammar.Integer, 1, 1,
+		grammar.JumpIfFalse, 1, 10,
+		grammar.Null,
+		grammar.Jump, 1, 18,
+		grammar.Advance,
+		grammar.Advance,
+		grammar.Integer, 1, 5, grammar.Noop,
+		grammar.Back,
+		grammar.Back,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.Nil(t, vm.Error)
+	assert.Equal(t, "null", vm.LastPopped.ToString())
+
+	vm = NewVM([]byte{grammar.Magic,
+		grammar.Integer, 1, 0,
+		grammar.JumpIfFalse, 1, 10,
+		grammar.Null,
+		grammar.Jump, 1, 18,
+		grammar.Advance,
+		grammar.Advance,
+		grammar.Integer, 1, 5, grammar.Noop,
+		grammar.Back,
+		grammar.Back,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.Nil(t, vm.Error)
+	assert.Equal(t, "5", vm.LastPopped.ToString())
+}
+
 func TestVMError(t *testing.T) {
 	vm := NewVM([]byte{})
 	vm.Run()
