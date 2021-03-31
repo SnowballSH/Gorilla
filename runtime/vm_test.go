@@ -69,6 +69,16 @@ func TestVMVariables(t *testing.T) {
 
 	assert.NotNil(t, vm.Error)
 	assert.Equal(t, errors.MakeVMError("Variable 'abd' is not defined", 0), vm.Error)
+
+	vm = NewVMWithStore([]byte{grammar.Magic,
+		grammar.Integer, 1, 0x03,
+		grammar.SetVar, 4, 'n', 'u', 'l', 'l', // undefined
+		grammar.Pop,
+	}, vm.Environment)
+	vm.Run()
+
+	assert.NotNil(t, vm.Error)
+	assert.Equal(t, errors.MakeVMError("Variable name 'null' is reserved", 0), vm.Error)
 }
 
 func TestCall(t *testing.T) {

@@ -152,6 +152,13 @@ func (vm *VM) RunStatement() {
 	case grammar.SetVar:
 		name := vm.readString()
 		value := vm.pop()
+
+		for _, w := range ReservedKW {
+			if w == name {
+				vm.MakeError(fmt.Sprintf("Variable name '%s' is reserved", name))
+			}
+		}
+
 		if len(name) >= 1 && name[0] == '$' {
 			Global.Set(name, value)
 		} else {

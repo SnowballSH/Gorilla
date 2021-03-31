@@ -6,6 +6,12 @@ import (
 	"strings"
 )
 
+//
+var ReservedKW = []string{
+	"null",
+	"print",
+}
+
 // Global is the global runtime storage
 var Global *Environment
 
