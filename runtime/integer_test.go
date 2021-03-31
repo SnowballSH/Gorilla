@@ -143,3 +143,14 @@ func TestIntegerBinOp(t *testing.T) {
 
 	assert.NotNil(t, vm.Error)
 }
+
+func TestIntegerError(t *testing.T) {
+	_, e := intIns.Store["+"].Call(nil)
+	assert.NotNil(t, e)
+	_, e = intIns.Store["-"].Call(nil)
+	assert.NotNil(t, e)
+	_, e = intIns.Store["*"].Call(nil)
+	assert.NotNil(t, e)
+	_, e = intIns.Store["/"].Call(nil)
+	assert.NotNil(t, e)
+}

@@ -23,5 +23,13 @@ func makeGlobal() {
 			fmt.Println(jw)
 			return NewString(jw), nil
 		}),
+
+		"str": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
+			k, err := getElement(args, 0)
+			if err != nil {
+				return nil, err
+			}
+			return NewString(k.ToString()), nil
+		}),
 	})
 }

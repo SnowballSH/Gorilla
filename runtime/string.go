@@ -13,7 +13,11 @@ var stringIns *Environment
 func makeStringIns() {
 	stringIns = NewEnvironmentWithStore(map[string]BaseObject{
 		"+": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
-			ro, err := GorillaToString(args[0])
+			k, err := getElement(args, 0)
+			if err != nil {
+				return nil, err
+			}
+			ro, err := GorillaToString(k)
 			if err != nil {
 				return nil, err
 			}
@@ -24,7 +28,11 @@ func makeStringIns() {
 		}),
 
 		"*": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
-			ro, err := GorillaToInteger(args[0])
+			k, err := getElement(args, 0)
+			if err != nil {
+				return nil, err
+			}
+			ro, err := GorillaToInteger(k)
 			if err != nil {
 				return nil, err
 			}

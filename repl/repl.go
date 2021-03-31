@@ -33,6 +33,12 @@ func completer(d prompt.Document, env *runtime.Environment) []prompt.Suggest {
 		{Text: ":quit", Description: "Quit the repl"},
 	}...)
 
+	/*
+		if len(strings.TrimSpace(d.GetWordBeforeCursor())) == 0 {
+			return nil
+		}
+	*/
+
 	return prompt.FilterHasPrefix(s, d.GetWordBeforeCursor(), false)
 }
 
@@ -41,14 +47,18 @@ func Start() {
 
 	env := runtime.NewEnvironment()
 
+	history := []string{"print('Hello, world!')"}
+
 	for {
 		text := prompt.Input("> ", func(document prompt.Document) []prompt.Suggest {
 			return completer(document, env)
-		}, prompt.OptionTitle("Gorilla "+config.VERSION))
+		}, prompt.OptionTitle("Gorilla "+config.VERSION), prompt.OptionHistory(history))
 		text = strings.TrimSpace(text)
 		if text == ":quit" {
 			return
 		}
+
+		history = append(history, text)
 
 		res, err := exports.CompileGorilla(text)
 

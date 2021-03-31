@@ -84,3 +84,10 @@ func TestStringClass(t *testing.T) {
 	_, err = StringClass.NewFunc(nil, StringClass)
 	assert.NotNil(t, err)
 }
+
+func TestStringError(t *testing.T) {
+	_, e := stringIns.Store["+"].Call(nil)
+	assert.NotNil(t, e)
+	_, e = stringIns.Store["*"].Call(nil)
+	assert.NotNil(t, e)
+}

@@ -9,7 +9,11 @@ var intIns *Environment
 func makeIntIns() {
 	intIns = NewEnvironmentWithStore(map[string]BaseObject{
 		"+": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
-			ro, err := GorillaToInteger(args[0])
+			k, err := getElement(args, 0)
+			if err != nil {
+				return nil, err
+			}
+			ro, err := GorillaToInteger(k)
 			if err != nil {
 				return nil, err
 			}
@@ -19,7 +23,11 @@ func makeIntIns() {
 			return NewInteger(left + right), nil
 		}),
 		"-": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
-			ro, err := GorillaToInteger(args[0])
+			k, err := getElement(args, 0)
+			if err != nil {
+				return nil, err
+			}
+			ro, err := GorillaToInteger(k)
 			if err != nil {
 				return nil, err
 			}
@@ -29,8 +37,11 @@ func makeIntIns() {
 			return NewInteger(left - right), nil
 		}),
 		"*": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
-
-			ro, err := GorillaToInteger(args[0])
+			k, err := getElement(args, 0)
+			if err != nil {
+				return nil, err
+			}
+			ro, err := GorillaToInteger(k)
 			if err != nil {
 				return nil, err
 			}
@@ -40,7 +51,11 @@ func makeIntIns() {
 			return NewInteger(left * right), nil
 		}),
 		"/": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
-			ro, err := GorillaToInteger(args[0])
+			k, err := getElement(args, 0)
+			if err != nil {
+				return nil, err
+			}
+			ro, err := GorillaToInteger(k)
 			if err != nil {
 				return nil, err
 			}
