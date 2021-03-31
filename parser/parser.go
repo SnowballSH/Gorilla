@@ -303,7 +303,6 @@ func (p *Parser) ParseAtom() (res ast.Expression) {
 		p.skipNL()
 		if p.curIs(token.RParen) {
 			k = p.cur
-			p.next()
 		} else {
 			p.report("Expected ')', got " + processToken(p.cur.Literal) + "")
 			return
