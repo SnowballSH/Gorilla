@@ -2,6 +2,8 @@
 
 # Gorilla Programming Language
 
+[![Go Reference](https://pkg.go.dev/badge/github.com/SnowballSH/Gorilla.svg)](https://pkg.go.dev/github.com/SnowballSH/Gorilla)
+
 ---
 
 ## NEWS:
