@@ -1,0 +1,5 @@
+# Hello World of the Gorilla Programming Language, but more complex
+
+if $VERSION {
+    print("Hello" + ",", "world!")
+}
