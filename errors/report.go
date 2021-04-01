@@ -5,18 +5,22 @@ import (
 	"strings"
 )
 
+// Type of Parsing Error
 type PARSINGERROR byte
 
+// MakeError makes a parsing error
 func MakeError(code, why string, line, char, e int) string {
 	return fmt.Sprintf("Error in line %d:\n\n", line+1) + strings.Split(strings.ReplaceAll(strings.TrimSpace(code), "\r", ""), "\n")[line] +
 		"\n" + strings.Repeat(" ", char-e) + "^" + "\n" + why
 }
 
+// Type of VM Error
 type VMERROR struct {
 	Message string
 	Line    int
 }
 
+// MakeVMError makes a VM error
 func MakeVMError(why string, l int) *VMERROR {
 	return &VMERROR{
 		Message: why,
@@ -24,12 +28,14 @@ func MakeVMError(why string, l int) *VMERROR {
 	}
 }
 
+// TestERR is for testing
 func TestERR(r interface{}) {
 	if _, ok := r.(PARSINGERROR); !ok {
 		panic(r)
 	}
 }
 
+// TestVMERR is for testing
 func TestVMERR(r interface{}) {
 	if _, ok := r.(*VMERROR); !ok {
 		panic(r)

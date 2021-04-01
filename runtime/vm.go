@@ -7,6 +7,7 @@ import (
 	"github.com/SnowballSH/Gorilla/grammar"
 )
 
+// The Base VM struct
 type VM struct {
 	source []byte
 	ip     int
@@ -22,6 +23,7 @@ type VM struct {
 	Environment *Environment
 }
 
+// NewVM creates a new vm from array of bytes
 func NewVM(source []byte) *VM {
 	return &VM{
 		source: source,
@@ -39,6 +41,7 @@ func NewVM(source []byte) *VM {
 	}
 }
 
+// NewVMWithStore is NewVM but with set environment
 func NewVMWithStore(source []byte, env *Environment) *VM {
 	return &VM{
 		source: source,
@@ -56,16 +59,19 @@ func NewVMWithStore(source []byte, env *Environment) *VM {
 	}
 }
 
+// MakeError panics a VM error
 func (vm *VM) MakeError(why string) {
 	x := errors.MakeVMError(why, vm.line)
 	vm.Error = x
 	panic(x)
 }
 
+// push pushes object to the end of stack
 func (vm *VM) push(obj BaseObject) {
 	vm.stack = append(vm.stack, obj)
 }
 
+// pop pops an object from the end of stack
 func (vm *VM) pop() BaseObject {
 	l := len(vm.stack) - 1
 	k := vm.stack[l]
@@ -74,12 +80,14 @@ func (vm *VM) pop() BaseObject {
 	return k
 }
 
+// read reads an instruction
 func (vm *VM) read() byte {
 	k := vm.source[vm.ip]
 	vm.ip++
 	return k
 }
 
+// readInt reads an integer
 func (vm *VM) readInt() int64 {
 	length := int(vm.read())
 	var number []byte
@@ -90,6 +98,7 @@ func (vm *VM) readInt() int64 {
 	return val
 }
 
+// readString reads a string
 func (vm *VM) readString() string {
 	length := int(vm.read())
 	var bytes []byte
@@ -99,6 +108,7 @@ func (vm *VM) readString() string {
 	return string(bytes)
 }
 
+// Run runs the bytecode
 func (vm *VM) Run() {
 	defer func() {
 		if r := recover(); r != nil {
@@ -117,6 +127,7 @@ func (vm *VM) Run() {
 	}
 }
 
+// RunStatement runs a single statement/opcode
 func (vm *VM) RunStatement() {
 	_type := vm.read()
 	switch _type {

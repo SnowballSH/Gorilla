@@ -13,6 +13,7 @@ func NewEnvironmentWithStore(store storeType) *Environment {
 	return &Environment{Store: store}
 }
 
+// Environment storage of Gorilla
 type Environment struct {
 	Store storeType
 }

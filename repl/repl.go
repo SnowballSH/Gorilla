@@ -42,6 +42,7 @@ func completer(d prompt.Document, env *runtime.Environment) []prompt.Suggest {
 	return prompt.FilterHasPrefix(s, d.GetWordBeforeCursor(), false)
 }
 
+// Start starts the repl
 func Start() {
 	fmt.Println("Welcome to Gorilla repl. Type :quit to quit.")
 

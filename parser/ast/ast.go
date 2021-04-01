@@ -7,16 +7,19 @@ import (
 	"strings"
 )
 
+// All ast nodes inherits from Node
 type Node interface {
 	String() string
 	Line() int
 }
 
+// Statement represents a statement
 type Statement interface {
 	Node
 	s()
 }
 
+// Expression represents an expression
 type Expression interface {
 	Node
 	e()
