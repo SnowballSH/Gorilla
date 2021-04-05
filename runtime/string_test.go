@@ -75,6 +75,24 @@ func TestStringMethods(t *testing.T) {
 	vm.Run()
 
 	assert.NotNil(t, vm.Error)
+
+	vm = NewVM([]byte{grammar.Magic,
+		grammar.Integer, 1, 1,
+		grammar.Integer, 1, 0,
+		grammar.GetInstance,
+		1, '-',
+		grammar.Call,
+		1, 0x01,
+		grammar.String, 1, 'b',
+		grammar.GetInstance,
+		1, '*',
+		grammar.Call,
+		1, 0x01,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.NotNil(t, vm.Error)
 }
 
 func TestStringClass(t *testing.T) {

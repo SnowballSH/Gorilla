@@ -39,6 +39,11 @@ func makeStringIns() {
 
 			left := self.Parent().(*Object).InternalValue.(string)
 			right := ro.InternalValue.(int64)
+
+			if right < 0 {
+				return nil, fmt.Errorf("negative string repeat count: %d", right)
+			}
+
 			return NewString(strings.Repeat(left, int(right))), nil
 		}),
 	})

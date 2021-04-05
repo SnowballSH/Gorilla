@@ -1,46 +1,14 @@
 package repl
 
 import (
+	"bufio"
 	"fmt"
-	"github.com/SnowballSH/Gorilla/config"
 	"github.com/SnowballSH/Gorilla/exports"
 	"github.com/SnowballSH/Gorilla/runtime"
-	"github.com/c-bata/go-prompt"
 	"github.com/fatih/color"
+	"os"
 	"strings"
 )
-
-func completer(d prompt.Document, env *runtime.Environment) []prompt.Suggest {
-	var s []prompt.Suggest
-	for n, k := range env.Store {
-		s = append(s, prompt.Suggest{
-			Text:        n,
-			Description: fmt.Sprintf("Scope Variable, type '%s'", k.Class().Name),
-		})
-	}
-	for n, k := range runtime.Global.Store {
-		w := n
-		if k.Class() == runtime.GoFuncClass {
-			w += "()"
-		}
-		s = append(s, prompt.Suggest{
-			Text:        w,
-			Description: fmt.Sprintf("Global Variable, type '%s'", k.Class().Name),
-		})
-	}
-
-	s = append(s, []prompt.Suggest{
-		{Text: ":quit", Description: "Quit the repl"},
-	}...)
-
-	/*
-		if len(strings.TrimSpace(d.GetWordBeforeCursor())) == 0 {
-			return nil
-		}
-	*/
-
-	return prompt.FilterHasPrefix(s, d.GetWordBeforeCursor(), false)
-}
 
 // Start starts the repl
 func Start() {
@@ -49,12 +17,12 @@ func Start() {
 	env := runtime.NewEnvironment()
 
 	history := []string{"print('Hello, world!')"}
+	r := bufio.NewReader(os.Stdin)
 
 	for {
-		text := prompt.Input("> ", func(document prompt.Document) []prompt.Suggest {
-			return completer(document, env)
-		}, prompt.OptionTitle("Gorilla "+config.VERSION), prompt.OptionHistory(history))
-		text = strings.TrimSpace(text)
+		fmt.Print("> ")
+		t, _, _ := r.ReadLine()
+		text := strings.TrimSpace(string(t))
 		if text == ":quit" {
 			return
 		}
