@@ -1,3 +1,7 @@
 package runtime
 
-var NumericClass = MakeClass("Numeric", NotCallable, NewEnvironment())
+var NumericClass *RClass
+
+func makeNumeric() {
+	NumericClass = MakeClassFromSuper("Numeric", AnyClass, NotCallable, NewEnvironment())
+}

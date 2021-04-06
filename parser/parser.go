@@ -10,11 +10,22 @@ import (
 
 // infixPrecedence is the precedence table for Gorilla
 var infixPrecedence = map[string][2]byte{
-	token.Plus:  {1, 2},
-	token.Minus: {1, 2},
+	token.Star:    {25, 26},
+	token.Slash:   {25, 26},
+	token.Percent: {25, 26},
 
-	token.Star:  {3, 4},
-	token.Slash: {3, 4},
+	token.Plus:  {23, 24},
+	token.Minus: {23, 24},
+
+	token.DbEq: {17, 18},
+	token.Neq:  {17, 18},
+}
+
+// prefixPrecedence is the prefix precedence table for Gorilla
+var prefixPrecedence = map[string]byte{
+	token.Plus:  27,
+	token.Minus: 27,
+	token.Not:   27,
 }
 
 // Parser is the base parsing struct
@@ -205,7 +216,17 @@ func (p *Parser) ParseIfElse() *ast.IfElse {
 // ParseExpression parses an expression
 func (p *Parser) ParseExpression(pr byte) ast.Expression {
 	p.skipNL()
-	left := p.ParseAtom()
+	var left ast.Expression
+	if prs, ok := prefixPrecedence[p.cur.Type]; ok {
+		tk := p.cur
+		p.next()
+		left = &ast.Prefix{
+			Right: p.ParseExpression(prs),
+			Op:    tk,
+		}
+	} else {
+		left = p.ParseAtom()
+	}
 
 	for !p.peekIs(token.EOF) {
 		op := p.peek

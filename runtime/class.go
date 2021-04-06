@@ -57,8 +57,8 @@ func (R *RClass) SetParent(_ BaseObject) {}
 // GetInstance gets instance variables for its children
 func (R *RClass) GetInstance(s string) (BaseObject, bool) {
 	o, ok := R.InstanceVars.Get(s)
-	if !ok {
-		o, ok = R.superClass.InstanceVars.Get(s)
+	if !ok && R.superClass != nil {
+		o, ok = R.superClass.GetInstance(s)
 	}
 	return o, ok
 }

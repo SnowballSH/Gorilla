@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-var NullClass = MakeClassFromSuper("Null", NumericClass,
+var NullClass = MakeClassFromSuper("Null", AnyClass,
 	func(self BaseObject, args ...BaseObject) (BaseObject, error) {
 		return nil, fmt.Errorf("cannot convert %s to null", args[0].Class().Name)
 	}, nullIns)

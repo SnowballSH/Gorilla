@@ -117,6 +117,16 @@ func (c *Compiler) compileExpr(v ast.Expression) {
 		c.emit(grammar.Call)
 		c.emitInt(1)
 
+	case *ast.Prefix:
+		c.compileExpr(e.Right)
+		c.updateLine(e.Line())
+
+		c.emit(grammar.GetInstance)
+		c.emitString(e.Op.Literal + "@")
+
+		c.emit(grammar.Call)
+		c.emitInt(0)
+
 	case *ast.Call:
 		for _, x := range reverse(e.Arguments) {
 			c.compileExpr(x)

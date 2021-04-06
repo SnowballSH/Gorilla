@@ -70,7 +70,20 @@ func (l *Lexer) next() token.Token {
 	case ';':
 		tok = l.newToken(token.Semicolon, ";")
 	case '=':
-		tok = l.newToken(token.Eq, "=")
+		if l.peekChar() == '=' {
+			l.readChar()
+			tok = l.newToken(token.DbEq, "==")
+		} else {
+			tok = l.newToken(token.Eq, "=")
+		}
+
+	case '!':
+		if l.peekChar() == '=' {
+			l.readChar()
+			tok = l.newToken(token.Neq, "!=")
+		} else {
+			tok = l.newToken(token.Not, "!")
+		}
 
 	case '+':
 		tok = l.newToken(token.Plus, "+")
@@ -80,6 +93,8 @@ func (l *Lexer) next() token.Token {
 		tok = l.newToken(token.Star, "*")
 	case '/':
 		tok = l.newToken(token.Slash, "/")
+	case '%':
+		tok = l.newToken(token.Percent, "%")
 
 	case '(':
 		tok = l.newToken(token.LParen, "(")

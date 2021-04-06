@@ -72,6 +72,18 @@ func TestInfix(t *testing.T) {
 
 		grammar.Pop,
 	}, compiler.Result)
+
+	compiler = NewCompiler()
+
+	compiler.Compile(parser.NewParser(parser.NewLexer("-1")).Parse())
+	assert.Equal(t, []byte{grammar.Magic,
+		grammar.Integer, 1, 0x01,
+		grammar.GetInstance,
+		2, '-', '@',
+		grammar.Call,
+		1, 0x0,
+		grammar.Pop,
+	}, compiler.Result)
 }
 
 func TestVars(t *testing.T) {

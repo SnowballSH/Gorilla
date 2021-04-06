@@ -48,7 +48,7 @@ func makeStringIns() {
 		}),
 	})
 
-	StringClass = MakeClassFromSuper("String", NumericClass,
+	StringClass = MakeClassFromSuper("String", AnyClass,
 		func(self BaseObject, args ...BaseObject) (BaseObject, error) {
 			return GorillaToString(args[0])
 		}, stringIns)

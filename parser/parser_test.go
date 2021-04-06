@@ -50,17 +50,38 @@ func TestParseBinOp(t *testing.T) {
 
 	assert.Equal(t, "((2 / 3) - 4);", res[0].String())
 
-	p = NewParser(NewLexer("3 * 9 + 4 - 5 * 6 * 999"))
+	p = NewParser(NewLexer("3 * 9 + 4 - 5 % 6 * 999"))
 	res = p.Parse()
 	assert.Equal(t, 1, len(res))
 
-	assert.Equal(t, "(((3 * 9) + 4) - ((5 * 6) * 999));", res[0].String())
+	assert.Equal(t, "(((3 * 9) + 4) - ((5 % 6) * 999));", res[0].String())
 
 	p = NewParser(NewLexer("3 * (9 + 4) - 5 * (6 * 999)"))
 	res = p.Parse()
 	assert.Equal(t, 1, len(res))
 
 	assert.Equal(t, "((3 * (9 + 4)) - (5 * (6 * 999)));", res[0].String())
+
+	p = NewParser(NewLexer("+-2"))
+	res = p.Parse()
+	assert.Equal(t, 1, len(res))
+
+	assert.Equal(t, "(+(-2));", res[0].String())
+}
+
+func TestComparison(t *testing.T) {
+	p := NewParser(NewLexer("2 == 3\n3 != 4"))
+	res := p.Parse()
+	assert.Equal(t, 2, len(res))
+
+	assert.Equal(t, "(2 == 3);", res[0].String())
+	assert.Equal(t, "(3 != 4);", res[1].String())
+
+	p = NewParser(NewLexer("!2"))
+	res = p.Parse()
+	assert.Equal(t, 1, len(res))
+
+	assert.Equal(t, "(!2);", res[0].String())
 }
 
 func TestVar(t *testing.T) {

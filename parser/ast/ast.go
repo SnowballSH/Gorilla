@@ -133,6 +133,21 @@ func (i *Infix) Line() int {
 	return i.Op.Line
 }
 
+type Prefix struct {
+	Right Expression
+	Op    token.Token
+}
+
+func (p *Prefix) String() string {
+	return fmt.Sprintf("(%s%s)", p.Op.Literal, p.Right.String())
+}
+
+func (p *Prefix) e() {}
+
+func (p *Prefix) Line() int {
+	return p.Op.Line
+}
+
 type Call struct {
 	Function  Expression
 	Arguments []Expression

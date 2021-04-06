@@ -2,7 +2,11 @@ package runtime
 
 import "fmt"
 
-var GoFuncClass = MakeClassFromSuper("Native Function", NumericClass, NotCallable, goFuncIns)
+var GoFuncClass *RClass
+
+func makeGoFuncIns() {
+	GoFuncClass = MakeClassFromSuper("Native Function", AnyClass, NotCallable, goFuncIns)
+}
 
 var goFuncIns = NewEnvironment()
 

@@ -36,9 +36,9 @@ func ExecuteGorillaBytecodeFromSourceAndEnv(bytecode []byte, source string, env 
 	vm.Run()
 	if vm.Error != nil {
 		return vm, nil, fmt.Errorf(
-			fmt.Sprintf("Runtime Error in line %d:\n| %s\n%s",
-				vm.Error.Line+1,
-				strings.Split(strings.ReplaceAll(source, "\r", ""), "\n")[vm.Error.Line], vm.Error.Message),
+			"Runtime Error in line %d:\n| %s\n%s",
+			vm.Error.Line+1,
+			strings.Split(strings.ReplaceAll(source, "\r", ""), "\n")[vm.Error.Line], vm.Error.Message,
 		)
 	}
 
@@ -54,9 +54,9 @@ func ExecuteGorillaBytecode(bytecode []byte) (*runtime.VM, runtime.BaseObject, e
 	vm.Run()
 	if vm.Error != nil {
 		return vm, nil, fmt.Errorf(
-			fmt.Sprintf("Runtime Error in line %d:\n\n%s",
-				vm.Error.Line+1,
-				vm.Error.Message),
+			"Runtime Error in line %d:\n\n%s",
+			vm.Error.Line+1,
+			vm.Error.Message,
 		)
 	}
 

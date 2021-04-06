@@ -21,10 +21,15 @@ const (
 	Eq        = "="
 	Comma     = ","
 
-	Plus  = "+"
-	Minus = "-"
-	Star  = "*"
-	Slash = "/"
+	DbEq = "=="
+	Neq  = "!="
+	Not  = "!"
+
+	Plus    = "+"
+	Minus   = "-"
+	Star    = "*"
+	Slash   = "/"
+	Percent = "%"
 
 	LParen = "("
 	RParen = ")"
