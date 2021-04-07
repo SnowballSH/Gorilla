@@ -13,9 +13,9 @@ func makeAnyIns() {
 				return nil, err
 			}
 			if self.Parent().EqualTo(k) {
-				return NewInteger(1), nil
+				return GorillaTrue, nil
 			} else {
-				return NewInteger(0), nil
+				return GorillaFalse, nil
 			}
 		}),
 		"!=": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
@@ -24,9 +24,9 @@ func makeAnyIns() {
 				return nil, err
 			}
 			if !self.Parent().EqualTo(k) {
-				return NewInteger(1), nil
+				return GorillaTrue, nil
 			} else {
-				return NewInteger(0), nil
+				return GorillaFalse, nil
 			}
 		}),
 	})

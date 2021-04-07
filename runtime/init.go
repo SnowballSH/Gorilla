@@ -4,6 +4,7 @@ func init() {
 	makeAnyIns()
 
 	makeNullIns()
+	makeBoolIns()
 
 	makeNumeric()
 	makeIntIns()

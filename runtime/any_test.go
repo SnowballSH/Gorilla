@@ -19,7 +19,7 @@ func TestAnyFunc(t *testing.T) {
 	vm.Run()
 
 	assert.Nil(t, vm.Error)
-	assert.Equal(t, vm.LastPopped.ToString(), "0")
+	assert.Equal(t, vm.LastPopped.ToString(), "false")
 
 	vm = NewVM([]byte{grammar.Magic,
 		grammar.Integer, 1, 0x03,
@@ -33,7 +33,7 @@ func TestAnyFunc(t *testing.T) {
 	vm.Run()
 
 	assert.Nil(t, vm.Error)
-	assert.Equal(t, vm.LastPopped.ToString(), "1")
+	assert.Equal(t, vm.LastPopped.ToString(), "true")
 
 	vm = NewVM([]byte{grammar.Magic,
 		grammar.Integer, 1, 0x03,
@@ -47,7 +47,7 @@ func TestAnyFunc(t *testing.T) {
 	vm.Run()
 
 	assert.Nil(t, vm.Error)
-	assert.Equal(t, vm.LastPopped.ToString(), "1")
+	assert.Equal(t, vm.LastPopped.ToString(), "true")
 
 	vm = NewVM([]byte{grammar.Magic,
 		grammar.Integer, 1, 0x03,
@@ -61,7 +61,7 @@ func TestAnyFunc(t *testing.T) {
 	vm.Run()
 
 	assert.Nil(t, vm.Error)
-	assert.Equal(t, vm.LastPopped.ToString(), "0")
+	assert.Equal(t, vm.LastPopped.ToString(), "false")
 
 	vm = NewVM([]byte{grammar.Magic,
 		grammar.Integer, 1, 0x03,

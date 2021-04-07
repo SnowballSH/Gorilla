@@ -7,10 +7,7 @@ import (
 )
 
 //
-var ReservedKW = []string{
-	"null",
-	"print",
-}
+var ReservedKW []string
 
 // Global is the global runtime storage
 var Global *Environment
@@ -18,7 +15,10 @@ var Global *Environment
 func makeGlobal() {
 	Global = NewEnvironmentWithStore(map[string]BaseObject{
 		"$VERSION": NewString(config.VERSION),
-		"null":     Null,
+
+		"null":  Null,
+		"true":  GorillaTrue,
+		"false": GorillaFalse,
 
 		"print": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
 			var w []string
@@ -38,4 +38,6 @@ func makeGlobal() {
 			return NewString(k.ToString()), nil
 		}),
 	})
+
+	ReservedKW = Global.Names()
 }
