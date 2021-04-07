@@ -21,8 +21,35 @@ contribute!
 
 If you are not, feel free to create issues about what you are expecting.
 
-Gorilla 1.0 will have a big syntax and runtime change. The runtime will be similar to [Ruby](https://www.ruby-lang.org/)
-, and syntax will be similar to [Coffeescript](https://coffeescript.org/) (without indentations). Stay tuned!
+---
+
+### Usage of the Gorilla library
+
+Download:
+
+```bash
+go get github.com/SnowballSH/Gorilla
+```
+
+Basic usage:
+
+```go
+import "github.com/SnowballSH/Gorilla/exports"
+
+code := "'Hello, world!'"
+
+// Compile Gorilla to bytecode
+res, err := exports.CompileGorilla(code)
+
+if err != nil {
+	panic(err)
+}
+
+// Execute Gorilla bytecode along with the source text for debugging
+vm, lastItem, err := exports.ExecuteGorillaBytecodeFromSource(res, code)
+
+println(lastItem.Inspect()) // 'Hello, world!'
+```
 
 ---
 
