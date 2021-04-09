@@ -51,10 +51,37 @@ func TestIntegerBinOp(t *testing.T) {
 	assert.Equal(t, vm.LastPopped.ToString(), "2")
 
 	vm = NewVM([]byte{grammar.Magic,
+		grammar.Integer, 1, 0x03,
+		grammar.Integer, 1, 0x06,
+		grammar.GetInstance,
+		1, '%',
+		grammar.Call,
+		1, 0x01,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.Nil(t, vm.Error)
+	assert.Equal(t, vm.LastPopped.ToString(), "0")
+
+	vm = NewVM([]byte{grammar.Magic,
 		grammar.Integer, 1, 0x00,
 		grammar.Integer, 1, 0x06,
 		grammar.GetInstance,
 		1, '/',
+		grammar.Call,
+		1, 0x01,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.NotNil(t, vm.Error)
+
+	vm = NewVM([]byte{grammar.Magic,
+		grammar.Integer, 1, 0x00,
+		grammar.Integer, 1, 0x06,
+		grammar.GetInstance,
+		1, '%',
 		grammar.Call,
 		1, 0x01,
 		grammar.Pop,
@@ -121,6 +148,19 @@ func TestIntegerBinOp(t *testing.T) {
 		grammar.String, 1, '1',
 		grammar.Integer, 1, 0x01,
 		grammar.GetInstance,
+		1, '%',
+		grammar.Call,
+		1, 0x01,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.NotNil(t, vm.Error)
+
+	vm = NewVM([]byte{grammar.Magic,
+		grammar.String, 1, '1',
+		grammar.Integer, 1, 0x01,
+		grammar.GetInstance,
 		1, '+',
 		grammar.Call,
 		1, 0x01,
@@ -142,6 +182,32 @@ func TestIntegerBinOp(t *testing.T) {
 	vm.Run()
 
 	assert.NotNil(t, vm.Error)
+
+	vm = NewVM([]byte{grammar.Magic,
+		grammar.Integer, 1, 0x01,
+		grammar.GetInstance,
+		2, '-', '@',
+		grammar.Call,
+		1, 0x00,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.Nil(t, vm.Error)
+	assert.Equal(t, vm.LastPopped.ToString(), "-1")
+
+	vm = NewVM([]byte{grammar.Magic,
+		grammar.Integer, 1, 0x01,
+		grammar.GetInstance,
+		2, '+', '@',
+		grammar.Call,
+		1, 0x00,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.Nil(t, vm.Error)
+	assert.Equal(t, vm.LastPopped.ToString(), "1")
 }
 
 func TestIntegerError(t *testing.T) {
@@ -152,5 +218,7 @@ func TestIntegerError(t *testing.T) {
 	_, e = intIns.Store["*"].Call(nil)
 	assert.NotNil(t, e)
 	_, e = intIns.Store["/"].Call(nil)
+	assert.NotNil(t, e)
+	_, e = intIns.Store["%"].Call(nil)
 	assert.NotNil(t, e)
 }

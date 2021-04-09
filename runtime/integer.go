@@ -22,6 +22,7 @@ func makeIntIns() {
 			right := ro.InternalValue.(int64)
 			return NewInteger(left + right), nil
 		}),
+
 		"-": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
 			k, err := getElement(args, 0)
 			if err != nil {
@@ -36,6 +37,7 @@ func makeIntIns() {
 			right := ro.InternalValue.(int64)
 			return NewInteger(left - right), nil
 		}),
+
 		"*": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
 			k, err := getElement(args, 0)
 			if err != nil {
@@ -50,6 +52,7 @@ func makeIntIns() {
 			right := ro.InternalValue.(int64)
 			return NewInteger(left * right), nil
 		}),
+
 		"/": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
 			k, err := getElement(args, 0)
 			if err != nil {
@@ -68,6 +71,36 @@ func makeIntIns() {
 			}
 
 			return NewInteger(left / right), nil
+		}),
+
+		"%": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
+			k, err := getElement(args, 0)
+			if err != nil {
+				return nil, err
+			}
+			ro, err := GorillaToInteger(k)
+			if err != nil {
+				return nil, err
+			}
+
+			left := self.Parent().(*Object).InternalValue.(int64)
+			right := ro.InternalValue.(int64)
+
+			if right == 0 {
+				return nil, fmt.Errorf("%d %s %d: Division by 0", left, "%", right)
+			}
+
+			return NewInteger(left % right), nil
+		}),
+
+		"-@": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
+			left := self.Parent().(*Object).InternalValue.(int64)
+			return NewInteger(-left), nil
+		}),
+
+		"+@": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
+			left := self.Parent().(*Object).InternalValue.(int64)
+			return NewInteger(+left), nil
 		}),
 	})
 
