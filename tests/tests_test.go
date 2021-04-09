@@ -19,6 +19,10 @@ var tests = []test{
 		filename: "arth.gr",
 		expected: runtime.NewInteger(-36),
 	},
+	{
+		filename: "condition.gr",
+		expected: runtime.GorillaFalse,
+	},
 }
 
 func TestAll(t *testing.T) {

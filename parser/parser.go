@@ -136,12 +136,7 @@ func (p *Parser) ParseExpressionStatement() ast.Statement {
 	stmt := &ast.ExpressionStatement{Tk: p.cur}
 	var w ast.Expression
 
-	switch p.cur.Type {
-	case token.If:
-		w = p.ParseIfElse()
-	default:
-		w = p.ParseExpression(0)
-	}
+	w = p.ParseExpression(0)
 
 	stmt.Es = w
 	return stmt
@@ -225,7 +220,12 @@ func (p *Parser) ParseExpression(pr byte) ast.Expression {
 			Op:    tk,
 		}
 	} else {
-		left = p.ParseAtom()
+		switch p.cur.Type {
+		case token.If:
+			left = p.ParseIfElse()
+		default:
+			left = p.ParseAtom()
+		}
 	}
 
 	for !p.peekIs(token.EOF) {
