@@ -208,6 +208,52 @@ func (p *Parser) ParseIfElse() *ast.IfElse {
 	}
 }
 
+// ParseIfElse parses a lambda expression
+// |a, b, c| { do_something(a * b * c) }
+func (p *Parser) ParseLambda() *ast.Lambda {
+	tk := p.cur // |
+
+	var idens []string
+
+	for p.peek.Type != token.EOF && p.peek.Type != token.VBar {
+		p.next()
+		p.skipNL()
+
+		iden := p.ParseIdenString()
+		idens = append(idens, iden)
+		p.skipNLPeek()
+
+		if p.peekIs(token.VBar) {
+			break
+		}
+
+		if !p.peekIs(token.Comma) {
+			p.next()
+			p.report("Expected ',', got " + processToken(p.cur.Literal))
+		}
+
+		p.next()
+
+		p.skipNLPeek()
+	}
+
+	p.next()
+	p.skipNL()
+	if p.curIs(token.VBar) {
+	} else {
+		p.report("Expected '|', got " + processToken(p.cur.Literal))
+	}
+
+	p.next()
+	block := p.ParseBlock()
+
+	return &ast.Lambda{
+		Arguments: idens,
+		Block:     block,
+		Tk:        tk,
+	}
+}
+
 // ParseExpression parses an expression
 func (p *Parser) ParseExpression(pr byte) ast.Expression {
 	p.skipNL()
@@ -223,6 +269,8 @@ func (p *Parser) ParseExpression(pr byte) ast.Expression {
 		switch p.cur.Type {
 		case token.If:
 			left = p.ParseIfElse()
+		case token.VBar:
+			left = p.ParseLambda()
 		default:
 			left = p.ParseAtom()
 		}
@@ -356,6 +404,16 @@ func (p *Parser) ParseIden() ast.Expression {
 		Name: p.cur.Literal,
 		Tk:   p.cur,
 	}
+}
+
+func (p *Parser) ParseIdenString() string {
+	p.skipNL()
+	x := p.cur
+	if x.Type != token.Iden {
+		p.report("Expected Identifier, got " + processToken(x.Type))
+	}
+
+	return x.Literal
 }
 
 // processToken is a helper function for errors

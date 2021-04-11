@@ -145,7 +145,35 @@ if 1 + 2 {
 } else {
 k;
 });`, res[0].String())
+}
 
+func TestLambda(t *testing.T) {
+	p := NewParser(NewLexer(`
+|a, b| {
+	a + b
+}
+`))
+	res := p.Parse()
+	assert.Equal(t, `(|a, b| {
+(a + b);
+});`, res[0].String())
+
+	p = NewParser(NewLexer(`|| {}`))
+	res = p.Parse()
+	assert.Equal(t, `(|| {
+});`, res[0].String())
+
+	p = NewParser(NewLexer(`|1| {}`))
+	p.Parse()
+	assert.NotNil(t, p.Error)
+
+	p = NewParser(NewLexer(`|a b| {}`))
+	p.Parse()
+	assert.NotNil(t, p.Error)
+
+	p = NewParser(NewLexer(`|`))
+	p.Parse()
+	assert.NotNil(t, p.Error)
 }
 
 func TestCall(t *testing.T) {

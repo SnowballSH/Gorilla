@@ -37,6 +37,8 @@ const (
 	LCurly = "{"
 	RCurly = "}"
 
+	VBar = "|"
+
 	Newline = "Newline"
 	Illegal = "Illegal"
 	EOF     = "End of file"

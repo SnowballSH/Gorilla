@@ -192,3 +192,19 @@ func (ie *IfElse) e() {}
 func (ie *IfElse) Line() int {
 	return ie.Tk.Line
 }
+
+type Lambda struct {
+	Arguments []string
+	Block     *Block
+	Tk        token.Token
+}
+
+func (l *Lambda) String() string {
+	return fmt.Sprintf("(|%s| %s)", strings.Join(l.Arguments, ", "), l.Block.String())
+}
+
+func (l *Lambda) e() {}
+
+func (l *Lambda) Line() int {
+	return l.Tk.Line
+}
