@@ -8,6 +8,8 @@ import (
 )
 
 func TestLambda(t *testing.T) {
+	w := NewVM(nil)
+
 	x := []byte{
 		grammar.Magic,
 		grammar.Integer, 1, 0x03, // 3
@@ -22,14 +24,14 @@ func TestLambda(t *testing.T) {
 
 		grammar.Pop,
 	}
-	lambda := NewLambda(x)
+	lambda := NewLambda(x, w)
 	assert.EqualValues(t, x, lambda.InternalValue)
 	assert.EqualValues(t, x, lambda.Value())
 	assert.Equal(t, "Lambda Function", lambda.ToString())
 	assert.Equal(t, fmt.Sprintf("Lambda Function %p", lambda), lambda.Inspect())
 	assert.Equal(t, LambdaClass, lambda.Class())
 	assert.True(t, lambda.IsTruthy())
-	assert.False(t, lambda.EqualTo(NewLambda(nil)))
+	assert.False(t, lambda.EqualTo(NewLambda(nil, w)))
 	assert.False(t, lambda.EqualTo(nil))
 
 	wot := NewString("")
@@ -42,7 +44,7 @@ func TestLambda(t *testing.T) {
 	x = []byte{
 		grammar.Magic,
 	}
-	lambda = NewLambda(x)
+	lambda = NewLambda(x, w)
 
 	k, e = lambda.Call(lambda)
 	assert.Nil(t, e)
@@ -62,7 +64,7 @@ func TestLambda(t *testing.T) {
 
 		grammar.Pop,
 	}
-	lambda = NewLambda(x)
+	lambda = NewLambda(x, w)
 	k, e = lambda.Call(lambda)
 	assert.NotNil(t, e)
 }
