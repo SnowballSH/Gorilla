@@ -218,7 +218,7 @@ func (vm *VM) RunStatement() {
 			bc = append(bc, vm.read())
 		}
 
-		vm.push(NewLambda(bc))
+		vm.push(NewLambda(bc, vm))
 
 	case grammar.Jump:
 		where := vm.readInt()

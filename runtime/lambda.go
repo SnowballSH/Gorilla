@@ -14,7 +14,7 @@ func makeLambdaIns() {
 	LambdaClass = MakeClassFromSuper("Lambda Function", AnyClass, NotCallable, lambdaIns)
 }
 
-func NewLambda(bytecode []byte) *Object {
+func NewLambda(bytecode []byte, oldVm *VM) *Object {
 	return &Object{
 		RClass:        LambdaClass,
 		InternalValue: bytecode,
@@ -31,7 +31,7 @@ func NewLambda(bytecode []byte) *Object {
 			return self == other
 		},
 		CallFunc: func(self BaseObject, args ...BaseObject) (BaseObject, error) {
-			vm := NewVM(bytecode)
+			vm := NewVMWithStore(bytecode, oldVm.Environment.Copy())
 			vm.Run()
 			k := vm.LastPopped
 			if k == nil {

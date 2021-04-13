@@ -1,0 +1,20 @@
+fizzbuzz = || {
+    if x % 3 == 0 {
+        "Fizz"
+    } else { "" } +
+    if x % 5 == 0 {
+        "Buzz"
+    } else { "" }
+}
+
+x = 9
+print("9 =>", fizzbuzz())
+
+x = 20
+print("20 =>", fizzbuzz())
+
+x = 45
+print("45 =>", fizzbuzz())
+
+x = 97
+print("97 =>", fizzbuzz())
