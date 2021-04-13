@@ -37,6 +37,8 @@ func makeGlobal() {
 			}
 			return NewString(k.ToString()), nil
 		}),
+
+		"Integer": IntegerClass,
 	})
 
 	ReservedKW = Global.Names()

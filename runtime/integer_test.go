@@ -23,8 +23,8 @@ func TestInteger(t *testing.T) {
 
 func TestIntegerBinOp(t *testing.T) {
 	vm := NewVM([]byte{grammar.Magic,
+		grammar.GetVar, 4, 't', 'r', 'u', 'e',
 		grammar.Integer, 1, 0x03,
-		grammar.Integer, 1, 0x01,
 		grammar.GetInstance,
 		1, '*',
 		grammar.Call,
@@ -65,7 +65,7 @@ func TestIntegerBinOp(t *testing.T) {
 	assert.Equal(t, vm.LastPopped.ToString(), "0")
 
 	vm = NewVM([]byte{grammar.Magic,
-		grammar.Integer, 1, 0x00,
+		grammar.GetVar, 5, 'f', 'a', 'l', 's', 'e',
 		grammar.Integer, 1, 0x06,
 		grammar.GetInstance,
 		1, '/',

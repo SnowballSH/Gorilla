@@ -48,4 +48,10 @@ const (
 
 	// where int
 	Jump
+
+	// numberOfParams int;
+	// [param3, param2, param1, ...]
+	// lengthOfCode int;
+	// code
+	Lambda
 )

@@ -130,6 +130,30 @@ func TestIfElse(t *testing.T) {
 	assert.Equal(t, "5", vm.LastPopped.ToString())
 }
 
+func TestVMLambda(t *testing.T) {
+	vm := NewVM([]byte{grammar.Magic,
+		grammar.Lambda,
+		1, 2, 1, 'b', 1, 'a',
+
+		1, 15,
+
+		grammar.Magic,
+		grammar.Advance,
+		grammar.Integer, 1, 1,
+		grammar.Integer, 1, 2,
+		grammar.GetInstance, 1, '+',
+		grammar.Call, 1, 1,
+		grammar.Pop,
+
+		grammar.Advance,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.Nil(t, vm.Error)
+	assert.Equal(t, "Lambda Function", vm.LastPopped.ToString())
+}
+
 func TestVMError(t *testing.T) {
 	vm := NewVM([]byte{})
 	vm.Run()

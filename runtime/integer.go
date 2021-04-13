@@ -122,6 +122,12 @@ func makeGorillaToInteger() {
 		switch o.Class() {
 		case IntegerClass:
 			return o, nil
+		case BoolClass:
+			if o.InternalValue == true {
+				return NewInteger(1), nil
+			} else {
+				return NewInteger(0), nil
+			}
 		default:
 			return nil, fmt.Errorf("cannot convert %s to Integer", o.Class().Name)
 		}

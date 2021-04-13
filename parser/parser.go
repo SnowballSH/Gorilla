@@ -274,6 +274,52 @@ func (p *Parser) ParseExpression(pr byte) ast.Expression {
 		default:
 			left = p.ParseAtom()
 		}
+
+		if p.peekIs(token.LParen) {
+			var k token.Token
+
+			k = p.peek
+
+			p.next()
+
+			var args []ast.Expression
+
+			for p.peek.Type != token.EOF && p.peek.Type != token.RParen {
+				p.next()
+				p.skipNL()
+
+				args = append(args, p.ParseExpression(0))
+
+				p.skipNLPeek()
+
+				if p.peekIs(token.RParen) {
+					break
+				}
+
+				if !p.peekIs(token.Comma) {
+					p.next()
+					p.report("Expected ',', got " + processToken(p.cur.Literal) + "")
+				}
+
+				p.next()
+
+				p.skipNLPeek()
+			}
+
+			p.next()
+			p.skipNL()
+			if p.curIs(token.RParen) {
+				k = p.cur
+			} else {
+				p.report("Expected ')', got " + processToken(p.cur.Literal) + "")
+			}
+
+			left = &ast.Call{
+				Function:  left,
+				Arguments: args,
+				Tk:        k,
+			}
+		}
 	}
 
 	for !p.peekIs(token.EOF) {
@@ -334,54 +380,6 @@ func (p *Parser) ParseAtom() (res ast.Expression) {
 	default:
 		p.report("Unexpected " + processToken(p.cur.Literal))
 		res = nil
-	}
-
-	if p.peekIs(token.LParen) {
-		var k token.Token
-
-		k = p.peek
-
-		p.next()
-
-		var args []ast.Expression
-
-		for p.peek.Type != token.EOF && p.peek.Type != token.RParen {
-			p.next()
-			p.skipNL()
-
-			args = append(args, p.ParseExpression(0))
-
-			p.skipNLPeek()
-
-			if p.peekIs(token.RParen) {
-				break
-			}
-
-			if !p.peekIs(token.Comma) {
-				p.next()
-				p.report("Expected ',', got " + processToken(p.cur.Literal) + "")
-				return
-			}
-
-			p.next()
-
-			p.skipNLPeek()
-		}
-
-		p.next()
-		p.skipNL()
-		if p.curIs(token.RParen) {
-			k = p.cur
-		} else {
-			p.report("Expected ')', got " + processToken(p.cur.Literal) + "")
-			return
-		}
-
-		res = &ast.Call{
-			Function:  res,
-			Arguments: args,
-			Tk:        k,
-		}
 	}
 
 	return

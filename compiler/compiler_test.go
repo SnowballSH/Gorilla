@@ -162,3 +162,31 @@ func TestIfElse(t *testing.T) {
 		grammar.Integer, 1, 1, grammar.Pop,
 	}, compiler.Result)
 }
+
+func TestLambda(t *testing.T) {
+	compiler := NewCompiler()
+
+	p := parser.NewParser(parser.NewLexer(`|a, b| {
+	a + b
+}`))
+	res := p.Parse()
+
+	compiler.Compile(res)
+	assert.Equal(t, []byte{grammar.Magic,
+		grammar.Lambda,
+		1, 2, 1, 'b', 1, 'a',
+
+		1, 15,
+
+		grammar.Magic,
+		grammar.Advance,
+		grammar.GetVar, 1, 'b',
+		grammar.GetVar, 1, 'a',
+		grammar.GetInstance, 1, '+',
+		grammar.Call, 1, 1,
+		grammar.Pop,
+
+		grammar.Advance,
+		grammar.Pop,
+	}, compiler.Result)
+}
