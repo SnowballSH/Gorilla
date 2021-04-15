@@ -1,4 +1,4 @@
-fizzbuzz = || {
+fizzbuzz = |x| {
     if x % 3 == 0 {
         "Fizz"
     } else { "" } +
@@ -7,14 +7,7 @@ fizzbuzz = || {
     } else { "" }
 }
 
-x = 9
-print("9 =>", fizzbuzz())
-
-x = 20
-print("20 =>", fizzbuzz())
-
-x = 45
-print("45 =>", fizzbuzz())
-
-x = 97
-print("97 =>", fizzbuzz())
+print("9 =>", fizzbuzz(9))
+print("20 =>", fizzbuzz(20))
+print("45 =>", fizzbuzz(45))
+print("97 =>", fizzbuzz(97))

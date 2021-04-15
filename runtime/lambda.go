@@ -14,7 +14,7 @@ func makeLambdaIns() {
 	LambdaClass = MakeClassFromSuper("Lambda Function", AnyClass, NotCallable, lambdaIns)
 }
 
-func NewLambda(bytecode []byte, oldVm *VM) *Object {
+func NewLambda(params []string, bytecode []byte, oldVm *VM) *Object {
 	return &Object{
 		RClass:        LambdaClass,
 		InternalValue: bytecode,
@@ -31,7 +31,14 @@ func NewLambda(bytecode []byte, oldVm *VM) *Object {
 			return self == other
 		},
 		CallFunc: func(self BaseObject, args ...BaseObject) (BaseObject, error) {
-			vm := NewVMWithStore(bytecode, oldVm.Environment.Copy())
+			if len(params) != len(args) {
+				return nil, fmt.Errorf("expected %d arguments, got %d", len(params), len(args))
+			}
+			env := oldVm.Environment.Copy()
+			for i, name := range params {
+				env.Set(name, args[i])
+			}
+			vm := NewVMWithStore(bytecode, env)
 			vm.Run()
 			k := vm.LastPopped
 			if k == nil {
