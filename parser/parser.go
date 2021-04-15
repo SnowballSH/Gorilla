@@ -145,7 +145,8 @@ func (p *Parser) ParseExpressionStatement() ast.Statement {
 // ParseBlock parses a block
 func (p *Parser) ParseBlock() *ast.Block {
 	if !p.curIs(token.LCurly) {
-		p.report("Expected '{', got " + processToken(p.cur.Literal))
+		x := p.ParseStatement()
+		return &ast.Block{Stmts: []ast.Statement{x}}
 	}
 
 	var stmts = &ast.Block{Stmts: nil}

@@ -149,9 +149,8 @@ k;
 
 func TestLambda(t *testing.T) {
 	p := NewParser(NewLexer(`
-|a, b| {
+|a, b|
 	a + b
-}
 `))
 	res := p.Parse()
 	assert.Equal(t, `(|a, b| {

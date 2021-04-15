@@ -1,10 +1,9 @@
 fizzbuzz = |x| {
-    if x % 3 == 0 {
-        "Fizz"
-    } else { "" } +
-    if x % 5 == 0 {
-        "Buzz"
-    } else { "" }
+    fizz = if x % 3 == 0
+               "Fizz" else ""
+    buzz = if x % 5 == 0
+               "Buzz" else ""
+    fizz + buzz
 }
 
 print("9 =>", fizzbuzz(9))
