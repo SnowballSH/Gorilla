@@ -1,12 +1,12 @@
 fib = |num| {
-    $x = 1
-    $y = 0
-    num.times(||{
-        # print($x)
-        c = $x
-        $x = $x + $y
-        $y = c
+    x = 1
+    y = 0
+    num.times({
+        # print(x)
+        c = x
+        x = x + y
+        y = c
     })
 }
 
-fib(90000)
+fib(90)

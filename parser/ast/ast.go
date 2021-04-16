@@ -209,6 +209,22 @@ func (l *Lambda) Line() int {
 	return l.Tk.Line
 }
 
+// Closure is Lambda without arguments
+type Closure struct {
+	Block *Block
+	Tk    token.Token
+}
+
+func (c *Closure) String() string {
+	return fmt.Sprintf("(%s)", c.Block.String())
+}
+
+func (c *Closure) e() {}
+
+func (c *Closure) Line() int {
+	return c.Tk.Line
+}
+
 type GetInstance struct {
 	Parent Expression
 	Name   string

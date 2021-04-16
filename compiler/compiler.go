@@ -208,6 +208,21 @@ func (c *Compiler) compileExpr(v ast.Expression) {
 
 		c.updateLine(comp.lastLine)
 
+	case *ast.Closure:
+		c.emit(grammar.Closure)
+
+		comp := &Compiler{
+			Result:   []byte{grammar.Magic},
+			lastLine: c.lastLine,
+		}
+		comp.Compile(e.Block.Stmts)
+
+		c.emitInt(int64(len(comp.Result)))
+
+		c.emit(comp.Result...)
+
+		c.updateLine(comp.lastLine)
+
 	case *ast.GetInstance:
 		c.compileExpr(e.Parent)
 		c.emit(grammar.GetInstance)

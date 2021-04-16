@@ -154,6 +154,28 @@ func TestVMLambda(t *testing.T) {
 	assert.Equal(t, "Lambda Function", vm.LastPopped.ToString())
 }
 
+func TestVMClosure(t *testing.T) {
+	vm := NewVM([]byte{grammar.Magic,
+		grammar.Closure,
+		1, 15,
+
+		grammar.Magic,
+		grammar.Advance,
+		grammar.Integer, 1, 1,
+		grammar.Integer, 1, 2,
+		grammar.GetInstance, 1, '+',
+		grammar.Call, 1, 1,
+		grammar.Pop,
+
+		grammar.Advance,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.Nil(t, vm.Error)
+	assert.Equal(t, "Closure", vm.LastPopped.ToString())
+}
+
 func TestVMError(t *testing.T) {
 	vm := NewVM([]byte{})
 	vm.Run()

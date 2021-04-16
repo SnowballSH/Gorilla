@@ -175,6 +175,14 @@ func TestLambda(t *testing.T) {
 	assert.NotNil(t, p.Error)
 }
 
+func TestClosure(t *testing.T) {
+	p := NewParser(NewLexer(`{a + b}`))
+	res := p.Parse()
+	assert.Equal(t, `({
+(a + b);
+});`, res[0].String())
+}
+
 func TestCall(t *testing.T) {
 	p := NewParser(NewLexer("$abc(1,\n 2, 3\n)"))
 	res := p.Parse()

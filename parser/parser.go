@@ -277,10 +277,17 @@ func (p *Parser) ParseExpression(pr byte) ast.Expression {
 			left = p.ParseIfElse()
 		case token.VBar:
 			left = p.ParseLambda()
+		case token.LCurly:
+			k := p.cur
+			left = &ast.Closure{
+				Block: p.ParseBlock(),
+				Tk:    k,
+			}
 		default:
 			left = p.ParseAtom()
 		}
 
+		// suffix
 		for {
 			if p.peekIs(token.LParen) {
 				var k token.Token

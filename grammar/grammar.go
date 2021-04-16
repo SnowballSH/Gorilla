@@ -54,4 +54,8 @@ const (
 	// lengthOfCode int;
 	// code
 	Lambda
+
+	// lengthOfCode int;
+	// code
+	Closure
 )

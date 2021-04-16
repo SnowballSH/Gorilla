@@ -220,6 +220,15 @@ func (vm *VM) RunStatement() {
 
 		vm.push(NewLambda(args, bc, vm))
 
+	case grammar.Closure:
+		var bc []byte
+		length := vm.readInt()
+		for i := int64(0); i < length; i++ {
+			bc = append(bc, vm.read())
+		}
+
+		vm.push(NewClosure(bc, vm))
+
 	case grammar.Jump:
 		where := vm.readInt()
 		vm.ip = int(where) + 1

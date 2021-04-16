@@ -13,6 +13,7 @@ func init() {
 
 	makeGoFuncIns()
 	makeLambdaIns()
+	makeClosureIns()
 
 	makeGorillaToInteger()
 	makeGorillaToString()
