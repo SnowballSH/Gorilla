@@ -337,6 +337,15 @@ func TestIntegerMethods(t *testing.T) {
 
 	assert.Nil(t, vm.Error)
 	assert.Equal(t, vm.LastPopped.ToString(), "true")
+
+	fn := intIns.Store["times"]
+	fn.SetParent(NewInteger(5))
+	_, e := fn.Call(fn, NewLambda(nil, []byte{grammar.Magic}, NewVM(nil)))
+	assert.Nil(t, e)
+	_, e = fn.Call(fn, NewLambda(nil, nil, NewVM(nil)))
+	assert.NotNil(t, e)
+	_, e = fn.Call(fn)
+	assert.NotNil(t, e)
 }
 
 func TestIntegerError(t *testing.T) {

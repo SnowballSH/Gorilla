@@ -142,6 +142,23 @@ func makeIntIns() {
 			left := self.Parent().(*Object).InternalValue.(int64)
 			return fromBool(left != 0), nil
 		}),
+
+		// times repeats a lambda self times
+		// Integer.times(fn: Lambda) -> Null
+		"times": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
+			left := self.Parent().(*Object).InternalValue.(int64)
+			fn, err := getElement(args, 0)
+			if err != nil {
+				return nil, err
+			}
+			for i := int64(0); i < left; i++ {
+				_, err = fn.Call(fn)
+				if err != nil {
+					return nil, err
+				}
+			}
+			return Null, nil
+		}),
 	})
 
 	IntegerClass = MakeClassFromSuper("Integer", NumericClass,
