@@ -20,6 +20,7 @@ const (
 	Semicolon = ";"
 	Eq        = "="
 	Comma     = ","
+	Dot       = "."
 
 	DbEq = "=="
 	Neq  = "!="

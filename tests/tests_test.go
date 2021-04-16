@@ -23,6 +23,10 @@ var tests = []test{
 		filename: "condition.gr",
 		expected: runtime.GorillaFalse,
 	},
+	{
+		filename: "function.gr",
+		expected: runtime.GorillaTrue,
+	},
 }
 
 func TestAll(t *testing.T) {

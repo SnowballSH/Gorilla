@@ -111,6 +111,8 @@ func (l *Lexer) next() token.Token {
 
 	case ',':
 		tok = l.newToken(token.Comma, ",")
+	case '.':
+		tok = l.newToken(token.Dot, ".")
 
 	case '"':
 		x, ok := l.readString('"')

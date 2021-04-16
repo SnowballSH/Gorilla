@@ -7,14 +7,12 @@ var GorillaFalse BaseObject
 
 var boolIns *Environment
 
+var fromBool func(b bool) BaseObject
+
 func makeBoolIns() {
 	boolIns = NewEnvironmentWithStore(map[string]BaseObject{
 		"!@": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
-			if self.Parent().IsTruthy() {
-				return GorillaFalse, nil
-			} else {
-				return GorillaTrue, nil
-			}
+			return fromBool(!self.Parent().IsTruthy()), nil
 		}),
 	})
 
@@ -64,5 +62,13 @@ func makeBoolIns() {
 		},
 		CallFunc:  NotCallable,
 		ParentObj: nil,
+	}
+
+	fromBool = func(b bool) BaseObject {
+		if b {
+			return GorillaTrue
+		} else {
+			return GorillaFalse
+		}
 	}
 }

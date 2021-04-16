@@ -102,6 +102,11 @@ func makeIntIns() {
 			left := self.Parent().(*Object).InternalValue.(int64)
 			return NewInteger(+left), nil
 		}),
+
+		"nonz": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
+			left := self.Parent().(*Object).InternalValue.(int64)
+			return fromBool(left != 0), nil
+		}),
 	})
 
 	IntegerClass = MakeClassFromSuper("Integer", NumericClass,

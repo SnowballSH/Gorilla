@@ -276,49 +276,64 @@ func (p *Parser) ParseExpression(pr byte) ast.Expression {
 			left = p.ParseAtom()
 		}
 
-		if p.peekIs(token.LParen) {
-			var k token.Token
+		for {
+			if p.peekIs(token.LParen) {
+				var k token.Token
 
-			k = p.peek
+				k = p.peek
 
-			p.next()
+				p.next()
 
-			var args []ast.Expression
+				var args []ast.Expression
 
-			for p.peek.Type != token.EOF && p.peek.Type != token.RParen {
+				for p.peek.Type != token.EOF && p.peek.Type != token.RParen {
+					p.next()
+					p.skipNL()
+
+					args = append(args, p.ParseExpression(0))
+
+					p.skipNLPeek()
+
+					if p.peekIs(token.RParen) {
+						break
+					}
+
+					if !p.peekIs(token.Comma) {
+						p.next()
+						p.report("Expected ',', got " + processToken(p.cur.Literal) + "")
+					}
+
+					p.next()
+
+					p.skipNLPeek()
+				}
+
 				p.next()
 				p.skipNL()
-
-				args = append(args, p.ParseExpression(0))
-
-				p.skipNLPeek()
-
-				if p.peekIs(token.RParen) {
-					break
+				if p.curIs(token.RParen) {
+					k = p.cur
+				} else {
+					p.report("Expected ')', got " + processToken(p.cur.Literal) + "")
 				}
 
-				if !p.peekIs(token.Comma) {
-					p.next()
-					p.report("Expected ',', got " + processToken(p.cur.Literal) + "")
+				left = &ast.Call{
+					Function:  left,
+					Arguments: args,
+					Tk:        k,
 				}
-
+			} else if p.peekIs(token.Dot) {
+				k := p.peek
 				p.next()
+				p.next()
+				str := p.ParseIdenString()
 
-				p.skipNLPeek()
-			}
-
-			p.next()
-			p.skipNL()
-			if p.curIs(token.RParen) {
-				k = p.cur
+				left = &ast.GetInstance{
+					Parent: left,
+					Name:   str,
+					Tk:     k,
+				}
 			} else {
-				p.report("Expected ')', got " + processToken(p.cur.Literal) + "")
-			}
-
-			left = &ast.Call{
-				Function:  left,
-				Arguments: args,
-				Tk:        k,
+				break
 			}
 		}
 	}

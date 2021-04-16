@@ -170,7 +170,7 @@ func TestKeyword(t *testing.T) {
 }
 
 func TestMisc(t *testing.T) {
-	lexer := NewLexer("a = 1 == != ! |")
+	lexer := NewLexer("a = 1 == != ! | .")
 	var n token.Token
 
 	n = lexer.next()
@@ -206,6 +206,10 @@ func TestMisc(t *testing.T) {
 	n = lexer.next()
 	assert.Equal(t, token.VBar, n.Type)
 	assert.Equal(t, "|", n.Literal)
+
+	n = lexer.next()
+	assert.Equal(t, token.Dot, n.Type)
+	assert.Equal(t, ".", n.Literal)
 }
 
 func TestBinOp(t *testing.T) {

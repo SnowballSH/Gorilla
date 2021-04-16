@@ -174,7 +174,7 @@ func TestLambda(t *testing.T) {
 	compiler.Compile(res)
 	assert.Equal(t, []byte{grammar.Magic,
 		grammar.Lambda,
-		1, 2, 1, 'b', 1, 'a',
+		1, 2, 1, 'a', 1, 'b',
 
 		1, 15,
 
@@ -187,6 +187,20 @@ func TestLambda(t *testing.T) {
 		grammar.Pop,
 
 		grammar.Advance,
+		grammar.Pop,
+	}, compiler.Result)
+}
+
+func TestGetInstance(t *testing.T) {
+	compiler := NewCompiler()
+
+	p := parser.NewParser(parser.NewLexer(`1.nonz`))
+	res := p.Parse()
+
+	compiler.Compile(res)
+	assert.Equal(t, []byte{grammar.Magic,
+		grammar.Integer, 1, 1,
+		grammar.GetInstance, 4, 'n', 'o', 'n', 'z',
 		grammar.Pop,
 	}, compiler.Result)
 }

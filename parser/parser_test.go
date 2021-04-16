@@ -215,6 +215,12 @@ Expected ')', got End of File
 `), *p.Error)
 }
 
+func TestGetInstance(t *testing.T) {
+	p := NewParser(NewLexer(`2.nonz`))
+	res := p.Parse()
+	assert.Equal(t, `(2.nonz);`, res[0].String())
+}
+
 func TestError(t *testing.T) {
 	var p *Parser
 

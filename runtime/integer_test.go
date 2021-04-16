@@ -208,6 +208,19 @@ func TestIntegerBinOp(t *testing.T) {
 
 	assert.Nil(t, vm.Error)
 	assert.Equal(t, vm.LastPopped.ToString(), "1")
+
+	vm = NewVM([]byte{grammar.Magic,
+		grammar.Integer, 1, 0x01,
+		grammar.GetInstance,
+		4, 'n', 'o', 'n', 'z',
+		grammar.Call,
+		1, 0x00,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.Nil(t, vm.Error)
+	assert.Equal(t, vm.LastPopped.ToString(), "true")
 }
 
 func TestIntegerError(t *testing.T) {

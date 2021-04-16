@@ -208,3 +208,19 @@ func (l *Lambda) e() {}
 func (l *Lambda) Line() int {
 	return l.Tk.Line
 }
+
+type GetInstance struct {
+	Parent Expression
+	Name   string
+	Tk     token.Token
+}
+
+func (g *GetInstance) String() string {
+	return fmt.Sprintf("(%s.%s)", g.Parent.String(), g.Name)
+}
+
+func (g *GetInstance) e() {}
+
+func (g *GetInstance) Line() int {
+	return g.Tk.Line
+}

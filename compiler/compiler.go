@@ -192,7 +192,7 @@ func (c *Compiler) compileExpr(v ast.Expression) {
 	case *ast.Lambda:
 		c.emit(grammar.Lambda)
 		c.emitInt(int64(len(e.Arguments)))
-		for _, x := range reverseStringArray(e.Arguments) {
+		for _, x := range e.Arguments {
 			c.emitString(x)
 		}
 
@@ -207,18 +207,15 @@ func (c *Compiler) compileExpr(v ast.Expression) {
 		c.emit(comp.Result...)
 
 		c.updateLine(comp.lastLine)
+
+	case *ast.GetInstance:
+		c.compileExpr(e.Parent)
+		c.emit(grammar.GetInstance)
+		c.emitString(e.Name)
 	}
 }
 
 func reverse(numbers []ast.Expression) []ast.Expression {
-	for i := 0; i < len(numbers)/2; i++ {
-		j := len(numbers) - i - 1
-		numbers[i], numbers[j] = numbers[j], numbers[i]
-	}
-	return numbers
-}
-
-func reverseStringArray(numbers []string) []string {
 	for i := 0; i < len(numbers)/2; i++ {
 		j := len(numbers) - i - 1
 		numbers[i], numbers[j] = numbers[j], numbers[i]
