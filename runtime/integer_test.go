@@ -208,6 +208,122 @@ func TestIntegerBinOp(t *testing.T) {
 
 	assert.Nil(t, vm.Error)
 	assert.Equal(t, vm.LastPopped.ToString(), "1")
+}
+
+func TestIntegerComp(t *testing.T) {
+	var vm *VM
+
+	vm = NewVM([]byte{grammar.Magic,
+		grammar.Integer, 1, 0x03,
+		grammar.Integer, 1, 0x06,
+		grammar.GetInstance,
+		1, '<',
+		grammar.Call,
+		1, 0x01,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.Nil(t, vm.Error)
+	assert.Equal(t, vm.LastPopped.ToString(), "false")
+
+	vm = NewVM([]byte{grammar.Magic,
+		grammar.Integer, 1, 0x03,
+		grammar.Integer, 1, 0x06,
+		grammar.GetInstance,
+		1, '>',
+		grammar.Call,
+		1, 0x01,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.Nil(t, vm.Error)
+	assert.Equal(t, vm.LastPopped.ToString(), "true")
+
+	vm = NewVM([]byte{grammar.Magic,
+		grammar.String, 1, '1',
+		grammar.Integer, 1, 0x01,
+		grammar.GetInstance,
+		1, '<',
+		grammar.Call,
+		1, 0x01,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.NotNil(t, vm.Error)
+
+	vm = NewVM([]byte{grammar.Magic,
+		grammar.String, 1, '1',
+		grammar.Integer, 1, 0x01,
+		grammar.GetInstance,
+		1, '>',
+		grammar.Call,
+		1, 0x01,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.NotNil(t, vm.Error)
+
+	vm = NewVM([]byte{grammar.Magic,
+		grammar.Integer, 1, 0x03,
+		grammar.Integer, 1, 0x03,
+		grammar.GetInstance,
+		2, '<', '=',
+		grammar.Call,
+		1, 0x01,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.Nil(t, vm.Error)
+	assert.Equal(t, vm.LastPopped.ToString(), "true")
+
+	vm = NewVM([]byte{grammar.Magic,
+		grammar.Integer, 1, 0x06,
+		grammar.Integer, 1, 0x06,
+		grammar.GetInstance,
+		2, '>', '=',
+		grammar.Call,
+		1, 0x01,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.Nil(t, vm.Error)
+	assert.Equal(t, vm.LastPopped.ToString(), "true")
+
+	vm = NewVM([]byte{grammar.Magic,
+		grammar.String, 1, '1',
+		grammar.Integer, 1, 0x01,
+		grammar.GetInstance,
+		2, '<', '=',
+		grammar.Call,
+		1, 0x01,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.NotNil(t, vm.Error)
+
+	vm = NewVM([]byte{grammar.Magic,
+		grammar.String, 1, '1',
+		grammar.Integer, 1, 0x01,
+		grammar.GetInstance,
+		2, '>', '=',
+		grammar.Call,
+		1, 0x01,
+		grammar.Pop,
+	})
+	vm.Run()
+
+	assert.NotNil(t, vm.Error)
+}
+
+func TestIntegerMethods(t *testing.T) {
+	var vm *VM
 
 	vm = NewVM([]byte{grammar.Magic,
 		grammar.Integer, 1, 0x01,

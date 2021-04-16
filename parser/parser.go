@@ -17,6 +17,11 @@ var infixPrecedence = map[string][2]byte{
 	token.Plus:  {23, 24},
 	token.Minus: {23, 24},
 
+	token.Smaller:   {19, 20},
+	token.Larger:    {19, 20},
+	token.SmallerEq: {19, 20},
+	token.LargerEq:  {19, 20},
+
 	token.DbEq: {17, 18},
 	token.Neq:  {17, 18},
 }

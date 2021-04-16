@@ -106,6 +106,21 @@ func (l *Lexer) next() token.Token {
 	case '}':
 		tok = l.newToken(token.RCurly, "}")
 
+	case '<':
+		if l.peekChar() == '=' {
+			l.readChar()
+			tok = l.newToken(token.SmallerEq, "<=")
+		} else {
+			tok = l.newToken(token.Smaller, "<")
+		}
+	case '>':
+		if l.peekChar() == '=' {
+			l.readChar()
+			tok = l.newToken(token.LargerEq, ">=")
+		} else {
+			tok = l.newToken(token.Larger, ">")
+		}
+
 	case '|':
 		tok = l.newToken(token.VBar, "|")
 

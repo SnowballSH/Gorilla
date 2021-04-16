@@ -8,65 +8,53 @@ var intIns *Environment
 
 func makeIntIns() {
 	intIns = NewEnvironmentWithStore(map[string]BaseObject{
+		// Integer + other: Integer -> Integer
 		"+": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
-			k, err := getElement(args, 0)
-			if err != nil {
-				return nil, err
-			}
-			ro, err := GorillaToInteger(k)
+			k, err := getInteger(args, 0)
 			if err != nil {
 				return nil, err
 			}
 
 			left := self.Parent().(*Object).InternalValue.(int64)
-			right := ro.InternalValue.(int64)
+			right := k
 			//return NewInteger(left + right), nil
 			return NewInteger(add(left, right)), nil
 		}),
 
+		// Integer - other: Integer -> Integer
 		"-": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
-			k, err := getElement(args, 0)
+			k, err := getInteger(args, 0)
 			if err != nil {
 				return nil, err
 			}
-			ro, err := GorillaToInteger(k)
-			if err != nil {
-				return nil, err
-			}
-
 			left := self.Parent().(*Object).InternalValue.(int64)
-			right := ro.InternalValue.(int64)
+			right := k
 			//return NewInteger(left - right), nil
 			return NewInteger(sub(left, right)), nil
 		}),
 
+		// Integer * other: Integer -> Integer
 		"*": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
-			k, err := getElement(args, 0)
-			if err != nil {
-				return nil, err
-			}
-			ro, err := GorillaToInteger(k)
+			k, err := getInteger(args, 0)
 			if err != nil {
 				return nil, err
 			}
 
 			left := self.Parent().(*Object).InternalValue.(int64)
-			right := ro.InternalValue.(int64)
-			return NewInteger(left * right), nil
+			right := k
+			//return NewInteger(left * right), nil
+			return NewInteger(mul(left, right)), nil
 		}),
 
+		// Integer / other: Integer -> Integer
 		"/": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
-			k, err := getElement(args, 0)
-			if err != nil {
-				return nil, err
-			}
-			ro, err := GorillaToInteger(k)
+			k, err := getInteger(args, 0)
 			if err != nil {
 				return nil, err
 			}
 
 			left := self.Parent().(*Object).InternalValue.(int64)
-			right := ro.InternalValue.(int64)
+			right := k
 
 			if right == 0 {
 				return nil, fmt.Errorf("%d / %d: Division by 0", left, right)
@@ -75,18 +63,15 @@ func makeIntIns() {
 			return NewInteger(left / right), nil
 		}),
 
+		// Integer % other: Integer -> Integer
 		"%": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
-			k, err := getElement(args, 0)
-			if err != nil {
-				return nil, err
-			}
-			ro, err := GorillaToInteger(k)
+			k, err := getInteger(args, 0)
 			if err != nil {
 				return nil, err
 			}
 
 			left := self.Parent().(*Object).InternalValue.(int64)
-			right := ro.InternalValue.(int64)
+			right := k
 
 			if right == 0 {
 				return nil, fmt.Errorf("%d %s %d: Division by 0", left, "%", right)
@@ -95,16 +80,64 @@ func makeIntIns() {
 			return NewInteger(left % right), nil
 		}),
 
+		// -Integer -> Integer
 		"-@": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
 			left := self.Parent().(*Object).InternalValue.(int64)
 			return NewInteger(-left), nil
 		}),
 
+		// +Integer -> Integer
 		"+@": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
 			left := self.Parent().(*Object).InternalValue.(int64)
 			return NewInteger(+left), nil
 		}),
 
+		// Integer < other: Integer -> Bool
+		"<": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
+			left := self.Parent().(*Object).InternalValue.(int64)
+			k, err := getInteger(args, 0)
+			if err != nil {
+				return nil, err
+			}
+
+			return fromBool(left < k), nil
+		}),
+
+		// Integer > other: Integer -> Bool
+		">": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
+			left := self.Parent().(*Object).InternalValue.(int64)
+			k, err := getInteger(args, 0)
+			if err != nil {
+				return nil, err
+			}
+
+			return fromBool(left > k), nil
+		}),
+
+		// Integer <= other: Integer -> Bool
+		"<=": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
+			left := self.Parent().(*Object).InternalValue.(int64)
+			k, err := getInteger(args, 0)
+			if err != nil {
+				return nil, err
+			}
+
+			return fromBool(left <= k), nil
+		}),
+
+		// Integer >= other: Integer -> Bool
+		">=": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
+			left := self.Parent().(*Object).InternalValue.(int64)
+			k, err := getInteger(args, 0)
+			if err != nil {
+				return nil, err
+			}
+
+			return fromBool(left >= k), nil
+		}),
+
+		// nonz returns whether self is 0
+		// Integer.nonz() -> Bool
 		"nonz": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
 			left := self.Parent().(*Object).InternalValue.(int64)
 			return fromBool(left != 0), nil
@@ -168,4 +201,16 @@ func NewInteger(value int64) *Object {
 		CallFunc:  NotCallable,
 		ParentObj: nil,
 	}
+}
+
+func getInteger(args []BaseObject, index int) (int64, error) {
+	k, err := getElement(args, index)
+	if err != nil {
+		return 0, err
+	}
+	ro, err := GorillaToInteger(k)
+	if err != nil {
+		return 0, err
+	}
+	return ro.InternalValue.(int64), nil
 }

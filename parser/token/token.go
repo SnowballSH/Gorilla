@@ -38,6 +38,11 @@ const (
 	LCurly = "{"
 	RCurly = "}"
 
+	Smaller   = "<"
+	Larger    = ">"
+	SmallerEq = "<="
+	LargerEq  = ">="
+
 	VBar = "|"
 
 	Newline = "Newline"
