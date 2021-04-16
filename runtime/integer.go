@@ -20,7 +20,8 @@ func makeIntIns() {
 
 			left := self.Parent().(*Object).InternalValue.(int64)
 			right := ro.InternalValue.(int64)
-			return NewInteger(left + right), nil
+			//return NewInteger(left + right), nil
+			return NewInteger(add(left, right)), nil
 		}),
 
 		"-": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
@@ -35,7 +36,8 @@ func makeIntIns() {
 
 			left := self.Parent().(*Object).InternalValue.(int64)
 			right := ro.InternalValue.(int64)
-			return NewInteger(left - right), nil
+			//return NewInteger(left - right), nil
+			return NewInteger(sub(left, right)), nil
 		}),
 
 		"*": NewGoFunc(func(self BaseObject, args ...BaseObject) (BaseObject, error) {
