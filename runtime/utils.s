@@ -11,10 +11,3 @@ TEXT ·sub(SB), $0-24
     SUBQ BP, BX
     MOVQ BX, ret+16(FP)
     RET
-
-TEXT ·mul(SB), $0-24
-    MOVQ x+0(FP), BX
-    MOVQ y+8(FP), BP
-    IMULQ BP, BX  // use IMUL due to int64
-    MOVQ BX, ret+16(FP)
-    RET

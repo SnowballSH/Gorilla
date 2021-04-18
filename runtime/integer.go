@@ -17,8 +17,7 @@ func makeIntIns() {
 
 			left := self.Parent().(*Object).InternalValue.(int64)
 			right := k
-			//return NewInteger(left + right), nil
-			return NewInteger(add(left, right)), nil
+			return NewInteger(left + right), nil
 		}),
 
 		// Integer - other: Integer -> Integer
@@ -29,8 +28,7 @@ func makeIntIns() {
 			}
 			left := self.Parent().(*Object).InternalValue.(int64)
 			right := k
-			//return NewInteger(left - right), nil
-			return NewInteger(sub(left, right)), nil
+			return NewInteger(left - right), nil
 		}),
 
 		// Integer * other: Integer -> Integer
@@ -42,8 +40,7 @@ func makeIntIns() {
 
 			left := self.Parent().(*Object).InternalValue.(int64)
 			right := k
-			//return NewInteger(left * right), nil
-			return NewInteger(mul(left, right)), nil
+			return NewInteger(left * right), nil
 		}),
 
 		// Integer / other: Integer -> Integer

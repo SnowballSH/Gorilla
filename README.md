@@ -15,7 +15,7 @@ the [0.x branch](https://github.com/SnowballSH/Gorilla/tree/0.x)**
 
 Gorilla is a dynamic, interpreted programming language written in Go and Plan 9 Assembly.
 
-It is made for creating fast, async, efficient, and simple apps.
+It is made for creating async, efficient, and simple apps.
 
 ---
 

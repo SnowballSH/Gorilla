@@ -52,6 +52,7 @@ func NewLambda(params []string, bytecode []byte, oldVm *VM) *Object {
 					vm.Error.Message,
 				)
 			}
+
 			return k, nil
 		},
 		ParentObj: nil,
@@ -63,7 +64,7 @@ var ClosureClass *RClass
 var closureIns *Environment
 
 func makeClosureIns() {
-	closureIns = NewEnvironment()
+	closureIns = NewEnvironmentWithStore(map[string]BaseObject{})
 
 	ClosureClass = MakeClassFromSuper("Closure", AnyClass, NotCallable, closureIns)
 }
