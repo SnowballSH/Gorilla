@@ -21,3 +21,10 @@ gorilla-windows-amd64.exe
 
 #/target
 Cargo.lock
+
+
+# Added by cargo
+#
+# already existing elements were commented out
+
+#/target
