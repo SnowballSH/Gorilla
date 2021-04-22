@@ -1,44 +1,86 @@
-use std::any::Any;
 use crate::env::*;
+use crate::helper::*;
 
-type CallFuncType =
-fn(this: &BaseObject, args: Vec<&BaseObject>) ->
-ObjResult;
+pub(crate) type CallFuncType =
+Box<dyn Fn(&BaseObject, Vec<&BaseObject>) -> ObjResult>;
 
-pub type ObjResult = Result<&'static BaseObject, String>;
-pub type ObjOption = Option<&'static BaseObject>;
+#[inline]
+pub(crate) fn not_callable() -> CallFuncType {
+    wrap(|this, args|
+        Err(format!("'{}' ({}) is not callable", this.to_string(), this.class.to_string()))
+    )
+}
 
-#[derive(Clone, Copy)]
+pub(crate) type ObjResult = Result<&'static BaseObject, String>;
+pub(crate) type ObjOption = Option<&'static BaseObject>;
+
+#[derive(Copy)]
+pub(crate) union ValueType {
+    pub(crate) int: i64,
+}
+
+impl Clone for ValueType {
+    #[inline]
+    fn clone(&self) -> Self {
+        unsafe {
+            match self {
+                ValueType { int } => ValueType { int: int.clone() }
+            }
+        }
+    }
+}
+
+impl PartialEq for ValueType {
+    fn eq(&self, other: &Self) -> bool {
+        unsafe {
+            match self {
+                ValueType { int } => {
+                    let a = int;
+                    match other {
+                        ValueType { int } => a == int,
+                        _ => false
+                    }
+                }
+                _ => false
+            }
+        }
+    }
+}
+
 pub(crate) struct BaseObject {
-    class: &'static Class,
-    internal_value: &'static dyn Any,
-    to_string_func: fn(this: &BaseObject) -> String,
-    to_inspect_func: fn(this: &BaseObject) -> String,
-    is_truthy_func: fn(this: &BaseObject) -> bool,
-    equal_func: fn(this: &BaseObject, other: &BaseObject) -> bool,
-    call_func: CallFuncType,
-    parent_obj: &'static BaseObject,
+    pub(crate) class: Class,
+    pub(crate) internal_value: ValueType,
+    pub(crate) to_string_func: Box<dyn Fn(&BaseObject) -> String>,
+    pub(crate) to_inspect_func: Box<dyn Fn(&BaseObject) -> String>,
+    pub(crate) is_truthy_func: Box<dyn Fn(&BaseObject) -> bool>,
+    pub(crate) equal_func: Box<dyn Fn(&BaseObject, &BaseObject) -> bool>,
+    pub(crate) call_func: CallFuncType,
+    pub(crate) parent_obj: ObjOption,
 }
 
 impl BaseObject {
     #[inline]
     fn class(&self) -> &Class {
-        self.class
+        &self.class
     }
 
-    fn value(&self) -> &dyn Any {
+    #[inline]
+    fn value(&self) -> ValueType {
         self.internal_value
     }
 
+    #[inline]
     fn to_string(&self) -> String {
         (self.to_string_func)(self)
     }
 
+    #[inline]
     fn to_inspect_string(&self) -> String {
         (self.to_inspect_func)(self)
     }
 
-    fn instance_get(&self, name: String) -> ObjOption {
+    #[inline]
+    fn instance_get(&'static self, name: String) -> ObjOption {
         self.class.get_instance_var(name)
     }
 
@@ -47,6 +89,7 @@ impl BaseObject {
         (self.is_truthy_func)(self)
     }
 
+    #[inline]
     fn equal_to(&self, other: &BaseObject) -> bool {
         (self.equal_func)(self, other)
     }
@@ -55,42 +98,49 @@ impl BaseObject {
         (self.call_func)(this, args)
     }
 
-    fn parent(&self) -> &BaseObject {
+    #[inline]
+    fn parent(&self) -> ObjOption {
         self.parent_obj
     }
 
     fn set_parent(&mut self, parent: &'static BaseObject) {
-        self.parent_obj = parent
+        self.parent_obj = Some(parent)
     }
 }
 
-#[derive(Clone)]
-struct Class {
-    name: String,
-    instance_vars: &'static Environment,
-    super_class: &'static Class,
+pub(crate) struct Class {
+    pub(crate) name: &'static str,
+    pub(crate) instance_vars: Environment,
+    pub(crate) super_class: Option<&'static Class>,
 }
 
 impl Class {
+    #[inline]
     fn to_string(&self) -> String {
-        "Class '".to_owned() + &*self.name + "'"
+        "Class '".to_owned() + self.name + "'"
     }
 
+    #[inline]
     fn to_inspect_string(&self) -> String {
         self.to_string()
     }
 
-    fn parent(&self) -> &'static Class {
-        self.super_class
-    }
-
     fn set_parent(&mut self, _: &'static BaseObject) {}
-    
-    fn get_instance_var(&self, s: String) -> ObjOption {
+
+    fn get_instance_var(&'static self, s: String) -> ObjOption {
         let x = self.instance_vars.get(s.clone());
         match x {
             Some(_) => x,
-            None => self.super_class.get_instance_var(s)
+            None => match self.super_class {
+                Some(y) => y.get_instance_var(s),
+                None => None
+            }
         }
+    }
+}
+
+impl PartialEq for Class {
+    fn eq(&self, other: &Self) -> bool {
+        self.name == other.name && self.super_class == other.super_class
     }
 }
