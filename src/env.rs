@@ -4,6 +4,7 @@ use crate::obj::*;
 
 type StoreType = HashMap<String, BaseObject>;
 
+#[derive(Default)]
 pub(crate) struct Environment {
     pub(crate) store: StoreType
 }

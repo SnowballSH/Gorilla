@@ -3,6 +3,7 @@ mod env;
 mod integer;
 mod helper;
 mod vm;
+mod grammar;
 
 #[macro_export] macro_rules! collection {
     // map-like

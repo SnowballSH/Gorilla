@@ -6,7 +6,7 @@ Box<dyn Fn(&BaseObject, Vec<&BaseObject>) -> ObjResult>;
 
 #[inline]
 pub(crate) fn not_callable() -> CallFuncType {
-    wrap(|this, args|
+    wrap(|this, _args|
         Err(format!("'{}' ({}) is not callable", this.to_string(), this.class.to_string()))
     )
 }
