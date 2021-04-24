@@ -1,14 +1,15 @@
 use crate::env::*;
-use crate::helper::*;
 
 pub(crate) type CallFuncType =
-Box<dyn Fn(&BaseObject, Vec<&BaseObject>) -> ObjResult>;
+fn(&BaseObject, Vec<&BaseObject>) -> ObjResult;
 
 #[inline]
 pub(crate) fn not_callable() -> CallFuncType {
-    wrap(|this, _args|
+    fn a (this: &BaseObject, _args: Vec<&BaseObject>) -> ObjResult {
         Err(format!("'{}' ({}) is not callable", this.to_string(), this.class.to_string()))
-    )
+    }
+
+    a
 }
 
 pub(crate) type ObjResult = Result<&'static BaseObject, String>;
@@ -47,13 +48,14 @@ impl PartialEq for ValueType {
     }
 }
 
+#[derive(Clone)]
 pub(crate) struct BaseObject {
     pub(crate) class: Class,
     pub(crate) internal_value: ValueType,
-    pub(crate) to_string_func: Box<dyn Fn(&BaseObject) -> String>,
-    pub(crate) to_inspect_func: Box<dyn Fn(&BaseObject) -> String>,
-    pub(crate) is_truthy_func: Box<dyn Fn(&BaseObject) -> bool>,
-    pub(crate) equal_func: Box<dyn Fn(&BaseObject, &BaseObject) -> bool>,
+    pub(crate) to_string_func: fn(&BaseObject) -> String,
+    pub(crate) to_inspect_func: fn(&BaseObject) -> String,
+    pub(crate) is_truthy_func: fn(&BaseObject) -> bool,
+    pub(crate) equal_func: fn(&BaseObject, &BaseObject) -> bool,
     pub(crate) call_func: CallFuncType,
     pub(crate) parent_obj: ObjOption,
 }
@@ -80,7 +82,7 @@ impl BaseObject {
     }
 
     #[inline]
-    fn instance_get(&'static self, name: String) -> ObjOption {
+    fn instance_get(& self, name: String) -> Option<BaseObject> {
         self.class.get_instance_var(name)
     }
 
@@ -108,6 +110,7 @@ impl BaseObject {
     }
 }
 
+#[derive(Clone)]
 pub(crate) struct Class {
     pub(crate) name: &'static str,
     pub(crate) instance_vars: Environment,
@@ -127,7 +130,7 @@ impl Class {
 
     fn set_parent(&mut self, _: &'static BaseObject) {}
 
-    fn get_instance_var(&'static self, s: String) -> ObjOption {
+    fn get_instance_var(&self, s: String) -> Option<BaseObject> {
         let x = self.instance_vars.get(s.clone());
         match x {
             Some(_) => x,

@@ -3,7 +3,7 @@ use strum_macros::EnumIter;
 
 use crate::grammar::Grammar::Noop;
 
-#[derive(Debug, EnumIter)]
+#[derive(Debug, EnumIter, Copy, Clone)]
 pub enum Grammar {
     Magic = 0x69,
     Pop = 0,
