@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use crate::env::Environment;
 use crate::obj::*;
 
-pub(crate) fn new_integer<'a>(x: i64) -> BaseObject<'a> {
+pub fn new_integer<'a>(x: i64) -> BaseObject<'a> {
     fn k1(this: BaseObject) -> String {
         unsafe { this.internal_value.int.to_string() }
     }

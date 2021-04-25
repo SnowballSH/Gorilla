@@ -5,17 +5,17 @@ use crate::grammar::Grammar;
 use crate::integer::new_integer;
 use crate::obj::*;
 
-pub(crate) struct VM<'a> {
-    pub(crate) source: Vec<u8>,
-    pub(crate) ip: usize,
-    pub(crate) line: usize,
-    pub(crate) stack: Vec<BaseObject<'a>>,
-    pub(crate) last_popped: Option<BaseObject<'a>>,
-    pub(crate) env: Environment<'a>,
+pub struct VM<'a> {
+    pub source: Vec<u8>,
+    pub ip: usize,
+    pub line: usize,
+    pub stack: Vec<BaseObject<'a>>,
+    pub last_popped: Option<BaseObject<'a>>,
+    pub env: Environment<'a>,
 }
 
 impl<'a> VM<'a> {
-    pub(crate) fn new(source: Vec<u8>) -> Self {
+    pub fn new(source: Vec<u8>) -> Self {
         VM {
             source,
             ip: 0,
@@ -60,7 +60,7 @@ impl<'a> VM<'a> {
         String::from_utf8(bytes).unwrap()
     }
 
-    pub(crate) fn run(&mut self) -> Result<Option<BaseObject<'a>>, String> {
+    pub fn run(&mut self) -> Result<Option<BaseObject<'a>>, String> {
         let length = self.source.len();
         if length == 0 || self.read() != Grammar::Magic.into() {
             return Err("Not a valid Gorilla bytecode".parse().unwrap());
