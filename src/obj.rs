@@ -1,19 +1,19 @@
 use crate::env::*;
 
 pub(crate) type CallFuncType<'a> =
-fn(&BaseObject<'a>, Vec<&BaseObject<'a>>) -> ObjResult<'a>;
+fn(BaseObject<'a>, Vec<BaseObject<'a>>) -> ObjResult<'a>;
 
 #[inline]
 pub(crate) fn not_callable<'a>() -> CallFuncType<'a> {
-    fn a<'a>(this: &BaseObject, _args: Vec<&BaseObject>) -> ObjResult<'a> {
+    fn a<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
         Err(format!("'{}' ({}) is not callable", this.to_string(), this.class.to_string()))
     }
 
     a
 }
 
-pub(crate) type ObjResult<'a> = Result<&'a BaseObject<'a>, String>;
-pub(crate) type ObjOption<'a> = Option<&'a BaseObject<'a>>;
+pub(crate) type ObjResult<'a> = Result<BaseObject<'a>, String>;
+pub(crate) type ObjOption<'a> = Option<BaseObject<'a>>;
 
 #[derive(Copy)]
 pub(crate) union ValueType {
@@ -52,10 +52,10 @@ impl PartialEq for ValueType {
 pub(crate) struct BaseObject<'a> {
     pub(crate) class: Class<'a>,
     pub(crate) internal_value: ValueType,
-    pub(crate) to_string_func: fn(&BaseObject<'a>) -> String,
-    pub(crate) to_inspect_func: fn(&BaseObject<'a>) -> String,
-    pub(crate) is_truthy_func: fn(&BaseObject<'a>) -> bool,
-    pub(crate) equal_func: fn(&BaseObject<'a>, &BaseObject<'a>) -> bool,
+    pub(crate) to_string_func: fn(BaseObject<'a>) -> String,
+    pub(crate) to_inspect_func: fn(BaseObject<'a>) -> String,
+    pub(crate) is_truthy_func: fn(BaseObject<'a>) -> bool,
+    pub(crate) equal_func: fn(BaseObject<'a>, BaseObject<'a>) -> bool,
     pub(crate) call_func: CallFuncType<'a>,
     pub(crate) parent_obj: Option<Box<BaseObject<'a>>>,
 }
@@ -73,12 +73,12 @@ impl<'a> BaseObject<'a> {
 
     #[inline]
     pub(crate) fn to_string(&self) -> String {
-        (self.to_string_func)(self)
+        (self.to_string_func)(self.clone())
     }
 
     #[inline]
     pub(crate) fn to_inspect_string(&self) -> String {
-        (self.to_inspect_func)(self)
+        (self.to_inspect_func)(self.clone())
     }
 
     #[inline]
@@ -88,15 +88,15 @@ impl<'a> BaseObject<'a> {
 
     #[inline]
     pub(crate) fn is_truthy(&self) -> bool {
-        (self.is_truthy_func)(self)
+        (self.is_truthy_func)(self.clone())
     }
 
     #[inline]
-    pub(crate) fn equal_to(&self, other: &BaseObject<'a>) -> bool {
-        (self.equal_func)(self, other)
+    pub(crate) fn equal_to(&self, other: BaseObject<'a>) -> bool {
+        (self.equal_func)(self.clone(), other)
     }
 
-    fn call(&self, this: &BaseObject<'a>, args: Vec<&BaseObject<'a>>) -> Result<&BaseObject<'a>, String> {
+    pub(crate) fn call(&self, this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> Result<BaseObject<'a>, String> {
         (self.call_func)(this, args)
     }
 

@@ -119,7 +119,18 @@ impl<'a> VM<'a> {
                 }
             }
             Grammar::Call => {
+                let amount = self.read_int();
+                let o = self.pop();
+                let mut args = vec![];
+                for _ in 0..amount {
+                    args.push(self.pop());
+                }
 
+                let res = o.call(o.clone(), args);
+                match res {
+                    Err(x) => return Some(x),
+                    Ok(x) => self.push(x)
+                };
             }
             _ => return Some(format!("Invalid instruction: {}", type_ as u8))
         };
@@ -162,6 +173,45 @@ mod tests {
             Ok(x) => assert!(
                 x.expect("No popped").internal_value == ValueType { int: 4 }
             )
+        }
+
+        let mut vm = VM::new(vec![Grammar::Magic as u8,
+                                  Grammar::Integer as u8, 1, 0x04,
+                                  Grammar::Getvar as u8, 2, 'a' as u8, 'b' as u8,
+                                  Grammar::Pop as u8,
+        ]);
+        let res = vm.run();
+        match res {
+            Err(_) => {}
+            Ok(_) => panic!("No Error...")
+        }
+    }
+
+    #[test]
+    fn test_call() {
+        let mut vm = VM::new(vec![Grammar::Magic as u8,
+                                  Grammar::Integer as u8, 1, 0x04,
+                                  Grammar::Call as u8, 1, 0x00,
+                                  Grammar::Pop as u8,
+        ]);
+        let res = vm.run();
+        match res {
+            Err(_) => {}
+            Ok(_) => panic!("No Error...")
+        }
+    }
+
+    #[test]
+    fn test_attr() {
+        let mut vm = VM::new(vec![Grammar::Magic as u8,
+                                  Grammar::Integer as u8, 1, 0x04,
+                                  Grammar::GetInstance as u8, 1, '?' as u8,
+                                  Grammar::Pop as u8,
+        ]);
+        let res = vm.run();
+        match res {
+            Err(_) => {}
+            Ok(_) => panic!("No Error...")
         }
     }
 }
