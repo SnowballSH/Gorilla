@@ -3,14 +3,14 @@ use std::collections::HashMap;
 use crate::env::Environment;
 use crate::obj::*;
 
-pub(crate) fn new_integer(x: i64) -> BaseObject {
+pub(crate) fn new_integer<'a>(x: i64) -> BaseObject<'a> {
     fn k1(this: &BaseObject) -> String {
         unsafe { this.internal_value.int.to_string() }
     }
     fn k3(this: &BaseObject) -> bool {
         unsafe { this.internal_value.int != 0 }
     }
-    fn k4(this: &BaseObject, other: &BaseObject) -> bool {
+    fn k4<'a>(this: &BaseObject<'a>, other: &BaseObject<'a>) -> bool {
         this.internal_value == other.internal_value && this.class == other.class
     }
     BaseObject {

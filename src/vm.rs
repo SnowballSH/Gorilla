@@ -5,16 +5,16 @@ use crate::grammar::Grammar;
 use crate::integer::new_integer;
 use crate::obj::*;
 
-pub(crate) struct VM {
+pub(crate) struct VM<'a> {
     pub(crate) source: Vec<u8>,
     pub(crate) ip: usize,
     pub(crate) line: usize,
-    pub(crate) stack: Vec<BaseObject>,
-    pub(crate) last_popped: Option<BaseObject>,
-    pub(crate) env: Environment,
+    pub(crate) stack: Vec<BaseObject<'a>>,
+    pub(crate) last_popped: Option<BaseObject<'a>>,
+    pub(crate) env: Environment<'a>,
 }
 
-impl VM {
+impl<'a> VM<'a> {
     pub(crate) fn new(source: Vec<u8>) -> Self {
         VM {
             source,
@@ -26,11 +26,11 @@ impl VM {
         }
     }
 
-    fn push(&mut self, obj: BaseObject) {
+    fn push(&mut self, obj: BaseObject<'a>) {
         self.stack.push(obj)
     }
 
-    fn pop(&mut self) -> BaseObject {
+    fn pop(&mut self) -> BaseObject<'a> {
         let popped = self.stack.pop().expect("Pop on empty stack...");
         self.last_popped = Some(popped.clone());
         popped
@@ -60,7 +60,7 @@ impl VM {
         String::from_utf8(bytes).unwrap()
     }
 
-    pub(crate) fn run(&mut self) -> Result<Option<BaseObject>, String> {
+    pub(crate) fn run(&mut self) -> Result<Option<BaseObject<'a>>, String> {
         let length = self.source.len();
         if length == 0 || self.read() != Grammar::Magic.into() {
             return Err("Not a valid Gorilla bytecode".parse().unwrap());
@@ -92,7 +92,7 @@ impl VM {
                 let name = self.read_string();
                 let res = self.env.get(name.clone());
                 match res {
-                    Some(x) => self.push(x),
+                    Some(x) => self.push(x.clone()),
                     None => return Some(format!("Variable '{}' is not defined", name))
                 }
             }
@@ -102,6 +102,24 @@ impl VM {
 
                 self.env.set(name, val.clone());
                 self.push(val);
+            }
+            Grammar::GetInstance => {
+                let self_ = self.pop();
+                let g = self.read_string();
+                let res = self_.instance_get(g.clone());
+                match res {
+                    Some(mut x) => {
+                        x.set_parent(self_);
+                        self.push(x);
+                    }
+                    None => return Some(format!(
+                        "Attribute '{}' does not exist on '{}' ({})",
+                        g, self_.to_string(), self_.class.to_string()
+                    ))
+                }
+            }
+            Grammar::Call => {
+
             }
             _ => return Some(format!("Invalid instruction: {}", type_ as u8))
         };

@@ -2,21 +2,19 @@ use std::collections::HashMap;
 
 use crate::obj::*;
 
-type StoreType = HashMap<String, BaseObject>;
-
 #[derive(Default, Clone)]
-pub(crate) struct Environment {
-    pub(crate) store: StoreType
+pub(crate) struct Environment<'a> {
+    pub(crate) store: HashMap<String, BaseObject<'a>>
 }
 
-impl Environment {
-    pub(crate) fn set(&mut self, name: String, val: BaseObject) {
+impl<'a> Environment<'a> {
+    pub(crate) fn set(&mut self, name: String, val: BaseObject<'a>) {
         self.store.insert(name, val);
     }
 
-    pub(crate) fn get(&self, name: String) -> Option<BaseObject> {
+    pub(crate) fn get(&self, name: String) -> Option<BaseObject<'a>> {
         match self.store.get(&*name) {
-            Some(x) => Some(x.to_owned()),
+            Some(x) => Some(x.clone()),
             None => None,
         }
     }
