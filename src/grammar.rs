@@ -6,7 +6,7 @@ use crate::grammar::Grammar::Noop;
 #[derive(Debug, EnumIter, Copy, Clone)]
 pub enum Grammar {
     Magic = 0x69,
-    Pop = 0,
+    Pop = 1,
     Noop,
     Advance,
     Back,

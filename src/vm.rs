@@ -132,6 +132,16 @@ impl<'a> VM<'a> {
                     Ok(x) => self.push(x)
                 };
             }
+            Grammar::Jump => {
+                let where_ = self.read_int();
+                self.ip = (where_ + 1) as usize
+            }
+            Grammar::JumpIfFalse => {
+                let where_ = self.read_int();
+                if !self.pop().is_truthy() {
+                    self.ip = (where_ + 1) as usize
+                }
+            }
             _ => return Some(format!("Invalid instruction: {}", type_ as u8))
         };
 

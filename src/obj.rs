@@ -13,7 +13,6 @@ pub fn not_callable<'a>() -> CallFuncType<'a> {
 }
 
 pub type ObjResult<'a> = Result<BaseObject<'a>, String>;
-pub type ObjOption<'a> = Option<BaseObject<'a>>;
 
 #[derive(Copy)]
 pub union ValueType {
@@ -39,7 +38,6 @@ impl PartialEq for ValueType {
                     let a = int;
                     match other {
                         ValueType { int } => a == int,
-                        _ => false
                     }
                 }
                 _ => false
