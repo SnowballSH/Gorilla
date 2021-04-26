@@ -1,55 +1,49 @@
+#![forbid(unsafe_code)]
+
 use crate::env::*;
+use crate::obj::ValueType::*;
 
 pub type CallFuncType<'a> =
 fn(BaseObject<'a>, Vec<BaseObject<'a>>) -> ObjResult<'a>;
 
 #[inline]
-pub fn not_callable<'a>() -> CallFuncType<'a> {
-    fn a<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
-        Err(format!("'{}' ({}) is not callable", this.to_string(), this.class.to_string()))
-    }
-
-    a
+pub fn not_callable<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+    Err(format!("'{}' ({}) is not callable", this.to_string(), this.class.to_string()))
 }
 
 pub type ObjResult<'a> = Result<BaseObject<'a>, String>;
 
-#[derive(Copy)]
-pub union ValueType {
-    pub int: i64,
+pub type NativeFunctionType<'a> = (&'static str, CallFuncType<'a>);
+
+#[derive(Clone)]
+pub enum ValueType<'a> {
+    Int(i64),
+    NativeFunction(NativeFunctionType<'a>),
 }
 
-impl Clone for ValueType {
-    #[inline]
-    fn clone(&self) -> Self {
-        unsafe {
-            match self {
-                ValueType { int } => ValueType { int: int.clone() }
-            }
-        }
-    }
-}
-
-impl PartialEq for ValueType {
+impl<'a> PartialEq for ValueType<'a> {
     fn eq(&self, other: &Self) -> bool {
-        unsafe {
             match self {
-                ValueType { int } => {
-                    let a = int;
+                Int(a) => {
                     match other {
-                        ValueType { int } => a == int,
+                        Int(i) => a == i,
+                        _ => false,
+                    }
+                },
+                NativeFunction(a) => {
+                    match other {
+                        NativeFunction(i) => a == i,
+                        _ => false,
                     }
                 }
-                _ => false
             }
-        }
     }
 }
 
 #[derive(Clone)]
 pub struct BaseObject<'a> {
     pub class: Class<'a>,
-    pub internal_value: ValueType,
+    pub internal_value: ValueType<'a>,
     pub to_string_func: fn(BaseObject<'a>) -> String,
     pub to_inspect_func: fn(BaseObject<'a>) -> String,
     pub is_truthy_func: fn(BaseObject<'a>) -> bool,
@@ -65,8 +59,8 @@ impl<'a> BaseObject<'a> {
     }
 
     #[inline]
-    pub fn value(&self) -> ValueType {
-        self.internal_value
+    pub fn value(&self) -> ValueType<'a> {
+        self.internal_value.clone()
     }
 
     #[inline]

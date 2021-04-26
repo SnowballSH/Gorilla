@@ -1,3 +1,5 @@
+#![forbid(unsafe_code)]
+
 use std::env::args;
 use std::fs::File;
 use std::io::Read;
@@ -8,6 +10,7 @@ mod integer;
 mod helper;
 mod vm;
 mod grammar;
+mod native_function;
 
 fn main() {
     let argv: Vec<String> = args().collect();

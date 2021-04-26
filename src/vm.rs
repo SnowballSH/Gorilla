@@ -1,3 +1,5 @@
+#![forbid(unsafe_code)]
+
 use std::io::Cursor;
 
 use crate::env::Environment;
@@ -152,8 +154,8 @@ impl<'a> VM<'a> {
 #[cfg(test)]
 mod tests {
     use crate::grammar::Grammar;
-    use crate::obj::ValueType;
     use crate::vm::VM;
+    use crate::obj::ValueType::*;
 
     #[test]
     fn test_var() {
@@ -166,7 +168,7 @@ mod tests {
         match res {
             Err(x) => panic!("Error: {}", x),
             Ok(x) => assert!(
-                x.expect("No popped").internal_value == ValueType { int: 3 }
+                x.expect("No popped").internal_value == Int(3)
             )
         }
 
@@ -181,7 +183,7 @@ mod tests {
         match res {
             Err(x) => panic!("Error: {}", x),
             Ok(x) => assert!(
-                x.expect("No popped").internal_value == ValueType { int: 4 }
+                x.expect("No popped").internal_value == Int(4)
             )
         }
 
@@ -222,6 +224,24 @@ mod tests {
         match res {
             Err(_) => {}
             Ok(_) => panic!("No Error...")
+        }
+    }
+
+    #[test]
+    fn test_arth() {
+        let mut vm = VM::new(vec![Grammar::Magic as u8,
+                                  Grammar::Integer as u8, 1, 0x03,
+                                  Grammar::Integer as u8, 1, 0x06,
+                                  Grammar::GetInstance as u8, 1, '+' as u8,
+                                  Grammar::Call as u8, 1, 0x01,
+                                  Grammar::Pop as u8,
+        ]);
+        let res = vm.run();
+        match res {
+            Err(x) => panic!("Error: {}", x),
+            Ok(x) => assert!(
+                x.expect("No popped").internal_value == Int(9)
+            )
         }
     }
 }

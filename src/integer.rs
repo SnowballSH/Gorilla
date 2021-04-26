@@ -1,32 +1,202 @@
+#![forbid(unsafe_code)]
+
 use std::collections::HashMap;
 
+use inner::inner;
+
 use crate::env::Environment;
+use crate::native_function::new_native_function;
 use crate::obj::*;
+use crate::obj::ValueType::*;
+
+fn add<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+    let other = args.first();
+    match other {
+        Some(x) => {
+            let a = inner!(this.parent().unwrap().internal_value, if Int);
+            let b = inner!(x.internal_value, if Int, else {
+            let g = inner!(this.internal_value, if NativeFunction);
+                return Err(format!("{} expects an integer", g.0))
+            });
+            Ok(new_integer(a + b))
+        }
+        None => {
+            let x = inner!(this.internal_value, if NativeFunction);
+            Err(format!(
+                "{} expects 1 argument, got 0", x.0
+            ))
+        }
+    }
+}
+
+fn sub<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+    let other = args.first();
+    match other {
+        Some(x) => {
+            let a = inner!(this.parent().unwrap().internal_value, if Int);
+            let b = inner!(x.internal_value, if Int, else {
+            let g = inner!(this.internal_value, if NativeFunction);
+                return Err(format!("{} expects an integer", g.0))
+            });
+            Ok(new_integer(a - b))
+        }
+        None => {
+            let x = inner!(this.internal_value, if NativeFunction);
+            Err(format!(
+                "{} expects 1 argument, got 0", x.0
+            ))
+        }
+    }
+}
+
+fn mul<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+    let other = args.first();
+    match other {
+        Some(x) => {
+            let a = inner!(this.parent().unwrap().internal_value, if Int);
+            let b = inner!(x.internal_value, if Int, else {
+            let g = inner!(this.internal_value, if NativeFunction);
+                return Err(format!("{} expects an integer", g.0))
+            });
+            Ok(new_integer(a * b))
+        }
+        None => {
+            let x = inner!(this.internal_value, if NativeFunction);
+            Err(format!(
+                "{} expects 1 argument, got 0", x.0
+            ))
+        }
+    }
+}
+
+fn div<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+    let other = args.first();
+    match other {
+        Some(x) => {
+            let a = inner!(this.parent().unwrap().internal_value, if Int);
+            let b = inner!(x.internal_value, if Int, else {
+            let g = inner!(this.internal_value, if NativeFunction);
+                return Err(format!("{} expects an integer", g.0))
+            });
+            Ok(new_integer(a / b))
+        }
+        None => {
+            let x = inner!(this.internal_value, if NativeFunction);
+            Err(format!(
+                "{} expects 1 argument, got 0", x.0
+            ))
+        }
+    }
+}
+
+fn mod_<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+    let other = args.first();
+    match other {
+        Some(x) => {
+            let a = inner!(this.parent().unwrap().internal_value, if Int);
+            let b = inner!(x.internal_value, if Int, else {
+            let g = inner!(this.internal_value, if NativeFunction);
+                return Err(format!("{} expects an integer", g.0))
+            });
+            Ok(new_integer(a % b))
+        }
+        None => {
+            let x = inner!(this.internal_value, if NativeFunction);
+            Err(format!(
+                "{} expects 1 argument, got 0", x.0
+            ))
+        }
+    }
+}
+
+fn neg<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+    let a = inner!(this.parent().unwrap().internal_value, if Int);
+    Ok(new_integer(-a))
+}
+
+fn pos<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+    let a = inner!(this.parent().unwrap().internal_value, if Int);
+    Ok(new_integer(a))
+}
 
 pub fn new_integer<'a>(x: i64) -> BaseObject<'a> {
     fn k1(this: BaseObject) -> String {
-        unsafe { this.internal_value.int.to_string() }
+        let a = inner!(this.internal_value, if Int);
+        a.to_string()
     }
     fn k3(this: BaseObject) -> bool {
-        unsafe { this.internal_value.int != 0 }
+        let a = inner!(this.internal_value, if Int);
+        a != 0
     }
     fn k4<'a>(this: BaseObject<'a>, other: BaseObject<'a>) -> bool {
         this.internal_value == other.internal_value && this.class == other.class
     }
+
+    let mut int_env = HashMap::default();
+
+    int_env.insert("+".to_string(), new_native_function((
+        "Integer.+",
+        add,
+    )));
+
+    int_env.insert("-".to_string(), new_native_function((
+        "Integer.-",
+        sub,
+    )));
+
+    int_env.insert("*".to_string(), new_native_function((
+        "Integer.*",
+        mul,
+    )));
+
+    int_env.insert("/".to_string(), new_native_function((
+        "Integer./",
+        div,
+    )));
+
+    int_env.insert("%".to_string(), new_native_function((
+        "Integer.%",
+        mod_,
+    )));
+
+    int_env.insert("-@".to_string(), new_native_function((
+        "- Integer",
+        neg,
+    )));
+
+    int_env.insert("+@".to_string(), new_native_function((
+        "+ Integer",
+        pos,
+    )));
+
     BaseObject {
         class: Class {
             name: "Integer",
             instance_vars: Environment {
-                store: HashMap::default()
+                store: int_env,
             },
             super_class: None,
         },
-        internal_value: ValueType { int: x },
+        internal_value: Int(x),
         to_string_func: k1,
         to_inspect_func: k1,
         is_truthy_func: k3,
         equal_func: k4,
-        call_func: not_callable(),
+        call_func: not_callable,
         parent_obj: None,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::integer::new_integer;
+
+    #[test]
+    fn example() {
+        let ii = new_integer(10);
+        let mut f = ii.instance_get("-".to_string()).unwrap();
+        f.set_parent(ii);
+        let res = f.clone().call(f, vec![new_integer(1)]);
+        assert_eq!(res.unwrap().to_string(), "9")
     }
 }
