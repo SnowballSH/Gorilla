@@ -13,9 +13,11 @@ the [0.x branch](https://github.com/SnowballSH/Gorilla/tree/0.x)**
 
 ### About
 
-Gorilla is a dynamic, interpreted programming language written in Go and Plan 9 Assembly.
+Gorilla is a dynamic, interpreted programming language written in Go.
 
 It is made for creating async, efficient, and simple apps.
+
+I am writing a rust runtime for gorilla, in order to make it fast and secure.
 
 ---
 

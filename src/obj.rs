@@ -54,16 +54,6 @@ pub struct BaseObject<'a> {
 
 impl<'a> BaseObject<'a> {
     #[inline]
-    pub fn class(&self) -> &Class<'a> {
-        &self.class
-    }
-
-    #[inline]
-    pub fn value(&self) -> ValueType<'a> {
-        self.internal_value.clone()
-    }
-
-    #[inline]
     pub fn to_string(&self) -> String {
         (self.to_string_func)(self.clone())
     }
