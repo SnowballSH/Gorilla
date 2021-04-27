@@ -2,9 +2,10 @@
 
 use std::collections::HashMap;
 
+use crate::any::any_class;
 use crate::env::Environment;
-use crate::obj::*;
 use crate::obj::ValueType::*;
+use crate::obj::*;
 use inner::inner;
 
 fn k1(this: BaseObject) -> String {
@@ -30,7 +31,7 @@ pub fn new_native_function<'a>(x: NativeFunctionType<'a>) -> BaseObject<'a> {
         class: Class {
             name: "Native Function",
             instance_vars: Environment {
-                store: HashMap::default()
+                store: HashMap::default(),
             },
             super_class: None,
         },
@@ -46,9 +47,9 @@ pub fn new_native_function<'a>(x: NativeFunctionType<'a>) -> BaseObject<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::obj::*;
-    use crate::native_function::new_native_function;
     use crate::integer::new_integer;
+    use crate::native_function::new_native_function;
+    use crate::obj::*;
 
     #[test]
     fn basic() {

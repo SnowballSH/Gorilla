@@ -4,10 +4,11 @@ use std::collections::HashMap;
 
 use inner::inner;
 
+use crate::any::any_class;
 use crate::env::Environment;
 use crate::native_function::new_native_function;
-use crate::obj::*;
 use crate::obj::ValueType::*;
+use crate::obj::*;
 
 fn add<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
     let other = args.first();
@@ -22,9 +23,7 @@ fn add<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
         }
         None => {
             let x = inner!(this.internal_value, if NativeFunction);
-            Err(format!(
-                "{} expects 1 argument, got 0", x.0
-            ))
+            Err(format!("{} expects 1 argument, got 0", x.0))
         }
     }
 }
@@ -42,9 +41,7 @@ fn sub<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
         }
         None => {
             let x = inner!(this.internal_value, if NativeFunction);
-            Err(format!(
-                "{} expects 1 argument, got 0", x.0
-            ))
+            Err(format!("{} expects 1 argument, got 0", x.0))
         }
     }
 }
@@ -62,9 +59,7 @@ fn mul<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
         }
         None => {
             let x = inner!(this.internal_value, if NativeFunction);
-            Err(format!(
-                "{} expects 1 argument, got 0", x.0
-            ))
+            Err(format!("{} expects 1 argument, got 0", x.0))
         }
     }
 }
@@ -85,9 +80,7 @@ fn div<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
         }
         None => {
             let x = inner!(this.internal_value, if NativeFunction);
-            Err(format!(
-                "{} expects 1 argument, got 0", x.0
-            ))
+            Err(format!("{} expects 1 argument, got 0", x.0))
         }
     }
 }
@@ -108,9 +101,7 @@ fn mod_<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
         }
         None => {
             let x = inner!(this.internal_value, if NativeFunction);
-            Err(format!(
-                "{} expects 1 argument, got 0", x.0
-            ))
+            Err(format!("{} expects 1 argument, got 0", x.0))
         }
     }
 }
@@ -142,48 +133,25 @@ fn k4<'a>(this: BaseObject<'a>, other: BaseObject<'a>) -> bool {
 pub fn new_integer<'a>(x: i64) -> BaseObject<'a> {
     let mut int_env = HashMap::default();
 
-    int_env.insert("+".to_string(), new_native_function((
-        "Integer.+",
-        add,
-    )));
+    int_env.insert("+".to_string(), new_native_function(("Integer.+", add)));
 
-    int_env.insert("-".to_string(), new_native_function((
-        "Integer.-",
-        sub,
-    )));
+    int_env.insert("-".to_string(), new_native_function(("Integer.-", sub)));
 
-    int_env.insert("*".to_string(), new_native_function((
-        "Integer.*",
-        mul,
-    )));
+    int_env.insert("*".to_string(), new_native_function(("Integer.*", mul)));
 
-    int_env.insert("/".to_string(), new_native_function((
-        "Integer./",
-        div,
-    )));
+    int_env.insert("/".to_string(), new_native_function(("Integer./", div)));
 
-    int_env.insert("%".to_string(), new_native_function((
-        "Integer.%",
-        mod_,
-    )));
+    int_env.insert("%".to_string(), new_native_function(("Integer.%", mod_)));
 
-    int_env.insert("-@".to_string(), new_native_function((
-        "- Integer",
-        neg,
-    )));
+    int_env.insert("-@".to_string(), new_native_function(("- Integer", neg)));
 
-    int_env.insert("+@".to_string(), new_native_function((
-        "+ Integer",
-        pos,
-    )));
+    int_env.insert("+@".to_string(), new_native_function(("+ Integer", pos)));
 
     BaseObject {
         class: Class {
             name: "Integer",
-            instance_vars: Environment {
-                store: int_env,
-            },
-            super_class: None,
+            instance_vars: Environment { store: int_env },
+            super_class: Some(any_class()),
         },
         internal_value: Int(x),
         to_string_func: k1,
@@ -242,5 +210,23 @@ mod tests {
         f.set_parent(ii);
         let res = f.clone().call(f, vec![new_integer(0)]);
         assert!(res.is_err());
+
+        let ii = new_integer(10);
+        let mut f = ii.instance_get("%".to_string()).unwrap();
+        f.set_parent(ii);
+        let res = f.clone().call(f, vec![]);
+        assert!(res.is_err()); // 0 arguments
+
+        let ii = new_integer(10);
+        let mut f = ii.instance_get("==".to_string()).unwrap();
+        f.set_parent(ii);
+        let res = f.clone().call(f, vec![new_integer(10)]);
+        assert_eq!(res.unwrap().to_string(), "true");
+
+        let ii = new_integer(10);
+        let mut f = ii.instance_get("!=".to_string()).unwrap();
+        f.set_parent(ii);
+        let res = f.clone().call(f, vec![new_integer(10)]);
+        assert_eq!(res.unwrap().to_string(), "false");
     }
 }

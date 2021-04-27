@@ -2,6 +2,7 @@
 
 use std::io::Cursor;
 
+use crate::bool::new_boolean;
 use crate::env::Environment;
 use crate::grammar::Grammar;
 use crate::integer::new_integer;
@@ -21,11 +22,17 @@ pub struct VM<'a> {
     pub last_popped: Option<BaseObject<'a>>,
     #[doc = "The environment of VM"]
     pub env: Environment<'a>,
+    #[doc = "Global Env"]
+    pub global: Environment<'a>,
 }
 
 impl<'a> VM<'a> {
     #[doc = "New VM from vector of bytes"]
     pub fn new(source: Vec<u8>) -> Self {
+        let mut global = Environment::default();
+        global.set("true".to_string(), new_boolean(true));
+        global.set("false".to_string(), new_boolean(false));
+
         VM {
             source,
             ip: 0,
@@ -33,6 +40,7 @@ impl<'a> VM<'a> {
             stack: vec![],
             last_popped: None,
             env: Default::default(),
+            global,
         }
     }
 
@@ -81,7 +89,7 @@ impl<'a> VM<'a> {
             let res = self.run_statement();
             match res {
                 Some(x) => return Err(x),
-                None => ()
+                None => (),
             };
         }
 
@@ -93,18 +101,28 @@ impl<'a> VM<'a> {
         match type_ {
             Grammar::Advance => self.line += 1,
             Grammar::Back => self.line -= 1,
-            Grammar::Pop => { self.pop(); }
+            Grammar::Pop => {
+                self.pop();
+            }
             Grammar::Noop => {}
+
             Grammar::Integer => {
                 let i = self.read_int();
                 self.push(new_integer(i))
             }
+
             Grammar::Getvar => {
                 let name = self.read_string();
                 let res = self.env.get(name.clone());
                 match res {
                     Some(x) => self.push(x.clone()),
-                    None => return Some(format!("Variable '{}' is not defined", name))
+                    None => {
+                        let res = self.global.get(name.clone());
+                        match res {
+                            Some(x) => self.push(x.clone()),
+                            None => return Some(format!("Variable '{}' is not defined", name)),
+                        }
+                    }
                 }
             }
             Grammar::Setvar => {
@@ -123,10 +141,14 @@ impl<'a> VM<'a> {
                         x.set_parent(self_);
                         self.push(x);
                     }
-                    None => return Some(format!(
-                        "Attribute '{}' does not exist on '{}' ({})",
-                        g, self_.to_string(), self_.class.to_string()
-                    ))
+                    None => {
+                        return Some(format!(
+                            "Attribute '{}' does not exist on '{}' ({})",
+                            g,
+                            self_.to_string(),
+                            self_.class.to_string()
+                        ))
+                    }
                 }
             }
             Grammar::Call => {
@@ -140,7 +162,7 @@ impl<'a> VM<'a> {
                 let res = o.call(o.clone(), args);
                 match res {
                     Err(x) => return Some(x),
-                    Ok(x) => self.push(x)
+                    Ok(x) => self.push(x),
                 };
             }
             Grammar::Jump => {
@@ -153,7 +175,7 @@ impl<'a> VM<'a> {
                     self.ip = (where_ + 1) as usize
                 }
             }
-            _ => return Some(format!("Invalid instruction: {}", type_ as u8))
+            _ => return Some(format!("Invalid instruction: {}", type_ as u8)),
         };
 
         None
@@ -163,116 +185,161 @@ impl<'a> VM<'a> {
 #[cfg(test)]
 mod tests {
     use crate::grammar::Grammar;
-    use crate::vm::VM;
     use crate::obj::ValueType::*;
+    use crate::vm::VM;
 
     #[test]
     fn test_var() {
-        let mut vm = VM::new(vec![Grammar::Magic as u8,
-                                  Grammar::Integer as u8, 1, 0x03,
-                                  Grammar::Setvar as u8, 2, 'a' as u8, 'b' as u8,
-                                  Grammar::Pop as u8
+        let mut vm = VM::new(vec![
+            Grammar::Magic as u8,
+            Grammar::Integer as u8,
+            1,
+            0x03,
+            Grammar::Setvar as u8,
+            2,
+            'a' as u8,
+            'b' as u8,
+            Grammar::Pop as u8,
         ]);
         let res = vm.run();
         match res {
             Err(x) => panic!("Error: {}", x),
-            Ok(x) => assert_eq!(
-                x.expect("No popped").internal_value, Int(3)
-            )
+            Ok(x) => assert_eq!(x.expect("No popped").internal_value, Int(3)),
         }
 
-        let mut vm = VM::new(vec![Grammar::Magic as u8,
-                                  Grammar::Integer as u8, 1, 0x04,
-                                  Grammar::Setvar as u8, 2, 'a' as u8, 'b' as u8,
-                                  Grammar::Pop as u8,
-                                  Grammar::Getvar as u8, 2, 'a' as u8, 'b' as u8,
-                                  Grammar::Pop as u8,
+        let mut vm = VM::new(vec![
+            Grammar::Magic as u8,
+            Grammar::Integer as u8,
+            1,
+            0x04,
+            Grammar::Setvar as u8,
+            2,
+            'a' as u8,
+            'b' as u8,
+            Grammar::Pop as u8,
+            Grammar::Getvar as u8,
+            2,
+            'a' as u8,
+            'b' as u8,
+            Grammar::Pop as u8,
         ]);
         let res = vm.run();
         match res {
             Err(x) => panic!("Error: {}", x),
-            Ok(x) => assert_eq!(
-                x.expect("No popped").internal_value, Int(4)
-            )
+            Ok(x) => assert_eq!(x.expect("No popped").internal_value, Int(4)),
         }
 
-        let mut vm = VM::new(vec![Grammar::Magic as u8,
-                                  Grammar::Integer as u8, 1, 0x04,
-                                  Grammar::Getvar as u8, 2, 'a' as u8, 'b' as u8,
-                                  Grammar::Pop as u8,
+        let mut vm = VM::new(vec![
+            Grammar::Magic as u8,
+            Grammar::Integer as u8,
+            1,
+            0x04,
+            Grammar::Getvar as u8,
+            2,
+            'a' as u8,
+            'b' as u8,
+            Grammar::Pop as u8,
         ]);
         let res = vm.run();
         match res {
             Err(_) => {}
-            Ok(_) => panic!("No Error...")
+            Ok(_) => panic!("No Error..."),
         }
     }
 
     #[test]
     fn test_call() {
-        let mut vm = VM::new(vec![Grammar::Magic as u8,
-                                  Grammar::Integer as u8, 1, 0x04,
-                                  Grammar::Call as u8, 1, 0x00,
-                                  Grammar::Pop as u8,
+        let mut vm = VM::new(vec![
+            Grammar::Magic as u8,
+            Grammar::Integer as u8,
+            1,
+            0x04,
+            Grammar::Call as u8,
+            1,
+            0x00,
+            Grammar::Pop as u8,
         ]);
         let res = vm.run();
         match res {
             Err(_) => {}
-            Ok(_) => panic!("No Error...")
+            Ok(_) => panic!("No Error..."),
         }
     }
 
     #[test]
     fn test_attr() {
-        let mut vm = VM::new(vec![Grammar::Magic as u8,
-                                  Grammar::Integer as u8, 1, 0x04,
-                                  Grammar::GetInstance as u8, 1, '?' as u8,
-                                  Grammar::Pop as u8,
+        let mut vm = VM::new(vec![
+            Grammar::Magic as u8,
+            Grammar::Integer as u8,
+            1,
+            0x04,
+            Grammar::GetInstance as u8,
+            1,
+            '?' as u8,
+            Grammar::Pop as u8,
         ]);
         let res = vm.run();
         match res {
             Err(_) => {}
-            Ok(_) => panic!("No Error...")
+            Ok(_) => panic!("No Error..."),
         }
     }
 
     #[test]
     fn test_arth() {
-        let mut vm = VM::new(vec![Grammar::Magic as u8,
-                                  Grammar::Integer as u8, 1, 0x03,
-                                  Grammar::Integer as u8, 1, 0x06,
-                                  Grammar::GetInstance as u8, 1, '+' as u8,
-                                  Grammar::Call as u8, 1, 0x01,
-                                  Grammar::Pop as u8,
+        let mut vm = VM::new(vec![
+            Grammar::Magic as u8,
+            Grammar::Integer as u8,
+            1,
+            0x03,
+            Grammar::Integer as u8,
+            1,
+            0x06,
+            Grammar::GetInstance as u8,
+            1,
+            '+' as u8,
+            Grammar::Call as u8,
+            1,
+            0x01,
+            Grammar::Pop as u8,
         ]);
         let res = vm.run();
         match res {
             Err(x) => panic!("Error: {}", x),
-            Ok(x) => assert_eq!(
-                x.expect("No popped").internal_value, Int(9)
-            )
+            Ok(x) => assert_eq!(x.expect("No popped").internal_value, Int(9)),
         }
     }
 
     #[test]
     fn test_jump() {
-        let mut vm = VM::new(vec![Grammar::Magic as u8,
-                                  Grammar::Integer as u8, 1, 0x01,
-                                  Grammar::JumpIfFalse as u8, 1, 12,
-                                  Grammar::Integer as u8, 1, 0x03,
-                                  Grammar::Jump as u8, 1, 20,
-                                  Grammar::Advance as u8, Grammar::Advance as u8,
-                                  Grammar::Integer as u8, 1, 0x04,
-                                  Grammar::Noop as u8,
-                                  Grammar::Back as u8, Grammar::Back as u8,
-                                  Grammar::Pop as u8,
+        let mut vm = VM::new(vec![
+            Grammar::Magic as u8,
+            Grammar::Integer as u8,
+            1,
+            0x01,
+            Grammar::JumpIfFalse as u8,
+            1,
+            12,
+            Grammar::Integer as u8,
+            1,
+            0x03,
+            Grammar::Jump as u8,
+            1,
+            20,
+            Grammar::Advance as u8,
+            Grammar::Advance as u8,
+            Grammar::Integer as u8,
+            1,
+            0x04,
+            Grammar::Noop as u8,
+            Grammar::Back as u8,
+            Grammar::Back as u8,
+            Grammar::Pop as u8,
         ]);
         let res = vm.run();
         match res {
             Err(x) => panic!("Error: {}", x),
-            Ok(x) => assert_eq!(
-                x.expect("No popped").internal_value, Int(3)
-            )
+            Ok(x) => assert_eq!(x.expect("No popped").internal_value, Int(3)),
         }
     }
 }

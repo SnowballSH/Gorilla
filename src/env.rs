@@ -4,7 +4,7 @@ use crate::obj::*;
 
 #[derive(Default, Clone, Eq, PartialEq, Debug)]
 pub struct Environment<'a> {
-    pub store: HashMap<String, BaseObject<'a>>
+    pub store: HashMap<String, BaseObject<'a>>,
 }
 
 impl<'a> Environment<'a> {

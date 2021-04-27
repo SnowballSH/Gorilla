@@ -3,12 +3,15 @@
 use crate::env::*;
 use crate::obj::ValueType::*;
 
-pub type CallFuncType<'a> =
-fn(BaseObject<'a>, Vec<BaseObject<'a>>) -> ObjResult<'a>;
+pub type CallFuncType<'a> = fn(BaseObject<'a>, Vec<BaseObject<'a>>) -> ObjResult<'a>;
 
 #[inline]
 pub fn not_callable<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
-    Err(format!("'{}' ({}) is not callable", this.to_string(), this.class.to_string()))
+    Err(format!(
+        "'{}' ({}) is not callable",
+        this.to_string(),
+        this.class.to_string()
+    ))
 }
 
 pub type ObjResult<'a> = Result<BaseObject<'a>, String>;
@@ -18,25 +21,26 @@ pub type NativeFunctionType<'a> = (&'static str, CallFuncType<'a>);
 #[derive(Clone, Eq, Debug)]
 pub enum ValueType<'a> {
     Int(i64),
+    Bool(bool),
     NativeFunction(NativeFunctionType<'a>),
 }
 
 impl<'a> PartialEq for ValueType<'a> {
     fn eq(&self, other: &Self) -> bool {
-            match self {
-                Int(a) => {
-                    match other {
-                        Int(i) => a == i,
-                        _ => false,
-                    }
-                },
-                NativeFunction(a) => {
-                    match other {
-                        NativeFunction(i) => a == i,
-                        _ => false,
-                    }
-                }
-            }
+        match self {
+            Int(a) => match other {
+                Int(i) => a == i,
+                _ => false,
+            },
+            Bool(a) => match other {
+                Bool(i) => a == i,
+                _ => false,
+            },
+            NativeFunction(a) => match other {
+                NativeFunction(i) => a == i,
+                _ => false,
+            },
+        }
     }
 }
 
@@ -78,7 +82,11 @@ impl<'a> BaseObject<'a> {
         (self.equal_func)(self.clone(), other)
     }
 
-    pub fn call(&self, this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> Result<BaseObject<'a>, String> {
+    pub fn call(
+        &self,
+        this: BaseObject<'a>,
+        args: Vec<BaseObject<'a>>,
+    ) -> Result<BaseObject<'a>, String> {
         (self.call_func)(this, args)
     }
 
@@ -94,9 +102,9 @@ impl<'a> BaseObject<'a> {
 
 #[derive(Clone, Eq, Debug)]
 pub struct Class<'a> {
-    pub name: &'static str,
+    pub name: &'a str,
     pub instance_vars: Environment<'a>,
-    pub super_class: Option<&'a Class<'a>>,
+    pub super_class: Option<Box<Class<'a>>>,
 }
 
 impl<'a> Class<'a> {
@@ -109,10 +117,10 @@ impl<'a> Class<'a> {
         let x = self.instance_vars.get(s.clone());
         match x {
             Some(_) => x,
-            None => match self.super_class {
+            None => match self.super_class.clone() {
                 Some(y) => y.get_instance_var(s),
-                None => None
-            }
+                None => None,
+            },
         }
     }
 }
