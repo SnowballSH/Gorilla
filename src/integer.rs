@@ -79,7 +79,7 @@ fn div<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
                 return Err(format!("{} expects an integer", g.0))
             });
             if b == 0 {
-                return Err(format!("Integer division by 0 in {} / {}", a, b))
+                return Err(format!("Integer division by 0 in {} / {}", a, b));
             }
             Ok(new_integer(a / b))
         }
@@ -102,7 +102,7 @@ fn mod_<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
                 return Err(format!("{} expects an integer", g.0))
             });
             if b == 0 {
-                return Err(format!("Integer modulo by 0 in {} % {}", a, b))
+                return Err(format!("Integer modulo by 0 in {} % {}", a, b));
             }
             Ok(new_integer(a % b))
         }
@@ -125,19 +125,21 @@ fn pos<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
     Ok(new_integer(a))
 }
 
-pub fn new_integer<'a>(x: i64) -> BaseObject<'a> {
-    fn k1(this: BaseObject) -> String {
-        let a = inner!(this.internal_value, if Int);
-        a.to_string()
-    }
-    fn k3(this: BaseObject) -> bool {
-        let a = inner!(this.internal_value, if Int);
-        a != 0
-    }
-    fn k4<'a>(this: BaseObject<'a>, other: BaseObject<'a>) -> bool {
-        this.internal_value == other.internal_value && this.class == other.class
-    }
+fn k1(this: BaseObject) -> String {
+    let a = inner!(this.internal_value, if Int);
+    a.to_string()
+}
 
+fn k3(this: BaseObject) -> bool {
+    let a = inner!(this.internal_value, if Int);
+    a != 0
+}
+
+fn k4<'a>(this: BaseObject<'a>, other: BaseObject<'a>) -> bool {
+    this.internal_value == other.internal_value && this.class == other.class
+}
+
+pub fn new_integer<'a>(x: i64) -> BaseObject<'a> {
     let mut int_env = HashMap::default();
 
     int_env.insert("+".to_string(), new_native_function((

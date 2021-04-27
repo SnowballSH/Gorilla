@@ -7,16 +7,24 @@ use crate::grammar::Grammar;
 use crate::integer::new_integer;
 use crate::obj::*;
 
+#[doc = "The Virtual Machine"]
 pub struct VM<'a> {
+    #[doc = "Source bytecode"]
     pub source: Vec<u8>,
+    #[doc = "Input pointer"]
     pub ip: usize,
+    #[doc = "Line"]
     pub line: usize,
+    #[doc = "Stack of objects"]
     pub stack: Vec<BaseObject<'a>>,
+    #[doc = "Last item popped. None when nothing is popped"]
     pub last_popped: Option<BaseObject<'a>>,
+    #[doc = "The environment of VM"]
     pub env: Environment<'a>,
 }
 
 impl<'a> VM<'a> {
+    #[doc = "New VM from vector of bytes"]
     pub fn new(source: Vec<u8>) -> Self {
         VM {
             source,
@@ -62,6 +70,7 @@ impl<'a> VM<'a> {
         String::from_utf8(bytes).unwrap()
     }
 
+    #[doc = "Run the bytecode"]
     pub fn run(&mut self) -> Result<Option<BaseObject<'a>>, String> {
         let length = self.source.len();
         if length == 0 || self.read() != Grammar::Magic.into() {
@@ -167,8 +176,8 @@ mod tests {
         let res = vm.run();
         match res {
             Err(x) => panic!("Error: {}", x),
-            Ok(x) => assert!(
-                x.expect("No popped").internal_value == Int(3)
+            Ok(x) => assert_eq!(
+                x.expect("No popped").internal_value, Int(3)
             )
         }
 
@@ -182,8 +191,8 @@ mod tests {
         let res = vm.run();
         match res {
             Err(x) => panic!("Error: {}", x),
-            Ok(x) => assert!(
-                x.expect("No popped").internal_value == Int(4)
+            Ok(x) => assert_eq!(
+                x.expect("No popped").internal_value, Int(4)
             )
         }
 
@@ -239,8 +248,30 @@ mod tests {
         let res = vm.run();
         match res {
             Err(x) => panic!("Error: {}", x),
-            Ok(x) => assert!(
-                x.expect("No popped").internal_value == Int(9)
+            Ok(x) => assert_eq!(
+                x.expect("No popped").internal_value, Int(9)
+            )
+        }
+    }
+
+    #[test]
+    fn test_jump() {
+        let mut vm = VM::new(vec![Grammar::Magic as u8,
+                                  Grammar::Integer as u8, 1, 0x01,
+                                  Grammar::JumpIfFalse as u8, 1, 12,
+                                  Grammar::Integer as u8, 1, 0x03,
+                                  Grammar::Jump as u8, 1, 20,
+                                  Grammar::Advance as u8, Grammar::Advance as u8,
+                                  Grammar::Integer as u8, 1, 0x04,
+                                  Grammar::Noop as u8,
+                                  Grammar::Back as u8, Grammar::Back as u8,
+                                  Grammar::Pop as u8,
+        ]);
+        let res = vm.run();
+        match res {
+            Err(x) => panic!("Error: {}", x),
+            Ok(x) => assert_eq!(
+                x.expect("No popped").internal_value, Int(3)
             )
         }
     }

@@ -1,9 +1,10 @@
 use strum::IntoEnumIterator;
 use strum_macros::EnumIter;
 
-use crate::grammar::Grammar::Noop;
+use crate::grammar::Grammar::*;
 
 #[derive(Debug, EnumIter, Copy, Clone)]
+#[doc = "Bytecode grammar for Gorilla, ported from Go"]
 pub enum Grammar {
     Magic = 0x69,
     Pop = 1,

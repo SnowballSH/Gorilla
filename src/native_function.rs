@@ -7,21 +7,25 @@ use crate::obj::*;
 use crate::obj::ValueType::*;
 use inner::inner;
 
+fn k1(this: BaseObject) -> String {
+    let x = inner!(this.internal_value, if NativeFunction);
+    format!("Native Function {}", x.0)
+}
+
+fn k3(_: BaseObject) -> bool {
+    true
+}
+
+fn k4<'a>(this: BaseObject<'a>, other: BaseObject<'a>) -> bool {
+    this.internal_value == other.internal_value && this.class == other.class
+}
+
+fn call<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+    let x = inner!(this.internal_value, if NativeFunction);
+    x.1(this.clone(), args.clone())
+}
+
 pub fn new_native_function<'a>(x: NativeFunctionType<'a>) -> BaseObject<'a> {
-    fn k1(this: BaseObject) -> String {
-        let x = inner!(this.internal_value, if NativeFunction);
-        format!("Native Function {}", x.0)
-    }
-    fn k3(_: BaseObject) -> bool {
-        true
-    }
-    fn k4<'a>(this: BaseObject<'a>, other: BaseObject<'a>) -> bool {
-        this.internal_value == other.internal_value && this.class == other.class
-    }
-    fn call<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
-        let x = inner!(this.internal_value, if NativeFunction);
-        x.1(this.clone(), args.clone())
-    }
     BaseObject {
         class: Class {
             name: "Native Function",
@@ -37,5 +41,21 @@ pub fn new_native_function<'a>(x: NativeFunctionType<'a>) -> BaseObject<'a> {
         equal_func: k4,
         call_func: call,
         parent_obj: None,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::obj::*;
+    use crate::native_function::new_native_function;
+    use crate::integer::new_integer;
+
+    #[test]
+    fn basic() {
+        fn idk<'a>(_this: BaseObject<'a>, _args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+            Ok(new_integer(1))
+        }
+        let f = new_native_function(("idk", idk));
+        assert_eq!(f.call(f.clone(), vec![]).unwrap(), new_integer(1))
     }
 }

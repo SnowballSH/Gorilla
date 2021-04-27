@@ -15,7 +15,7 @@ pub type ObjResult<'a> = Result<BaseObject<'a>, String>;
 
 pub type NativeFunctionType<'a> = (&'static str, CallFuncType<'a>);
 
-#[derive(Clone)]
+#[derive(Clone, Eq, Debug)]
 pub enum ValueType<'a> {
     Int(i64),
     NativeFunction(NativeFunctionType<'a>),
@@ -40,7 +40,7 @@ impl<'a> PartialEq for ValueType<'a> {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Eq, PartialEq, Debug)]
 pub struct BaseObject<'a> {
     pub class: Class<'a>,
     pub internal_value: ValueType<'a>,
@@ -92,7 +92,7 @@ impl<'a> BaseObject<'a> {
     }
 }
 
-#[derive(Clone)]
+#[derive(Clone, Eq, Debug)]
 pub struct Class<'a> {
     pub name: &'static str,
     pub instance_vars: Environment<'a>,
