@@ -7,3 +7,4 @@ pub mod integer;
 pub mod native_function;
 pub mod obj;
 pub mod vm;
+pub mod string;

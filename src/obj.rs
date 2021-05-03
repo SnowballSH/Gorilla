@@ -23,6 +23,7 @@ pub enum ValueType<'a> {
     Int(i64),
     Bool(bool),
     NativeFunction(NativeFunctionType<'a>),
+    Str(String),
 }
 
 impl<'a> PartialEq for ValueType<'a> {
@@ -34,6 +35,10 @@ impl<'a> PartialEq for ValueType<'a> {
             },
             Bool(a) => match other {
                 Bool(i) => a == i,
+                _ => false,
+            },
+            Str(a) => match other {
+                Str(i) => a == i,
                 _ => false,
             },
             NativeFunction(a) => match other {

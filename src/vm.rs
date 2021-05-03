@@ -7,6 +7,7 @@ use crate::env::Environment;
 use crate::grammar::Grammar;
 use crate::integer::new_integer;
 use crate::obj::*;
+use crate::string::new_string;
 
 #[doc = "The Virtual Machine"]
 pub struct VM<'a> {
@@ -108,7 +109,12 @@ impl<'a> VM<'a> {
 
             Grammar::Integer => {
                 let i = self.read_int();
-                self.push(new_integer(i))
+                self.push(new_integer(i));
+            }
+
+            Grammar::String => {
+                let i = self.read_string();
+                self.push(new_string(i));
             }
 
             Grammar::Getvar => {

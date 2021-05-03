@@ -10,6 +10,7 @@ mod env;
 mod grammar;
 mod helper;
 mod integer;
+mod string;
 mod native_function;
 mod obj;
 mod vm;
