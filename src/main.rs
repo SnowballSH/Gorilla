@@ -16,6 +16,8 @@ pub mod obj;
 pub mod vm;
 pub mod parser;
 pub mod ast;
+pub mod compiler;
+mod helpers;
 
 fn main() {
     let argv: Vec<String> = args().collect();
