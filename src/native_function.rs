@@ -2,7 +2,6 @@
 
 use std::collections::HashMap;
 
-use crate::any::any_class;
 use crate::env::Environment;
 use crate::obj::ValueType::*;
 use crate::obj::*;
@@ -26,7 +25,7 @@ fn call<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
     x.1(this.clone(), args.clone())
 }
 
-pub fn new_native_function<'a>(x: NativeFunctionType<'a>) -> BaseObject<'a> {
+pub fn new_native_function(x: NativeFunctionType) -> BaseObject {
     BaseObject {
         class: Class {
             name: "Native Function",

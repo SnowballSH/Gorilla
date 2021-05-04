@@ -153,7 +153,7 @@ impl<'a> VM<'a> {
                             g,
                             self_.to_string(),
                             self_.class.to_string()
-                        ))
+                        ));
                     }
                 }
             }

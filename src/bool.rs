@@ -1,11 +1,13 @@
 #![forbid(unsafe_code)]
 
+use std::collections::HashMap;
+
+use inner::inner;
+
 use crate::any::any_class;
 use crate::env::Environment;
+use crate::obj::{BaseObject, Class, not_callable};
 use crate::obj::ValueType::*;
-use crate::obj::{not_callable, BaseObject, Class};
-use inner::inner;
-use std::collections::HashMap;
 
 fn k1(this: BaseObject) -> String {
     let a = inner!(this.internal_value, if Bool);

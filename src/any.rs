@@ -1,11 +1,12 @@
 #![forbid(unsafe_code)]
 
+use inner::inner;
+
 use crate::bool::new_boolean;
 use crate::env::Environment;
 use crate::native_function::new_native_function;
-use crate::obj::ValueType::*;
 use crate::obj::*;
-use inner::inner;
+use crate::obj::ValueType::*;
 
 fn dbeq<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
     let other = args.first();
