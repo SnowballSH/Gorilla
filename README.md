@@ -21,36 +21,6 @@ I am writing a rust runtime for gorilla, in order to make it fast and secure.
 
 ---
 
-### Usage of the Gorilla library
-
-Download:
-
-```bash
-go get github.com/SnowballSH/Gorilla
-```
-
-Basic usage:
-
-```go
-import "github.com/SnowballSH/Gorilla/exports"
-
-code := "'Hello,' + ' world!'"
-
-// Compile Gorilla to bytecode
-res, err := exports.CompileGorilla(code)
-
-if err != nil {
-	panic(err)
-}
-
-// Execute Gorilla bytecode along with the source text for debugging
-vm, lastItem, err := exports.ExecuteGorillaBytecodeFromSource(res, code)
-
-println(lastItem.Inspect()) // 'Hello, world!'
-```
-
----
-
 The following links are all based on gorilla 0.4.0.1:
 
 #### View more on the [website](https://snowballsh.me/Gorilla/)
