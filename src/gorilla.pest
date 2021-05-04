@@ -1,0 +1,38 @@
+program = _{ SOI ~ TERMINATOR* ~ (stmt ~ TERMINATOR+) * ~ stmt? ~ EOI }
+
+TERMINATOR = _{ NEWLINE | ";" }
+WHITESPACE = _{ " " | "\t" }
+
+integer = @{ ASCII_DIGIT+ }
+identifier = @{ !keyword ~ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
+keyword = @{
+    "if" | "else"
+}
+
+call = {
+    term ~ ("(" ~ (expression ~ ",")* ~ expression? ~ ")")+
+}
+
+term = _{ integer | identifier | "(" ~ expression ~ ")" }
+
+expression_inner = _{ call | term }
+
+add = { "+" }
+sub = { "-" }
+mul = { "*" }
+div = { "/" }
+modulo = { "%" }
+
+operators = _{
+    add | sub | mul | div | modulo
+}
+
+infix = _{ expression_inner ~ (operators ~ expression_inner)+ }
+
+expression = { infix | expression_inner }
+
+expression_stmt = { expression }
+
+stmt = _{
+    expression_stmt
+}

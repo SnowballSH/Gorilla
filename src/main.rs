@@ -4,16 +4,18 @@ use std::env::args;
 use std::fs::File;
 use std::io::Read;
 
-mod any;
-mod bool;
-mod env;
-mod grammar;
-mod helper;
-mod integer;
-mod string;
-mod native_function;
-mod obj;
-mod vm;
+pub mod any;
+pub mod bool;
+pub mod env;
+pub mod grammar;
+pub mod helper;
+pub mod integer;
+pub mod string;
+pub mod native_function;
+pub mod obj;
+pub mod vm;
+pub mod parser;
+pub mod ast;
 
 fn main() {
     let argv: Vec<String> = args().collect();
