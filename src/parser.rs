@@ -80,9 +80,16 @@ fn parse_expression(pair: Pair<Rule>) -> Expression {
 
 fn parse_statement(pair: Pair<Rule>) -> Statement {
     match pair.as_rule() {
-        Rule::expression_stmt => Statement::ExprStmt(
-            parse_expression(pair.into_inner().next().unwrap())
-        ),
+        Rule::expression_stmt => {
+            let p = pair.into_inner().next().unwrap();
+            let s = p.clone().as_span();
+            Statement::ExprStmt(
+                ExprStmt {
+                    expr: parse_expression(p),
+                    pos: s
+                }
+            )
+        },
         _ => unreachable!()
     }
 }

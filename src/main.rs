@@ -8,7 +8,6 @@ pub mod any;
 pub mod bool;
 pub mod env;
 pub mod grammar;
-pub mod helper;
 pub mod integer;
 pub mod string;
 pub mod native_function;

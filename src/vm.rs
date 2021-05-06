@@ -45,22 +45,26 @@ impl<'a> VM<'a> {
         }
     }
 
+    #[inline]
     fn push(&mut self, obj: BaseObject<'a>) {
         self.stack.push(obj)
     }
 
+    #[inline]
     fn pop(&mut self) -> BaseObject<'a> {
         let popped = self.stack.pop().expect("Pop on empty stack...");
         self.last_popped = Some(popped.clone());
         popped
     }
 
+    #[inline]
     fn read(&mut self) -> u8 {
         let k = self.source[self.ip];
         self.ip += 1;
         k
     }
 
+    #[inline]
     fn read_int(&mut self) -> i64 {
         let length = self.read();
         let mut number = vec![];
@@ -70,8 +74,19 @@ impl<'a> VM<'a> {
         leb128::read::signed(&mut Cursor::new(number)).expect("Not a valid integer")
     }
 
-    fn read_string(&mut self) -> String {
+    #[inline]
+    fn read_unsigned_int(&mut self) -> u64 {
         let length = self.read();
+        let mut number = vec![];
+        for _ in 0..length {
+            number.push(self.read());
+        }
+        leb128::read::unsigned(&mut Cursor::new(number)).expect("Not a valid integer")
+    }
+
+    #[inline]
+    fn read_string(&mut self) -> String {
+        let length = self.read_unsigned_int();
         let mut bytes = vec![];
         for _ in 0..length {
             bytes.push(self.read());
@@ -158,7 +173,7 @@ impl<'a> VM<'a> {
                 }
             }
             Grammar::Call => {
-                let amount = self.read_int();
+                let amount = self.read_unsigned_int();
                 let o = self.pop();
                 let mut args = vec![];
                 for _ in 0..amount {
@@ -172,11 +187,11 @@ impl<'a> VM<'a> {
                 };
             }
             Grammar::Jump => {
-                let where_ = self.read_int();
+                let where_ = self.read_unsigned_int();
                 self.ip = (where_ + 1) as usize
             }
             Grammar::JumpIfFalse => {
-                let where_ = self.read_int();
+                let where_ = self.read_unsigned_int();
                 if !self.pop().is_truthy() {
                     self.ip = (where_ + 1) as usize
                 }
@@ -202,7 +217,7 @@ mod tests {
             1,
             0x03,
             Grammar::Setvar as u8,
-            2,
+            1, 2,
             'a' as u8,
             'b' as u8,
             Grammar::Pop as u8,
@@ -219,12 +234,12 @@ mod tests {
             1,
             0x04,
             Grammar::Setvar as u8,
-            2,
+            1, 2,
             'a' as u8,
             'b' as u8,
             Grammar::Pop as u8,
             Grammar::Getvar as u8,
-            2,
+            1, 2,
             'a' as u8,
             'b' as u8,
             Grammar::Pop as u8,
@@ -241,7 +256,7 @@ mod tests {
             1,
             0x04,
             Grammar::Getvar as u8,
-            2,
+            1, 2,
             'a' as u8,
             'b' as u8,
             Grammar::Pop as u8,
@@ -280,7 +295,7 @@ mod tests {
             1,
             0x04,
             Grammar::GetInstance as u8,
-            1,
+            1, 1,
             '?' as u8,
             Grammar::Pop as u8,
         ]);
@@ -302,7 +317,7 @@ mod tests {
             1,
             0x06,
             Grammar::GetInstance as u8,
-            1,
+            1, 1,
             '+' as u8,
             Grammar::Call as u8,
             1,
