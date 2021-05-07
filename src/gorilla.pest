@@ -29,7 +29,9 @@ operators = _{
 
 infix = _{ expression_inner ~ (operators ~ expression_inner)+ }
 
-expression = { infix | expression_inner }
+assign = { identifier ~ "=" ~ expression }
+
+expression = { assign | infix | expression_inner }
 
 expression_stmt = { expression }
 

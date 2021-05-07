@@ -42,6 +42,16 @@ fn others(pair: Pair<Rule>) -> Expression {
             name: pair.as_str(),
             pos: pair.as_span(),
         }),
+        Rule::assign => {
+            let mut inner = pair.clone().into_inner();
+            let name = inner.next().unwrap().as_str();
+            let res = inner.next().unwrap();
+            Expression::SetVar(Box::new(SetVar {
+                name,
+                value: parse_expression(res),
+                pos: pair.as_span(),
+            }))
+        }
         Rule::call => {
             let mut inner = pair.clone().into_inner();
             let res = inner.next().unwrap();

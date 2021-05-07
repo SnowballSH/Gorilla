@@ -17,6 +17,7 @@ pub mod parser;
 pub mod ast;
 pub mod compiler;
 mod helpers;
+mod overall_test;
 
 fn main() {
     let argv: Vec<String> = args().collect();

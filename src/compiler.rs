@@ -86,11 +86,21 @@ impl<'a> Compiler<'a> {
                 self.emit_grammar(Grammar::Integer);
                 self.emit_unsigned_int(x.value);
             }
+
             Expression::GetVar(x) => {
                 self.update_line(span_to_line(self.source, x.pos));
                 self.emit_grammar(Grammar::Getvar);
                 self.emit_string(x.name);
             }
+            Expression::SetVar(x) => {
+                let span = span_to_line(self.source, x.pos);
+                self.update_line(span);
+                self.compile_expr(x.value);
+                self.update_line(span);
+                self.emit_grammar(Grammar::Setvar);
+                self.emit_string(x.name);
+            }
+
             Expression::Infix(x) => {
                 let line = span_to_line(self.source, x.pos);
                 self.update_line(line);
@@ -106,6 +116,7 @@ impl<'a> Compiler<'a> {
                 self.emit_grammar(Grammar::Call);
                 self.emit_unsigned_int(1);
             }
+
             Expression::Call(x) => {
                 self.update_line(span_to_line(self.source, x.pos));
                 let mut args = x.arguments.clone();
@@ -124,8 +135,8 @@ impl<'a> Compiler<'a> {
 #[cfg(test)]
 mod tests {
     use crate::compiler::Compiler;
-    use crate::parser::parse;
     use crate::grammar::Grammar;
+    use crate::parser::parse;
 
     #[test]
     fn number() {

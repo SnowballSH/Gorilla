@@ -4,6 +4,7 @@ use pest::Span;
 pub enum Expression<'a> {
     Int(Integer<'a>),
     GetVar(GetVar<'a>),
+    SetVar(Box<SetVar<'a>>),
     Infix(Box<Infix<'a>>),
     Call(Box<Call<'a>>), // callee, args
 }
@@ -25,6 +26,13 @@ pub struct Integer<'a> {
 #[derive(Debug, Clone)]
 pub struct GetVar<'a> {
     pub name: &'a str,
+    pub pos: Span<'a>,
+}
+
+#[derive(Debug, Clone)]
+pub struct SetVar<'a> {
+    pub name: &'a str,
+    pub value: Expression<'a>,
     pub pos: Span<'a>,
 }
 
