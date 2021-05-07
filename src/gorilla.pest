@@ -3,7 +3,7 @@ program = _{ SOI ~ TERMINATOR* ~ (stmt ~ TERMINATOR+) * ~ stmt? ~ EOI }
 TERMINATOR = _{ NEWLINE | ";" }
 WHITESPACE = _{ " " | "\t" }
 
-integer = @{ ASCII_DIGIT+ }
+integer = @{ ASCII_DIGIT{1, 18} }
 identifier = @{ !keyword ~ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
 keyword = @{
     "if" | "else"

@@ -1,11 +1,12 @@
-use pest_derive::*;
-use pest::Parser;
-use pest::iterators::{Pair};
 use lazy_static::*;
+use pest::iterators::Pair;
+use pest::Parser;
 use pest::prec_climber::*;
+use pest_derive::*;
+
+use Rule::*;
 
 use crate::ast::*;
-use Rule::*;
 
 lazy_static! {
     static ref PREC_CLIMBER: PrecClimber<Rule> = {
@@ -86,10 +87,10 @@ fn parse_statement(pair: Pair<Rule>) -> Statement {
             Statement::ExprStmt(
                 ExprStmt {
                     expr: parse_expression(p),
-                    pos: s
+                    pos: s,
                 }
             )
-        },
+        }
         _ => unreachable!()
     }
 }
@@ -115,7 +116,7 @@ pub fn parse(code: &str) -> Result<Program, pest::error::Error<Rule>> {
 
 #[cfg(test)]
 mod tests {
-    use crate::parser::{parse};
+    use crate::parser::parse;
 
     #[test]
     fn parsing() {
@@ -127,6 +128,14 @@ mod tests {
                 assert_eq!(x.len(), 1);
             }
             Err(x) => { panic!("{}", x.to_string()); }
+        };
+
+        let res = parse("9223372036854775808");
+        match res {
+            Ok(_) => {
+                panic!("no error");
+            }
+            Err(_) => {}
         };
     }
 }
