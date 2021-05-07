@@ -65,16 +65,6 @@ impl<'a> VM<'a> {
     }
 
     #[inline]
-    fn read_int(&mut self) -> i64 {
-        let length = self.read();
-        let mut number = vec![];
-        for _ in 0..length {
-            number.push(self.read());
-        }
-        leb128::read::signed(&mut Cursor::new(number)).expect("Not a valid integer")
-    }
-
-    #[inline]
     fn read_unsigned_int(&mut self) -> u64 {
         let length = self.read();
         let mut number = vec![];
@@ -123,8 +113,8 @@ impl<'a> VM<'a> {
             Grammar::Noop => {}
 
             Grammar::Integer => {
-                let i = self.read_int();
-                self.push(new_integer(i));
+                let i = self.read_unsigned_int();
+                self.push(new_integer(i as i64));
             }
 
             Grammar::String => {
@@ -208,6 +198,21 @@ mod tests {
     use crate::grammar::Grammar;
     use crate::obj::ValueType::*;
     use crate::vm::VM;
+
+    #[test]
+    fn test_integer_encoding() {
+        let bc = vec![
+            Grammar::Magic as u8,
+            Grammar::Integer as u8, 3, 0xe5, 0x8e, 0x26,
+            Grammar::Pop as u8,
+        ];
+        let mut vm = VM::new(bc);
+        let res = vm.run();
+        match res {
+            Err(x) => panic!("Error: {}", x),
+            Ok(x) => assert_eq!(x.expect("No popped").internal_value, Int(624485)),
+        }
+    }
 
     #[test]
     fn test_var() {

@@ -10,6 +10,7 @@ use crate::native_function::new_native_function;
 use crate::obj::ValueType::*;
 use crate::obj::*;
 
+#[inline]
 fn add<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
     let other = args.first();
     match other {
@@ -28,6 +29,7 @@ fn add<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
     }
 }
 
+#[inline]
 fn sub<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
     let other = args.first();
     match other {
@@ -46,6 +48,7 @@ fn sub<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
     }
 }
 
+#[inline]
 fn mul<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
     let other = args.first();
     match other {
@@ -64,6 +67,7 @@ fn mul<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
     }
 }
 
+#[inline]
 fn div<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
     let other = args.first();
     match other {
@@ -85,6 +89,7 @@ fn div<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
     }
 }
 
+#[inline]
 fn mod_<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
     let other = args.first();
     match other {
@@ -106,26 +111,31 @@ fn mod_<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
     }
 }
 
+#[inline]
 fn neg<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
     let a = inner!(this.parent().unwrap().internal_value, if Int);
     Ok(new_integer(-a))
 }
 
+#[inline]
 fn pos<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
     let a = inner!(this.parent().unwrap().internal_value, if Int);
     Ok(new_integer(a))
 }
 
+#[inline]
 fn k1(this: BaseObject) -> String {
     let a = inner!(this.internal_value, if Int);
     a.to_string()
 }
 
+#[inline]
 fn k3(this: BaseObject) -> bool {
     let a = inner!(this.internal_value, if Int);
     a != 0
 }
 
+#[inline]
 fn k4<'a>(this: BaseObject<'a>, other: BaseObject<'a>) -> bool {
     this.internal_value == other.internal_value && this.class == other.class
 }

@@ -1,16 +1,21 @@
 use crate::ast::*;
 use crate::grammar::Grammar;
-use crate::helpers::span_to_line;
+use crate::helpers::*;
 
 #[derive(Debug)]
+#[doc = "The compiler struct. Compiles AST to bytecodes."]
 pub struct Compiler<'a> {
+    #[doc = "resulting bytecode"]
     pub result: Vec<u8>,
+    #[doc = "last line processed"]
     pub last_line: usize,
+    #[doc = "source code"]
     pub source: &'a str,
 }
 
 impl<'a> Compiler<'a> {
-    fn new(source: &'a str) -> Self {
+    #[doc = "Creates a new compiler"]
+    pub fn new(source: &'a str) -> Self {
         Compiler {
             result: vec![Grammar::Magic as u8],
             last_line: 0,
@@ -46,18 +51,9 @@ impl<'a> Compiler<'a> {
     }
 
     #[inline]
-    fn emit_int(&mut self, value: i64) {
-        let mut buf = [0; 1024];
-        let mut writable = &mut buf[..];
-        leb128::write::signed(&mut writable, value).expect("Should write number");
-        self.emit_all(&buf);
-    }
-
-    #[inline]
     fn emit_unsigned_int(&mut self, value: u64) {
-        let mut buf = [0; 1024];
-        let mut writable = &mut buf[..];
-        leb128::write::unsigned(&mut writable, value).expect("Should write number");
+        let buf = leb128_unsigned(value);
+        self.emit(buf.len() as u8);
         self.emit_all(&buf);
     }
 
@@ -88,7 +84,7 @@ impl<'a> Compiler<'a> {
             Expression::Int(x) => {
                 self.update_line(span_to_line(self.source, x.pos));
                 self.emit_grammar(Grammar::Integer);
-                self.emit_int(x.value);
+                self.emit_unsigned_int(x.value);
             }
             Expression::GetVar(x) => {
                 self.update_line(span_to_line(self.source, x.pos));
@@ -122,5 +118,24 @@ impl<'a> Compiler<'a> {
                 self.emit_unsigned_int(x.arguments.len() as u64)
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::compiler::Compiler;
+    use crate::parser::parse;
+    use crate::grammar::Grammar;
+
+    #[test]
+    fn number() {
+        let code = "624485";
+        let mut compiler = Compiler::new(code);
+        compiler.compile(parse(code).unwrap());
+        assert_eq!(compiler.result, vec![
+            Grammar::Magic as u8,
+            Grammar::Integer as u8, 3, 0xe5, 0x8e, 0x26,
+            Grammar::Pop as u8,
+        ]);
     }
 }

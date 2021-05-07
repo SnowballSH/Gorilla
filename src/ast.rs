@@ -18,7 +18,7 @@ pub struct Infix<'a> {
 
 #[derive(Debug, Clone)]
 pub struct Integer<'a> {
-    pub value: i64,
+    pub value: u64,
     pub pos: Span<'a>,
 }
 
