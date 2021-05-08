@@ -8,6 +8,7 @@ use crate::grammar::Grammar;
 use crate::integer::new_integer;
 use crate::obj::*;
 use crate::string::new_string;
+use crate::native_function::new_native_function;
 
 #[doc = "The Virtual Machine"]
 pub struct VM<'a> {
@@ -27,12 +28,23 @@ pub struct VM<'a> {
     pub global: Environment<'a>,
 }
 
+fn print_line<'a>(_this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+    let mut strings = vec![];
+    for arg in args {
+        strings.push(arg.to_string());
+    }
+    let string = strings.join(" ");
+    println!("{}", string);
+    Ok(new_string(string))
+}
+
 impl<'a> VM<'a> {
     #[doc = "New VM from vector of bytes"]
     pub fn new(source: Vec<u8>) -> Self {
         let mut global = Environment::default();
         global.set("true".to_string(), new_boolean(true));
         global.set("false".to_string(), new_boolean(false));
+        global.set("println".to_string(), new_native_function(("println", print_line)));
 
         VM {
             source,
@@ -140,7 +152,11 @@ impl<'a> VM<'a> {
                 let name = self.read_string();
                 let val = self.pop();
 
-                self.env.set(name, val.clone());
+                if self.global.get(name.clone()).is_some() {
+                    self.global.set(name, val.clone())
+                } else {
+                    self.env.set(name, val.clone());
+                }
                 self.push(val);
             }
             Grammar::GetInstance => {
