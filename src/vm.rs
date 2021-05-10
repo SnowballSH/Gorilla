@@ -2,12 +2,13 @@
 
 use std::io::Cursor;
 
-use crate::bool::new_boolean;
+use crate::bool::*;
 use crate::env::Environment;
 use crate::grammar::Grammar;
 use crate::integer::new_integer;
 use crate::obj::*;
 use crate::string::new_string;
+use crate::native_function::new_native_function;
 
 #[doc = "The Virtual Machine"]
 pub struct VM<'a> {
@@ -27,12 +28,23 @@ pub struct VM<'a> {
     pub global: Environment<'a>,
 }
 
+fn print_line<'a>(_this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+    let mut strings = vec![];
+    for arg in args {
+        strings.push(arg.to_string());
+    }
+    let string = strings.join(" ");
+    println!("{}", string);
+    Ok(new_string(string))
+}
+
 impl<'a> VM<'a> {
     #[doc = "New VM from vector of bytes"]
     pub fn new(source: Vec<u8>) -> Self {
         let mut global = Environment::default();
         global.set("true".to_string(), new_boolean(true));
         global.set("false".to_string(), new_boolean(false));
+        global.set("println".to_string(), new_native_function(("println", print_line)));
 
         VM {
             source,
@@ -45,33 +57,38 @@ impl<'a> VM<'a> {
         }
     }
 
+    #[inline]
     fn push(&mut self, obj: BaseObject<'a>) {
         self.stack.push(obj)
     }
 
+    #[inline]
     fn pop(&mut self) -> BaseObject<'a> {
         let popped = self.stack.pop().expect("Pop on empty stack...");
         self.last_popped = Some(popped.clone());
         popped
     }
 
+    #[inline]
     fn read(&mut self) -> u8 {
         let k = self.source[self.ip];
         self.ip += 1;
         k
     }
 
-    fn read_int(&mut self) -> i64 {
+    #[inline]
+    fn read_unsigned_int(&mut self) -> u64 {
         let length = self.read();
         let mut number = vec![];
         for _ in 0..length {
             number.push(self.read());
         }
-        leb128::read::signed(&mut Cursor::new(number)).expect("Not a valid integer")
+        leb128::read::unsigned(&mut Cursor::new(number)).expect("Not a valid integer")
     }
 
+    #[inline]
     fn read_string(&mut self) -> String {
-        let length = self.read();
+        let length = self.read_unsigned_int();
         let mut bytes = vec![];
         for _ in 0..length {
             bytes.push(self.read());
@@ -108,8 +125,8 @@ impl<'a> VM<'a> {
             Grammar::Noop => {}
 
             Grammar::Integer => {
-                let i = self.read_int();
-                self.push(new_integer(i));
+                let i = self.read_unsigned_int();
+                self.push(new_integer(i as i64));
             }
 
             Grammar::String => {
@@ -135,7 +152,11 @@ impl<'a> VM<'a> {
                 let name = self.read_string();
                 let val = self.pop();
 
-                self.env.set(name, val.clone());
+                if self.global.get(name.clone()).is_some() {
+                    self.global.set(name, val.clone())
+                } else {
+                    self.env.set(name, val.clone());
+                }
                 self.push(val);
             }
             Grammar::GetInstance => {
@@ -158,7 +179,7 @@ impl<'a> VM<'a> {
                 }
             }
             Grammar::Call => {
-                let amount = self.read_int();
+                let amount = self.read_unsigned_int();
                 let o = self.pop();
                 let mut args = vec![];
                 for _ in 0..amount {
@@ -172,11 +193,11 @@ impl<'a> VM<'a> {
                 };
             }
             Grammar::Jump => {
-                let where_ = self.read_int();
+                let where_ = self.read_unsigned_int();
                 self.ip = (where_ + 1) as usize
             }
             Grammar::JumpIfFalse => {
-                let where_ = self.read_int();
+                let where_ = self.read_unsigned_int();
                 if !self.pop().is_truthy() {
                     self.ip = (where_ + 1) as usize
                 }
@@ -195,6 +216,21 @@ mod tests {
     use crate::vm::VM;
 
     #[test]
+    fn test_integer_encoding() {
+        let bc = vec![
+            Grammar::Magic as u8,
+            Grammar::Integer as u8, 3, 0xe5, 0x8e, 0x26,
+            Grammar::Pop as u8,
+        ];
+        let mut vm = VM::new(bc);
+        let res = vm.run();
+        match res {
+            Err(x) => panic!("Error: {}", x),
+            Ok(x) => assert_eq!(x.expect("No popped").internal_value, Int(624485)),
+        }
+    }
+
+    #[test]
     fn test_var() {
         let mut vm = VM::new(vec![
             Grammar::Magic as u8,
@@ -202,7 +238,7 @@ mod tests {
             1,
             0x03,
             Grammar::Setvar as u8,
-            2,
+            1, 2,
             'a' as u8,
             'b' as u8,
             Grammar::Pop as u8,
@@ -219,12 +255,12 @@ mod tests {
             1,
             0x04,
             Grammar::Setvar as u8,
-            2,
+            1, 2,
             'a' as u8,
             'b' as u8,
             Grammar::Pop as u8,
             Grammar::Getvar as u8,
-            2,
+            1, 2,
             'a' as u8,
             'b' as u8,
             Grammar::Pop as u8,
@@ -241,7 +277,7 @@ mod tests {
             1,
             0x04,
             Grammar::Getvar as u8,
-            2,
+            1, 2,
             'a' as u8,
             'b' as u8,
             Grammar::Pop as u8,
@@ -280,7 +316,7 @@ mod tests {
             1,
             0x04,
             Grammar::GetInstance as u8,
-            1,
+            1, 1,
             '?' as u8,
             Grammar::Pop as u8,
         ]);
@@ -302,7 +338,7 @@ mod tests {
             1,
             0x06,
             Grammar::GetInstance as u8,
-            1,
+            1, 1,
             '+' as u8,
             Grammar::Call as u8,
             1,

@@ -3,19 +3,37 @@ program = _{ SOI ~ TERMINATOR* ~ (stmt ~ TERMINATOR+) * ~ stmt? ~ EOI }
 TERMINATOR = _{ NEWLINE | ";" }
 WHITESPACE = _{ " " | "\t" }
 
-integer = @{ ASCII_DIGIT+ }
-identifier = @{ !keyword ~ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
+integer = @{ ASCII_DIGIT{1, 18} }
+identifier = @{ !keyword ~ (ASCII_ALPHA | "_" | "$") ~ (ASCII_ALPHANUMERIC | "_")* }
 keyword = @{
     "if" | "else"
 }
 
+string_literal = @{ "\"" ~ literal_char* ~ "\"" }
+literal_char = { escape_sequence | (!"\"" ~ ANY) }
+escape_sequence = _{ "\\\\" | "\\\"" | "\\\'" | "\\n" | "\\r" | "\\t" | "\\0" }
+
 call = {
-    term ~ ("(" ~ (expression ~ ",")* ~ expression? ~ ")")+
+    "(" ~ (expression ~ ",")* ~ expression? ~ ")"
 }
 
-term = _{ integer | identifier | "(" ~ expression ~ ")" }
+empty_call = {
+    "!"
+}
 
-expression_inner = _{ call | term }
+field = {
+    "." ~ identifier
+}
+
+suffix = {
+    term ~ (call | field | empty_call)+
+}
+
+term = _{ string_literal | integer | identifier | "(" ~ expression ~ ")" }
+
+prefix = { prefix_operators+ ~ expression_inner }
+
+expression_inner = _{ suffix | prefix | term }
 
 add = { "+" }
 sub = { "-" }
@@ -27,9 +45,15 @@ operators = _{
     add | sub | mul | div | modulo
 }
 
+prefix_operators = _{
+    add | sub
+}
+
 infix = _{ expression_inner ~ (operators ~ expression_inner)+ }
 
-expression = { infix | expression_inner }
+assign = { identifier ~ "=" ~ expression }
+
+expression = { assign | infix | expression_inner }
 
 expression_stmt = { expression }
 
