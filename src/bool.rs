@@ -11,6 +11,7 @@ use crate::integer::new_integer;
 use crate::obj::{BaseObject, Class, not_callable, ObjResult};
 use crate::obj::ValueType::*;
 use crate::native_function::new_native_function;
+use crate::string::new_string;
 
 fn k1(this: BaseObject) -> String {
     let a = inner!(this.internal_value, if Bool);
@@ -31,10 +32,17 @@ fn to_int<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>) -> ObjResult<'a>
     Ok(new_integer(if a { 1 } else { 0 }))
 }
 
+#[inline]
+fn to_string<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+    let a = inner!(this.parent().unwrap().internal_value, if Bool);
+    Ok(new_string(a.to_string()))
+}
+
 pub fn new_boolean<'a>(x: bool) -> BaseObject<'a> {
     let mut _env = HashMap::default();
 
-    _env.insert("i".to_string(), new_native_function(("Boolean.to_i", to_int)));
+    _env.insert("i".to_string(), new_native_function(("Boolean.i", to_int)));
+    _env.insert("s".to_string(), new_native_function(("Boolean.s", to_string)));
 
     BaseObject {
         class: Class {

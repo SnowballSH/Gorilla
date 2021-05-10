@@ -9,6 +9,7 @@ use crate::env::Environment;
 use crate::native_function::new_native_function;
 use crate::obj::ValueType::*;
 use crate::obj::*;
+use crate::string::new_string;
 
 #[inline]
 fn add<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
@@ -124,6 +125,12 @@ fn pos<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
 }
 
 #[inline]
+fn to_string<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+    let a = inner!(this.parent().unwrap().internal_value, if Int);
+    Ok(new_string(a.to_string()))
+}
+
+#[inline]
 fn k1(this: BaseObject) -> String {
     let a = inner!(this.internal_value, if Int);
     a.to_string()
@@ -156,6 +163,9 @@ pub fn new_integer<'a>(x: i64) -> BaseObject<'a> {
     int_env.insert("-@".to_string(), new_native_function(("- Integer", neg)));
 
     int_env.insert("+@".to_string(), new_native_function(("+ Integer", pos)));
+
+    int_env.insert("s".to_string(), new_native_function(("Integer.s", to_string)));
+    int_env.insert("i".to_string(), new_native_function(("Integer.i", pos)));
 
     BaseObject {
         class: Class {

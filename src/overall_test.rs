@@ -20,5 +20,13 @@ mod test_overall {
         let code = "1 / 0";
         let result = run_code(code);
         assert!(result.is_err());
+
+        let code = "1.this_does_not_exist";
+        let result = run_code(code);
+        assert!(result.is_err());
+
+        let code = "a = true.i!.s!; a.i! - 1.i!";
+        let result = run_code(code);
+        assert_eq!(result, Ok(Some(new_integer(0))));
     }
 }

@@ -55,7 +55,6 @@ fn others(pair: Pair<Rule>) -> Expression {
         Rule::prefix => {
             let mut inner: Vec<Pair<Rule>> = pair.clone().into_inner().collect();
             let last = inner.pop().unwrap();
-
             let mut right = parse_expression(last);
 
             while let Some(x) = inner.pop() {
@@ -136,10 +135,10 @@ pub fn climb(pair: Pair<Rule>) -> Expression {
 
 fn parse_expression(pair: Pair<Rule>) -> Expression {
     let inner: Vec<Pair<Rule>> = pair.clone().into_inner().collect();
-    let res = if inner.len() == 0 {
-        others(pair)
-    } else {
+    let res = if inner.len() != 0 && pair.clone().as_rule() == Rule::expression {
         climb(pair)
+    } else {
+        others(pair)
     };
 
     res
@@ -165,6 +164,7 @@ pub fn parse(code: &str) -> Result<Program, pest::error::Error<Rule>> {
     let res = GorillaParser::parse(Rule::program, code);
     match res {
         Ok(res) => {
+            //dbg!(&res);
             let mut ast = vec![];
             for pair in res {
                 match pair.as_rule() {
@@ -174,6 +174,7 @@ pub fn parse(code: &str) -> Result<Program, pest::error::Error<Rule>> {
                     _ => {}
                 }
             }
+            //dbg!(&ast);
             Ok(ast)
         }
         Err(e) => Err(e)
