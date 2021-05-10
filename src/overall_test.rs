@@ -13,6 +13,10 @@ mod test_overall {
         let result = run_code(code);
         assert_eq!(result, Ok(Some(new_integer(4763 / 23 + 98765))));
 
+        let code = "$abc = -9 * +-7; _ = -256 + $abc + 0; _";
+        let result = run_code(code);
+        assert_eq!(result, Ok(Some(new_integer(-256 + -9 * -7 + 0))));
+
         let code = "1 / 0";
         let result = run_code(code);
         assert!(result.is_err());

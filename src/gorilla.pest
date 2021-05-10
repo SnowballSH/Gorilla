@@ -4,7 +4,7 @@ TERMINATOR = _{ NEWLINE | ";" }
 WHITESPACE = _{ " " | "\t" }
 
 integer = @{ ASCII_DIGIT{1, 18} }
-identifier = @{ !keyword ~ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | "_")* }
+identifier = @{ !keyword ~ (ASCII_ALPHA | "_" | "$") ~ (ASCII_ALPHANUMERIC | "_")* }
 keyword = @{
     "if" | "else"
 }
@@ -27,7 +27,9 @@ suffix = {
 
 term = _{ integer | identifier | "(" ~ expression ~ ")" }
 
-expression_inner = _{ suffix | term }
+prefix = { prefix_operators+ ~ expression_inner }
+
+expression_inner = _{ suffix | prefix | term }
 
 add = { "+" }
 sub = { "-" }
@@ -45,11 +47,9 @@ prefix_operators = _{
 
 infix = _{ expression_inner ~ (operators ~ expression_inner)+ }
 
-prefix = { prefix_operators+ ~ expression_inner }
-
 assign = { identifier ~ "=" ~ expression }
 
-expression = { assign | infix | prefix | expression_inner }
+expression = { assign | infix | expression_inner }
 
 expression_stmt = { expression }
 
