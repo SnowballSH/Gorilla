@@ -52,28 +52,64 @@ fn others(pair: Pair<Rule>) -> Expression {
                 pos: pair.as_span(),
             }))
         }
+        Rule::prefix => {
+            let mut inner: Vec<Pair<Rule>> = pair.clone().into_inner().collect();
+            let last = inner.pop().unwrap();
+
+            let mut right = parse_expression(last);
+
+            while let Some(x) = inner.pop() {
+                right = Expression::Prefix(Box::new(Prefix {
+                    operator: x.as_str(),
+                    right,
+                    pos: pair.as_span(),
+                }))
+            }
+
+            right
+        }
         Rule::call => {
             let mut inner = pair.clone().into_inner();
             let res = inner.next().unwrap();
             let _args: Vec<Pair<Rule>> = inner.collect();
             let mut args_iter = _args.into_iter();
-            let mut callee = Call {
-                callee: parse_expression(res),
-                arguments: args_iter.next().unwrap().into_inner()
-                    .map(|w| parse_expression(w))
-                    .collect(),
-                pos: pair.as_span(),
-            };
-            while let Some(xx) = args_iter.next() {
-                callee = Call {
-                    callee: Expression::Call(Box::new(callee)),
-                    arguments: xx.into_inner()
+
+            let n = args_iter.next().unwrap();
+            let mut callee = match n.as_rule() {
+                Rule::args => Expression::Call(Box::new(Call {
+                    callee: parse_expression(res),
+                    arguments: n.into_inner()
                         .map(|w| parse_expression(w))
                         .collect(),
                     pos: pair.as_span(),
+                })),
+                Rule::field => Expression::GetInstance(Box::new(GetInstance {
+                    parent: parse_expression(res),
+                    name: n.into_inner().next().unwrap().as_str(),
+                    pos: pair.as_span(),
+                })),
+                _ => unreachable!()
+            };
+
+            while let Some(xx) = args_iter.next() {
+                callee =  match xx.as_rule() {
+                    Rule::args => Expression::Call(Box::new(Call {
+                        callee,
+                        arguments: xx.into_inner()
+                            .map(|w| parse_expression(w))
+                            .collect(),
+                        pos: pair.as_span(),
+                    })),
+                    Rule::field => Expression::GetInstance(Box::new(GetInstance {
+                        parent: callee,
+                        name: xx.into_inner().next().unwrap().as_str(),
+                        pos: pair.as_span(),
+                    })),
+                    _ => unreachable!()
                 }
             }
-            Expression::Call(Box::new(callee))
+
+            callee
         }
         Rule::expression => climb(pair),
         _ => {
@@ -141,7 +177,7 @@ mod tests {
     #[test]
     fn parsing() {
         let res = parse("
-(println)(a + 99 % 3)");
+(println)(a + 99 % 3)(123)");
         match res {
             Ok(x) => {
                 // dbg!(&x);

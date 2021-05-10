@@ -6,12 +6,21 @@ pub enum Expression<'a> {
     GetVar(GetVar<'a>),
     SetVar(Box<SetVar<'a>>),
     Infix(Box<Infix<'a>>),
-    Call(Box<Call<'a>>), // callee, args
+    Prefix(Box<Prefix<'a>>),
+    Call(Box<Call<'a>>),
+    GetInstance(Box<GetInstance<'a>>),
 }
 
 #[derive(Debug, Clone)]
 pub struct Infix<'a> {
     pub left: Expression<'a>,
+    pub operator: &'a str,
+    pub right: Expression<'a>,
+    pub pos: Span<'a>,
+}
+
+#[derive(Debug, Clone)]
+pub struct Prefix<'a> {
     pub operator: &'a str,
     pub right: Expression<'a>,
     pub pos: Span<'a>,
@@ -40,6 +49,13 @@ pub struct SetVar<'a> {
 pub struct Call<'a> {
     pub callee: Expression<'a>,
     pub arguments: Vec<Expression<'a>>,
+    pub pos: Span<'a>,
+}
+
+#[derive(Debug, Clone)]
+pub struct GetInstance<'a> {
+    pub parent: Expression<'a>,
+    pub name: &'a str,
     pub pos: Span<'a>,
 }
 

@@ -117,6 +117,20 @@ impl<'a> Compiler<'a> {
                 self.emit_unsigned_int(1);
             }
 
+            Expression::Prefix(x) => {
+                let line = span_to_line(self.source, x.pos);
+                self.update_line(line);
+
+                self.compile_expr(x.right);
+                self.update_line(line);
+
+                self.emit_grammar(Grammar::GetInstance);
+                self.emit_string(&*(x.operator.to_owned() + "@"));
+
+                self.emit_grammar(Grammar::Call);
+                self.emit_unsigned_int(0);
+            }
+
             Expression::Call(x) => {
                 self.update_line(span_to_line(self.source, x.pos));
                 let mut args = x.arguments.clone();
@@ -127,6 +141,13 @@ impl<'a> Compiler<'a> {
                 self.compile_expr(x.callee);
                 self.emit_grammar(Grammar::Call);
                 self.emit_unsigned_int(x.arguments.len() as u64)
+            }
+
+            Expression::GetInstance(x) => {
+                self.update_line(span_to_line(self.source, x.pos));
+                self.compile_expr(x.parent);
+                self.emit_grammar(Grammar::GetInstance);
+                self.emit_string(x.name);
             }
         }
     }

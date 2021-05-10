@@ -13,8 +13,12 @@ args = {
     "(" ~ (expression ~ ",")* ~ expression? ~ ")"
 }
 
+field = {
+    "." ~ identifier
+}
+
 call = {
-    term ~ args+
+    term ~ (args | field)+
 }
 
 term = _{ integer | identifier | "(" ~ expression ~ ")" }
@@ -31,11 +35,17 @@ operators = _{
     add | sub | mul | div | modulo
 }
 
+prefix_operators = _{
+    add | sub
+}
+
 infix = _{ expression_inner ~ (operators ~ expression_inner)+ }
+
+prefix = { prefix_operators+ ~ expression_inner }
 
 assign = { identifier ~ "=" ~ expression }
 
-expression = { assign | infix | expression_inner }
+expression = { assign | infix | prefix | expression_inner }
 
 expression_stmt = { expression }
 
