@@ -2,22 +2,20 @@
 
 # Gorilla Programming Language
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/SnowballSH/Gorilla.svg)](https://pkg.go.dev/github.com/SnowballSH/Gorilla)
-
 ---
 
 **If you are expecting a fully-working gorilla source code, visit
 the [0.x branch](https://github.com/SnowballSH/Gorilla/tree/0.x)**
 
+Gorilla 0.x is written in pure Go.
+
 ---
 
 ### About
 
-Gorilla is a dynamic, interpreted programming language written in Go.
+Gorilla 1.x is a dynamic, interpreted programming language written in Rust.
 
 It is made for creating async, efficient, and simple apps.
-
-I am writing a rust runtime for gorilla, in order to make it fast and secure.
 
 ---
 
