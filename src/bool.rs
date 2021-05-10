@@ -3,13 +3,14 @@
 use std::collections::HashMap;
 
 use inner::inner;
+use lazy_static::*;
 
 use crate::any::any_class;
 use crate::env::Environment;
-use crate::obj::{BaseObject, Class, not_callable};
+use crate::integer::new_integer;
+use crate::obj::{BaseObject, Class, not_callable, ObjResult};
 use crate::obj::ValueType::*;
-
-use lazy_static::*;
+use crate::native_function::new_native_function;
 
 fn k1(this: BaseObject) -> String {
     let a = inner!(this.internal_value, if Bool);
@@ -24,8 +25,16 @@ fn k4<'a>(this: BaseObject<'a>, other: BaseObject<'a>) -> bool {
     this.internal_value == other.internal_value && this.class == other.class
 }
 
+#[inline]
+fn to_int<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+    let a = inner!(this.parent().unwrap().internal_value, if Bool);
+    Ok(new_integer(if a { 1 } else { 0 }))
+}
+
 pub fn new_boolean<'a>(x: bool) -> BaseObject<'a> {
     let mut _env = HashMap::default();
+
+    _env.insert("i".to_string(), new_native_function(("Boolean.to_i", to_int)));
 
     BaseObject {
         class: Class {

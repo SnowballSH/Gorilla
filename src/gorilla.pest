@@ -9,21 +9,25 @@ keyword = @{
     "if" | "else"
 }
 
-args = {
+call = {
     "(" ~ (expression ~ ",")* ~ expression? ~ ")"
+}
+
+empty_call = {
+    "!"
 }
 
 field = {
     "." ~ identifier
 }
 
-call = {
-    term ~ (args | field)+
+suffix = {
+    term ~ (call | field | empty_call)+
 }
 
 term = _{ integer | identifier | "(" ~ expression ~ ")" }
 
-expression_inner = _{ call | term }
+expression_inner = _{ suffix | term }
 
 add = { "+" }
 sub = { "-" }

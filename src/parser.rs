@@ -68,7 +68,7 @@ fn others(pair: Pair<Rule>) -> Expression {
 
             right
         }
-        Rule::call => {
+        Rule::suffix => {
             let mut inner = pair.clone().into_inner();
             let res = inner.next().unwrap();
             let _args: Vec<Pair<Rule>> = inner.collect();
@@ -76,7 +76,7 @@ fn others(pair: Pair<Rule>) -> Expression {
 
             let n = args_iter.next().unwrap();
             let mut callee = match n.as_rule() {
-                Rule::args => Expression::Call(Box::new(Call {
+                Rule::call => Expression::Call(Box::new(Call {
                     callee: parse_expression(res),
                     arguments: n.into_inner()
                         .map(|w| parse_expression(w))
@@ -88,12 +88,17 @@ fn others(pair: Pair<Rule>) -> Expression {
                     name: n.into_inner().next().unwrap().as_str(),
                     pos: pair.as_span(),
                 })),
+                Rule::empty_call => Expression::Call(Box::new(Call {
+                    callee: parse_expression(res),
+                    arguments: vec![],
+                    pos: pair.as_span(),
+                })),
                 _ => unreachable!()
             };
 
             while let Some(xx) = args_iter.next() {
                 callee =  match xx.as_rule() {
-                    Rule::args => Expression::Call(Box::new(Call {
+                    Rule::call => Expression::Call(Box::new(Call {
                         callee,
                         arguments: xx.into_inner()
                             .map(|w| parse_expression(w))
@@ -103,6 +108,11 @@ fn others(pair: Pair<Rule>) -> Expression {
                     Rule::field => Expression::GetInstance(Box::new(GetInstance {
                         parent: callee,
                         name: xx.into_inner().next().unwrap().as_str(),
+                        pos: pair.as_span(),
+                    })),
+                    Rule::empty_call => Expression::Call(Box::new(Call {
+                        callee,
+                        arguments: vec![],
                         pos: pair.as_span(),
                     })),
                     _ => unreachable!()
