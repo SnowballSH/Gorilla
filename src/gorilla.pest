@@ -9,6 +9,10 @@ keyword = @{
     "if" | "else"
 }
 
+string_literal = @{ "\"" ~ literal_char* ~ "\"" }
+literal_char = { escape_sequence | (!"\"" ~ ANY) }
+escape_sequence = _{ "\\\\" | "\\\"" | "\\\'" | "\\n" | "\\r" | "\\t" | "\\0" }
+
 call = {
     "(" ~ (expression ~ ",")* ~ expression? ~ ")"
 }
@@ -25,7 +29,7 @@ suffix = {
     term ~ (call | field | empty_call)+
 }
 
-term = _{ integer | identifier | "(" ~ expression ~ ")" }
+term = _{ string_literal | integer | identifier | "(" ~ expression ~ ")" }
 
 prefix = { prefix_operators+ ~ expression_inner }
 

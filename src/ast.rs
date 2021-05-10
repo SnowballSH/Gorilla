@@ -3,6 +3,7 @@ use pest::Span;
 #[derive(Debug, Clone)]
 pub enum Expression<'a> {
     Int(Integer<'a>),
+    String(String<'a>),
     GetVar(GetVar<'a>),
     SetVar(Box<SetVar<'a>>),
     Infix(Box<Infix<'a>>),
@@ -29,6 +30,12 @@ pub struct Prefix<'a> {
 #[derive(Debug, Clone)]
 pub struct Integer<'a> {
     pub value: u64,
+    pub pos: Span<'a>,
+}
+
+#[derive(Debug, Clone)]
+pub struct String<'a> {
+    pub value: std::string::String,
     pub pos: Span<'a>,
 }
 

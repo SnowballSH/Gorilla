@@ -86,6 +86,11 @@ impl<'a> Compiler<'a> {
                 self.emit_grammar(Grammar::Integer);
                 self.emit_unsigned_int(x.value);
             }
+            Expression::String(x) => {
+                self.update_line(span_to_line(self.source, x.pos));
+                self.emit_grammar(Grammar::String);
+                self.emit_string(&*x.value);
+            }
 
             Expression::GetVar(x) => {
                 self.update_line(span_to_line(self.source, x.pos));

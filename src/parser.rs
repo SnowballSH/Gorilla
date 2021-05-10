@@ -38,6 +38,37 @@ fn others(pair: Pair<Rule>) -> Expression {
             value: pair.as_str().parse().unwrap(),
             pos: pair.as_span(),
         }),
+        Rule::string_literal => {
+            let s = &pair.as_str()[1..pair.as_str().len() - 1];
+            let mut rs = std::string::String::new();
+
+            let mut escape = false;
+            for ch in s.chars() {
+                if escape {
+                    rs.push(match ch {
+                        '\\' => '\\',
+                        '"' => '"',
+                        '\'' => '\'',
+                        'n' => '\n',
+                        'r' => '\r',
+                        't' => '\t',
+                        '0' => '\0',
+                        _ => ch
+                    });
+                    escape = false;
+                } else {
+                    match ch {
+                        '\\' => escape = true,
+                        _ => rs.push(ch)
+                    }
+                }
+            }
+
+            Expression::String(String {
+                value: rs,
+                pos: pair.as_span(),
+            })
+        }
         Rule::identifier => Expression::GetVar(GetVar {
             name: pair.as_str(),
             pos: pair.as_span(),
@@ -96,7 +127,7 @@ fn others(pair: Pair<Rule>) -> Expression {
             };
 
             while let Some(xx) = args_iter.next() {
-                callee =  match xx.as_rule() {
+                callee = match xx.as_rule() {
                     Rule::call => Expression::Call(Box::new(Call {
                         callee,
                         arguments: xx.into_inner()

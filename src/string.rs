@@ -14,6 +14,24 @@ fn k1(this: BaseObject) -> String {
     a.to_string()
 }
 
+fn k2(this: BaseObject) -> String {
+    let a = inner!(this.internal_value, if Str);
+    let mut rs = String::new();
+    for ch in a.chars() {
+        rs += &*match ch {
+            '\\' => r"\\".to_string(),
+            '\'' => r"\'".to_string(),
+            '"' => "\\\"".to_string(),
+            '\n' => r"\n".to_string(),
+            '\r' => r"\r".to_string(),
+            '\t' => r"\t".to_string(),
+            '\0' => r"\0".to_string(),
+            _ => ch.to_string(),
+        };
+    }
+    "\"".to_owned() + &*rs + "\""
+}
+
 fn k3(this: BaseObject) -> bool {
     inner!(this.internal_value, if Str) != ""
 }
@@ -52,7 +70,7 @@ pub fn new_string<'a>(x: String) -> BaseObject<'a> {
         },
         internal_value: Str(x),
         to_string_func: k1,
-        to_inspect_func: k1,
+        to_inspect_func: k2,
         is_truthy_func: k3,
         equal_func: k4,
         call_func: not_callable,
