@@ -55,15 +55,25 @@ fn others(pair: Pair<Rule>) -> Expression {
         Rule::call => {
             let mut inner = pair.clone().into_inner();
             let res = inner.next().unwrap();
-            let args: Vec<Pair<Rule>> = inner.collect();
-            Expression::Call(
-                Box::new(Call {
-                    callee: parse_expression(res),
-                    arguments: args
-                        .into_iter().map(|w| parse_expression(w))
+            let _args: Vec<Pair<Rule>> = inner.collect();
+            let mut args_iter = _args.into_iter();
+            let mut callee = Call {
+                callee: parse_expression(res),
+                arguments: args_iter.next().unwrap().into_inner()
+                    .map(|w| parse_expression(w))
+                    .collect(),
+                pos: pair.as_span(),
+            };
+            while let Some(xx) = args_iter.next() {
+                callee = Call {
+                    callee: Expression::Call(Box::new(callee)),
+                    arguments: xx.into_inner()
+                        .map(|w| parse_expression(w))
                         .collect(),
                     pos: pair.as_span(),
-                }))
+                }
+            }
+            Expression::Call(Box::new(callee))
         }
         Rule::expression => climb(pair),
         _ => {

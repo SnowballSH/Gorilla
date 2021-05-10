@@ -9,8 +9,12 @@ keyword = @{
     "if" | "else"
 }
 
+args = {
+    "(" ~ (expression ~ ",")* ~ expression? ~ ")"
+}
+
 call = {
-    term ~ ("(" ~ (expression ~ ",")* ~ expression? ~ ")")+
+    term ~ args+
 }
 
 term = _{ integer | identifier | "(" ~ expression ~ ")" }
