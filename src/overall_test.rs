@@ -12,5 +12,9 @@ mod test_overall {
         let code = "abc = 4763 / 23 + 98765; abc";
         let result = run_code(code);
         assert_eq!(result, Ok(Some(new_integer(4763 / 23 + 98765))));
+
+        let code = "1 / 0";
+        let result = run_code(code);
+        assert!(result.is_err());
     }
 }

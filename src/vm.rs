@@ -2,7 +2,7 @@
 
 use std::io::Cursor;
 
-use crate::bool::new_boolean;
+use crate::bool::*;
 use crate::env::Environment;
 use crate::grammar::Grammar;
 use crate::integer::new_integer;

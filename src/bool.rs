@@ -9,6 +9,8 @@ use crate::env::Environment;
 use crate::obj::{BaseObject, Class, not_callable};
 use crate::obj::ValueType::*;
 
+use lazy_static::*;
+
 fn k1(this: BaseObject) -> String {
     let a = inner!(this.internal_value, if Bool);
     a.to_string()
@@ -38,5 +40,21 @@ pub fn new_boolean<'a>(x: bool) -> BaseObject<'a> {
         equal_func: k4,
         call_func: not_callable,
         parent_obj: None,
+    }
+}
+
+lazy_static! {
+    pub static ref GORILLA_TRUE: BaseObject<'static> = new_boolean(true);
+    pub static ref GORILLA_FALSE: BaseObject<'static> = new_boolean(false);
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::bool::*;
+
+    #[test]
+    fn test() {
+        assert_eq!(GORILLA_TRUE.to_string(), "true");
+        assert_eq!(GORILLA_FALSE.to_string(), "false");
     }
 }
