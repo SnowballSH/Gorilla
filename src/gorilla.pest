@@ -18,7 +18,7 @@ call = {
 }
 
 empty_call = {
-    "!"
+    !neq ~ "!"
 }
 
 field = {
@@ -40,9 +40,12 @@ sub = { "-" }
 mul = { "*" }
 div = { "/" }
 modulo = { "%" }
+dbeq = { "==" }
+neq = { "!=" }
 
 operators = _{
     add | sub | mul | div | modulo
+    | dbeq | neq
 }
 
 prefix_operators = _{
