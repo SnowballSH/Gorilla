@@ -13,6 +13,10 @@ string_literal = @{ "\"" ~ literal_char* ~ "\"" }
 literal_char = { escape_sequence | (!"\"" ~ ANY) }
 escape_sequence = _{ "\\\\" | "\\\"" | "\\\'" | "\\n" | "\\r" | "\\t" | "\\0" }
 
+block = {
+    ("{" ~ TERMINATOR* ~ (stmt ~ TERMINATOR+) * ~ stmt? ~  "}") | stmt
+}
+
 call = {
     "(" ~ (expression ~ ",")* ~ expression? ~ ")"
 }
