@@ -1,5 +1,5 @@
 use lazy_static::*;
-use pest::iterators::Pair;
+use pest::iterators::{Pair, Pairs};
 use pest::Parser;
 use pest::prec_climber::*;
 use pest_derive::*;
@@ -74,6 +74,7 @@ fn others(pair: Pair<Rule>) -> Expression {
             name: pair.as_str(),
             pos: pair.as_span(),
         }),
+
         Rule::assign => {
             let mut inner = pair.clone().into_inner();
             let name = inner.next().unwrap().as_str();
@@ -84,6 +85,32 @@ fn others(pair: Pair<Rule>) -> Expression {
                 pos: pair.as_span(),
             }))
         }
+
+        Rule::condition_if => {
+            let mut inner = pair.clone().into_inner();
+            let cond = inner.next().unwrap();
+            let res = inner.next().unwrap();
+            Expression::If(Box::new(If {
+                cond: parse_expression(cond),
+                body: parse_program(res.into_inner()),
+                other: vec![],
+                pos: pair.as_span(),
+            }))
+        }
+
+        Rule::condition_ifelse => {
+            let mut inner = pair.clone().into_inner();
+            let cond = inner.next().unwrap();
+            let res = inner.next().unwrap();
+            let other = inner.next().unwrap();
+            Expression::If(Box::new(If {
+                cond: parse_expression(cond),
+                body: parse_program(res.into_inner()),
+                other: parse_program(other.into_inner()),
+                pos: pair.as_span(),
+            }))
+        }
+
         Rule::prefix => {
             let mut inner: Vec<Pair<Rule>> = pair.clone().into_inner().collect();
             let last = inner.pop().unwrap();
@@ -192,21 +219,24 @@ fn parse_statement(pair: Pair<Rule>) -> Statement {
     }
 }
 
+fn parse_program(res: Pairs<Rule>) -> Program {
+    let mut ast = vec![];
+    for pair in res {
+        match pair.as_rule() {
+            Rule::stmt | Rule::expression_stmt => {
+                ast.push(parse_statement(pair))
+            }
+            _ => {}
+        }
+    }
+    ast
+}
+
 pub fn parse(code: &str) -> Result<Program, pest::error::Error<Rule>> {
     let res = GorillaParser::parse(Rule::program, code);
     match res {
         Ok(res) => {
-            //dbg!(&res);
-            let mut ast = vec![];
-            for pair in res {
-                match pair.as_rule() {
-                    Rule::stmt | Rule::expression_stmt => {
-                        ast.push(parse_statement(pair))
-                    }
-                    _ => {}
-                }
-            }
-            //dbg!(&ast);
+            let ast = parse_program(res);
             Ok(ast)
         }
         Err(e) => Err(e)

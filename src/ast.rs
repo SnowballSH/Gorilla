@@ -10,6 +10,16 @@ pub enum Expression<'a> {
     Prefix(Box<Prefix<'a>>),
     Call(Box<Call<'a>>),
     GetInstance(Box<GetInstance<'a>>),
+
+    If(Box<If<'a>>),
+}
+
+#[derive(Debug, Clone)]
+pub struct If<'a> {
+    pub cond: Expression<'a>,
+    pub body: Program<'a>,
+    pub other: Program<'a>,
+    pub pos: Span<'a>,
 }
 
 #[derive(Debug, Clone)]

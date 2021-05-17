@@ -2,6 +2,8 @@ program = _{ SOI ~ TERMINATOR* ~ (stmt ~ TERMINATOR+) * ~ stmt? ~ EOI }
 
 TERMINATOR = _{ NEWLINE | ";" }
 WHITESPACE = _{ " " | "\t" }
+block_comment = _{ "#*" ~ (block_comment | !"*#" ~ ANY)* ~ "*#" }
+COMMENT = _{ block_comment | ("#" ~ (!NEWLINE ~ ANY)*) }
 
 integer = @{ ASCII_DIGIT{1, 18} }
 identifier = @{ !keyword ~ (ASCII_ALPHA | "_" | "$") ~ (ASCII_ALPHANUMERIC | "_")* }
@@ -15,6 +17,14 @@ escape_sequence = _{ "\\\\" | "\\\"" | "\\\'" | "\\n" | "\\r" | "\\t" | "\\0" }
 
 block = {
     ("{" ~ TERMINATOR* ~ (stmt ~ TERMINATOR+) * ~ stmt? ~  "}") | stmt
+}
+
+condition_if = {
+    "if" ~ TERMINATOR* ~ expression ~ TERMINATOR* ~ block
+}
+
+condition_ifelse = {
+    "if" ~ TERMINATOR* ~ expression ~ TERMINATOR* ~ block ~ TERMINATOR* ~ "else" ~ TERMINATOR* ~ block
 }
 
 call = {
@@ -60,7 +70,8 @@ infix = _{ expression_inner ~ (operators ~ expression_inner)+ }
 
 assign = { identifier ~ "=" ~ expression }
 
-expression = { assign | infix | expression_inner }
+// condition_ifelse must be before condition_if
+expression = { assign | condition_ifelse | condition_if | infix | expression_inner }
 
 expression_stmt = { expression }
 

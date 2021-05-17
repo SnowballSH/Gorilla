@@ -37,5 +37,18 @@ mod test_overall {
         let code = "\"new\\nline\\0\"";
         let result = run_code(code);
         assert_eq!(result, Ok(Some(new_string("new\nline\0".parse().unwrap()))));
+
+        let code = "if 0
+y
+else
+z";
+        let result = run_code(code);
+        assert!(result.is_err());
+        /*
+        {
+            let k = result.err().unwrap();
+            println!("Line {}: {}", k.1, k.0);
+        }
+         */
     }
 }

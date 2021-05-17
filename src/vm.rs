@@ -10,21 +10,21 @@ use crate::obj::*;
 use crate::string::new_string;
 use crate::native_function::new_native_function;
 
-#[doc = "The Virtual Machine"]
+/// The Virtual Machine
 pub struct VM<'a> {
-    #[doc = "Source bytecode"]
+    /// Source bytecode
     pub source: Vec<u8>,
-    #[doc = "Input pointer"]
+    /// Input pointer
     pub ip: usize,
-    #[doc = "Line"]
+    /// Line
     pub line: usize,
-    #[doc = "Stack of objects"]
+    /// Stack of objects
     pub stack: Vec<BaseObject<'a>>,
-    #[doc = "Last item popped. None when nothing is popped"]
+    /// Last item popped. None when nothing is popped
     pub last_popped: Option<BaseObject<'a>>,
-    #[doc = "The environment of VM"]
+    /// The environment of VM
     pub env: Environment<'a>,
-    #[doc = "Global Env"]
+    /// Global Env
     pub global: Environment<'a>,
 }
 
@@ -39,7 +39,7 @@ fn print_line<'a>(_this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult
 }
 
 impl<'a> VM<'a> {
-    #[doc = "New VM from vector of bytes"]
+    /// New VM from vector of bytes
     pub fn new(source: Vec<u8>) -> Self {
         let mut global = Environment::default();
         global.set("true".to_string(), new_boolean(true));

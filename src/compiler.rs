@@ -3,18 +3,18 @@ use crate::grammar::Grammar;
 use crate::helpers::*;
 
 #[derive(Debug)]
-#[doc = "The compiler struct. Compiles AST to bytecodes."]
+/// The compiler struct. Compiles AST to bytecodes.
 pub struct Compiler<'a> {
-    #[doc = "resulting bytecode"]
+    /// resulting bytecode
     pub result: Vec<u8>,
-    #[doc = "last line processed"]
+    /// last line processed
     pub last_line: usize,
-    #[doc = "source code"]
+    /// source code
     pub source: &'a str,
 }
 
 impl<'a> Compiler<'a> {
-    #[doc = "Creates a new compiler"]
+    /// Creates a new compiler
     pub fn new(source: &'a str) -> Self {
         Compiler {
             result: vec![Grammar::Magic as u8],
@@ -63,6 +63,7 @@ impl<'a> Compiler<'a> {
         self.emit_all(value.as_bytes());
     }
 
+    /// compiles a full program
     pub fn compile(&mut self, nodes: Program) {
         for node in nodes {
             self.compile_node(node);
@@ -79,6 +80,7 @@ impl<'a> Compiler<'a> {
         }
     }
 
+    //noinspection DuplicatedCode
     fn compile_expr(&mut self, expr: Expression) {
         match expr {
             Expression::Int(x) => {
@@ -154,6 +156,67 @@ impl<'a> Compiler<'a> {
                 self.emit_grammar(Grammar::GetInstance);
                 self.emit_string(x.name);
             }
+
+            Expression::If(x) => {
+                let p = x.pos;
+                let pos = span_to_line(self.source, p);
+                self.update_line(pos);
+                self.compile_expr(x.cond);
+
+                {
+                    let mut compi = Compiler {
+                        result: vec![],
+                        last_line: self.last_line,
+                        source: self.source,
+                    };
+
+                    let mut compe = Compiler {
+                        result: vec![],
+                        last_line: self.last_line,
+                        source: self.source,
+                    };
+
+                    compi.compile(x.body);
+                    compe.compile(x.other);
+
+                    if compi.result.len() > 0 && *compi.result.last().unwrap() == Grammar::Pop as u8 {
+                        compi.result.pop();
+                        compi.emit_grammar(Grammar::Noop);
+                    } else {
+                        compi.emit_grammar(Grammar::Null)
+                    }
+
+                    if compe.result.len() > 0 && *compe.result.last().unwrap() == Grammar::Pop as u8 {
+                        compe.result.pop();
+                        compe.emit_grammar(Grammar::Noop);
+                    } else {
+                        compe.emit_grammar(Grammar::Null)
+                    }
+
+                    compi.update_line(pos);
+                    compe.update_line(pos);
+
+                    self.emit_grammar(Grammar::JumpIfFalse);
+
+                    compi.emit_grammar(Grammar::Jump);
+
+                    let k = (self.result.len() + compi.result.len() + 1) as u64;
+                    compi.emit_unsigned_int(
+                        (
+                            self.result.len() + 2 +
+                                leb128_unsigned(
+                                    k
+                                ).len() + compi.result.len() + compe.result.len()
+                        ) as u64
+                    );
+
+                    let k = (self.result.len() + compi.result.len() + 1) as u64;
+                    self.emit_unsigned_int(k);
+
+                    self.result.extend(compi.result);
+                    self.result.extend(compe.result);
+                }
+            }
         }
     }
 }
@@ -172,6 +235,31 @@ mod tests {
         assert_eq!(compiler.result, vec![
             Grammar::Magic as u8,
             Grammar::Integer as u8, 3, 0xe5, 0x8e, 0x26,
+            Grammar::Pop as u8,
+        ]);
+    }
+
+    #[test]
+    fn if_else() {
+        let code = "if 1 {
+        } else {5
+        }
+        1";
+        let mut compiler = Compiler::new(code);
+        compiler.compile(parse(code).unwrap_or_else(|x| panic!("{}", x.to_string())));
+        assert_eq!(compiler.result, vec![
+            Grammar::Magic as u8,
+            Grammar::Integer as u8, 1, 1,
+            Grammar::JumpIfFalse as u8, 1, 10,
+            Grammar::Null as u8,
+            Grammar::Jump as u8, 1, 16,
+            Grammar::Advance as u8,// Grammar::Advance as u8,
+            Grammar::Integer as u8, 1, 5, Grammar::Noop as u8,
+            Grammar::Back as u8,// Grammar::Back as u8,
+            Grammar::Pop as u8,
+            Grammar::Advance as u8, Grammar::Advance as u8,
+            Grammar::Advance as u8,// Grammar::Advance as u8,
+            Grammar::Integer as u8, 1, 1,
             Grammar::Pop as u8,
         ]);
     }

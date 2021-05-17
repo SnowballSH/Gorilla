@@ -34,16 +34,22 @@ pub fn leb128_unsigned(val: u64) -> Vec<u8> {
     res
 }
 
-pub fn run_code(code: &str) -> Result<Option<BaseObject>, String> {
+pub fn run_code(code: &str) -> Result<Option<BaseObject>, (String, usize)> {
     let mut compiler = Compiler::new(code);
     let p = parse(code);
     if let Err(e) = p {
-        return Err(e.to_string());
+        return Err((e.to_string(), 0));
     }
     compiler.compile(p.unwrap());
     let mut vm = VM::new(compiler.result);
     let result = vm.run();
-    result
+    if let Ok(x) = result {
+        Ok(x)
+    } else if let Err(x) = result {
+        Err((x, vm.line))
+    } else {
+        unreachable!()
+    }
 }
 
 pub fn run_code_with_env<'a>(code: &str, env: Environment<'a>)
