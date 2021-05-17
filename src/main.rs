@@ -4,7 +4,7 @@ use std::env::args;
 use std::fs::File;
 use std::io::Read;
 use std::io;
-use crate::helpers::{run_code_with_env};
+use crate::helpers::{run_code_with_env, run_code};
 use crate::env::Environment;
 
 pub mod any;
@@ -13,6 +13,7 @@ pub mod env;
 pub mod grammar;
 pub mod integer;
 pub mod string;
+pub mod null;
 pub mod native_function;
 pub mod obj;
 pub mod vm;
@@ -63,16 +64,11 @@ fn main() {
     file.read_to_end(&mut contents)
         .expect("Unable to read the file");
 
-    let mut vm = vm::VM::new(contents);
-    let res = vm.run();
+    let res = run_code(std::str::from_utf8(&*contents).unwrap());
     match res {
-        Ok(x) => {
-            if let Some(y) = x {
-                println!("| Last item popped: {}", y.to_string());
-            }
-        }
+        Ok(_) => {}
         Err(e) => {
-            println!("| Error: {}", e);
+            println!("| In Line {}:\n| Error: {}", e.1 + 1, e.0);
         }
     };
 }

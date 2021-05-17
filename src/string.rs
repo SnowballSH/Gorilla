@@ -56,11 +56,32 @@ fn parse_int<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>) -> ObjResult<
     }
 }
 
+#[inline]
+fn add<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+    let other = args.first();
+    match other {
+        Some(x) => {
+            let a = inner!(this.parent().unwrap().internal_value, if Str);
+            let b = inner!(&x.internal_value, if Str, else {
+            let g = inner!(this.internal_value, if NativeFunction);
+                return Err(format!("{} expects an string", g.0))
+            });
+            Ok(new_string(a + &*b))
+        }
+        None => {
+            let x = inner!(this.internal_value, if NativeFunction);
+            Err(format!("{} expects 1 argument, got 0", x.0))
+        }
+    }
+}
+
 pub fn new_string<'a>(x: String) -> BaseObject<'a> {
     let mut _env = HashMap::default();
 
     _env.insert("s".to_string(), new_native_function(("String.s", to_string)));
     _env.insert("i".to_string(), new_native_function(("String.i", parse_int)));
+
+    _env.insert("+".to_string(), new_native_function(("String.+", add)));
 
     BaseObject {
         class: Class {

@@ -9,6 +9,7 @@ use crate::integer::new_integer;
 use crate::obj::*;
 use crate::string::new_string;
 use crate::native_function::new_native_function;
+use crate::null::new_null;
 
 /// The Virtual Machine
 pub struct VM<'a> {
@@ -44,6 +45,8 @@ impl<'a> VM<'a> {
         let mut global = Environment::default();
         global.set("true".to_string(), new_boolean(true));
         global.set("false".to_string(), new_boolean(false));
+        global.set("null".to_string(), new_null());
+
         global.set("println".to_string(), new_native_function(("println", print_line)));
 
         VM {
@@ -124,6 +127,10 @@ impl<'a> VM<'a> {
             }
             Grammar::Noop => {}
 
+            Grammar::Null => {
+                self.push(new_null());
+            }
+
             Grammar::Integer => {
                 let i = self.read_unsigned_int();
                 self.push(new_integer(i as i64));
@@ -202,7 +209,10 @@ impl<'a> VM<'a> {
                     self.ip = (where_ + 1) as usize
                 }
             }
-            _ => return Some(format!("Invalid instruction: {}", type_ as u8)),
+            _ => {
+                dbg!(&self.source);
+                return Some(format!("Invalid instruction: {}", type_ as u8))
+            },
         };
 
         None
