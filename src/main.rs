@@ -6,6 +6,7 @@ use std::io::Read;
 use std::io;
 use crate::helpers::{run_code_with_env, run_code};
 use crate::env::Environment;
+use console::style;
 
 pub mod any;
 pub mod bool;
@@ -37,6 +38,9 @@ fn main() {
 
     if argv.len() < 2 {
         let mut environment = Environment::default();
+
+        println!("{}", style("Welcome to Gorilla repl. Type :quit to quit.").yellow());
+
         loop {
             let ip = get_input();
             if ip.trim() == ":quit" {
@@ -47,11 +51,11 @@ fn main() {
             match result.0 {
                 Ok(x) => {
                     if let Some(val) = x {
-                        println!("#>> {}", val.to_inspect_string());
+                        println!("=> {}", style(val.to_inspect_string()).blue());
                     }
                 }
                 Err(e) => {
-                    eprintln!("{}", e);
+                    println!("{}", style(e).red());
                 }
             }
         }

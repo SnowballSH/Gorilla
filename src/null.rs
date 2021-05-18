@@ -2,8 +2,6 @@
 
 use std::collections::HashMap;
 
-use inner::inner;
-
 use crate::any::any_class;
 use crate::env::Environment;
 use crate::obj::{BaseObject, Class, not_callable, ObjResult};
