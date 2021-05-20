@@ -77,6 +77,27 @@ impl<'a> Compiler<'a> {
                 self.compile_expr(x.expr);
                 self.emit_grammar(Grammar::Pop);
             }
+            Statement::FunctionDeclare(x) => {
+                self.update_line(span_to_line(self.source, x.pos));
+
+                self.emit_grammar(Grammar::Function);
+                self.emit_unsigned_int(x.args.len() as u64);
+
+                for s in x.args {
+                    self.emit_string(s);
+                }
+
+                let mut comp = Compiler {
+                    result: vec![],
+                    last_line: self.last_line,
+                    source: self.source,
+                };
+
+                comp.compile(x.body);
+                self.emit_unsigned_int(comp.result.len() as u64);
+                self.emit_all(comp.result.as_slice());
+                self.update_line(comp.last_line);
+            }
         }
     }
 

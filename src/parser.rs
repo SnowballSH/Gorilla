@@ -215,6 +215,16 @@ fn parse_statement(pair: Pair<Rule>) -> Statement {
                 }
             )
         }
+        Rule::function_declare => {
+            let mut inner = pair.clone().into_inner();
+            Statement::FunctionDeclare(FunctionDeclare {
+                name: inner.next().unwrap().as_str(),
+                args: inner.next().unwrap().into_inner().map(|w|w.as_str())
+                    .collect(),
+                body: parse_program(inner.next().unwrap().into_inner()),
+                pos: pair.as_span()
+            })
+        }
         _ => unreachable!()
     }
 }
@@ -223,7 +233,7 @@ fn parse_program(res: Pairs<Rule>) -> Program {
     let mut ast = vec![];
     for pair in res {
         match pair.as_rule() {
-            Rule::stmt | Rule::expression_stmt => {
+            Rule::stmt | Rule::expression_stmt | Rule::function_declare => {
                 ast.push(parse_statement(pair))
             }
             _ => {}

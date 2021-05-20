@@ -79,11 +79,20 @@ pub struct GetInstance<'a> {
 #[derive(Debug, Clone)]
 pub enum Statement<'a> {
     ExprStmt(ExprStmt<'a>),
+    FunctionDeclare(FunctionDeclare<'a>),
 }
 
 #[derive(Debug, Clone)]
 pub struct ExprStmt<'a> {
     pub expr: Expression<'a>,
+    pub pos: Span<'a>,
+}
+
+#[derive(Debug, Clone)]
+pub struct FunctionDeclare<'a> {
+    pub name: &'a str,
+    pub args: Vec<&'a str>,
+    pub body: Program<'a>,
     pub pos: Span<'a>,
 }
 

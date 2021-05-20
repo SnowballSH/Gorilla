@@ -8,7 +8,7 @@ COMMENT = _{ block_comment | ("#" ~ (!NEWLINE ~ ANY)*) }
 integer = @{ ASCII_DIGIT{1, 18} }
 identifier = @{ !keyword ~ (ASCII_ALPHA | "_" | "$") ~ (ASCII_ALPHANUMERIC | "_")* }
 keyword = @{
-    "if" | "else"
+    "if" | "else" | "fn"
 }
 
 string_literal = @{ "\"" ~ literal_char* ~ "\"" }
@@ -20,15 +20,23 @@ block = {
 }
 
 condition_if = {
-    "if" ~ TERMINATOR* ~ expression ~ TERMINATOR* ~ block
+    "if" ~ NEWLINE* ~ expression ~ NEWLINE* ~ block
 }
 
 condition_ifelse = {
-    "if" ~ TERMINATOR* ~ expression ~ TERMINATOR* ~ block ~ TERMINATOR* ~ "else" ~ TERMINATOR* ~ block
+    "if" ~ NEWLINE* ~ expression ~ NEWLINE* ~ block ~ NEWLINE* ~ "else" ~ NEWLINE* ~ block
+}
+
+function_declare = {
+    "fn" ~ NEWLINE* ~ identifier ~ NEWLINE* ~ function_arguments ~ NEWLINE* ~ block
 }
 
 call = {
-    "(" ~ (expression ~ ",")* ~ expression? ~ ")"
+    "(" ~ NEWLINE* ~ (expression ~ NEWLINE* ~ "," ~ NEWLINE*)* ~ NEWLINE* ~ expression? ~ NEWLINE* ~ ")"
+}
+
+function_arguments = {
+    "(" ~ NEWLINE* ~ (identifier~ NEWLINE*  ~ "," ~ NEWLINE*)* ~ NEWLINE* ~ identifier? ~ NEWLINE* ~ ")"
 }
 
 empty_call = {
@@ -76,5 +84,5 @@ expression = { assign | condition_ifelse | condition_if | infix | expression_inn
 expression_stmt = { expression }
 
 stmt = _{
-    expression_stmt
+    expression_stmt | function_declare
 }

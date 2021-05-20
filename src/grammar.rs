@@ -20,8 +20,7 @@ pub enum Grammar {
     Call,
     JumpIfFalse,
     Jump,
-    Lambda,
-    Closure,
+    Function,
 }
 
 impl From<Grammar> for u8 {
