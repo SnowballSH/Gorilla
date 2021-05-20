@@ -1,8 +1,8 @@
 #[cfg(test)]
 mod test_overall {
     use crate::builtin_types::integer::new_integer;
-    use crate::helpers::run_code;
     use crate::builtin_types::string::new_string;
+    use crate::helpers::run_code;
 
     #[test]
     fn connect() {
@@ -44,11 +44,15 @@ else
 z";
         let result = run_code(code);
         assert!(result.is_err());
-        /*
-        {
-            let k = result.err().unwrap();
-            println!("Line {}: {}", k.1, k.0);
-        }
-         */
+
+        let code = "fn add_anything(item1, item2) item1 + item2
+add_anything(\"LOL \", \"ALR\")";
+        let result = run_code(code);
+        assert_eq!(result, Ok(Some(new_string("LOL ALR".parse().unwrap()))));
+
+        let code = "fn add_anything(item1, item2) item1 + item2
+add_anything(75, 57)";
+        let result = run_code(code);
+        assert_eq!(result, Ok(Some(new_integer(75 + 57))));
     }
 }

@@ -1,0 +1,14 @@
+# Longer version
+fn add_anything(item1, item2) {
+    internal_variable = item1 + item2
+    internal_variable
+}
+
+println(add_anything(12, 35))
+println(add_anything("Hello, ", "world!"))
+
+# Shorter version
+fn add_anything(a, b) a + b
+
+println(add_anything(12, 35))
+println(add_anything("Hello, ", "world!"))

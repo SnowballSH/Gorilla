@@ -16,6 +16,7 @@ pub fn not_callable<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>) -> Obj
 
 pub type ObjResult<'a> = Result<BaseObject<'a>, String>;
 
+// TODO BUG: Add VM
 pub type NativeFunctionType<'a> = (&'static str, CallFuncType<'a>);
 pub type FunctionType = (String, Vec<String>, Vec<u8>);
 
