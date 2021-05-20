@@ -8,14 +8,9 @@ use crate::helpers::{run_code_with_env, run_code};
 use crate::env::Environment;
 use console::style;
 
-pub mod any;
-pub mod bool;
 pub mod env;
 pub mod grammar;
-pub mod integer;
-pub mod string;
-pub mod null;
-pub mod native_function;
+pub mod builtin_types;
 pub mod obj;
 pub mod vm;
 pub mod parser;

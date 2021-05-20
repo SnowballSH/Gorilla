@@ -5,13 +5,13 @@ use std::collections::HashMap;
 use inner::inner;
 use lazy_static::*;
 
-use crate::any::any_class;
+use crate::builtin_types::any::any_class;
 use crate::env::Environment;
-use crate::integer::new_integer;
+use crate::builtin_types::integer::new_integer;
 use crate::obj::{BaseObject, Class, not_callable, ObjResult};
 use crate::obj::ValueType::*;
-use crate::native_function::new_native_function;
-use crate::string::new_string;
+use crate::builtin_types::native_function::new_native_function;
+use crate::builtin_types::string::new_string;
 
 fn k1(this: BaseObject) -> String {
     let a = inner!(this.internal_value, if Bool);
@@ -67,7 +67,7 @@ lazy_static! {
 
 #[cfg(test)]
 mod tests {
-    use crate::bool::*;
+    use crate::builtin_types::bool::*;
 
     #[test]
     fn test() {

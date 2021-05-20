@@ -2,14 +2,15 @@
 
 use std::io::Cursor;
 
-use crate::bool::*;
+use crate::builtin_types::bool::*;
+use crate::builtin_types::function::new_function;
+use crate::builtin_types::integer::new_integer;
+use crate::builtin_types::native_function::new_native_function;
+use crate::builtin_types::null::new_null;
+use crate::builtin_types::string::new_string;
 use crate::env::Environment;
 use crate::grammar::Grammar;
-use crate::integer::new_integer;
 use crate::obj::*;
-use crate::string::new_string;
-use crate::native_function::new_native_function;
-use crate::null::new_null;
 
 /// The Virtual Machine
 pub struct VM<'a> {
@@ -199,6 +200,26 @@ impl<'a> VM<'a> {
                     Ok(x) => self.push(x),
                 };
             }
+
+            Grammar::Function => {
+                let name = self.read_string();
+                let amount_of_params = self.read_unsigned_int();
+                let mut params = vec![];
+                for _ in 0..amount_of_params {
+                    params.push(self.read_string());
+                }
+                let code_length = self.read_unsigned_int();
+                let mut code = vec![];
+                for _ in 0..code_length {
+                    code.push(self.read());
+                }
+
+                let f = new_function((
+                    name.clone(), params,
+                    code));
+                self.env.set(name, f);
+            }
+
             Grammar::Jump => {
                 let where_ = self.read_unsigned_int();
                 self.ip = (where_ + 1) as usize
@@ -211,8 +232,8 @@ impl<'a> VM<'a> {
             }
             _ => {
                 dbg!(&self.source);
-                return Some(format!("Invalid instruction: {}", type_ as u8))
-            },
+                return Some(format!("Invalid instruction: {}", type_ as u8));
+            }
         };
 
         None

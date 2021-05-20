@@ -2,9 +2,9 @@
 
 use inner::inner;
 
-use crate::bool::new_boolean;
+use crate::builtin_types::bool::new_boolean;
 use crate::env::Environment;
-use crate::native_function::new_native_function;
+use crate::builtin_types::native_function::new_native_function;
 use crate::obj::*;
 use crate::obj::ValueType::*;
 

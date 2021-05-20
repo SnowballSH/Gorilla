@@ -1,13 +1,13 @@
 #![forbid(unsafe_code)]
 
-use crate::any::any_class;
+use crate::builtin_types::any::any_class;
 use crate::env::Environment;
 use crate::obj::ValueType::*;
 use crate::obj::{not_callable, BaseObject, Class, ObjResult};
 use inner::inner;
 use std::collections::HashMap;
-use crate::native_function::new_native_function;
-use crate::integer::new_integer;
+use crate::builtin_types::native_function::new_native_function;
+use crate::builtin_types::integer::new_integer;
 
 fn k1(this: BaseObject) -> String {
     let a = inner!(this.internal_value, if Str);

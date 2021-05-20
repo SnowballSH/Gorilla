@@ -1,7 +1,5 @@
 #![forbid(unsafe_code)]
 
-use std::collections::HashMap;
-
 use crate::env::Environment;
 use crate::obj::ValueType::*;
 use crate::obj::*;
@@ -29,9 +27,7 @@ pub fn new_native_function(x: NativeFunctionType) -> BaseObject {
     BaseObject {
         class: Class {
             name: "Native Function",
-            instance_vars: Environment {
-                store: HashMap::default(),
-            },
+            instance_vars: Environment::default(),
             super_class: None,
         },
         internal_value: NativeFunction(x),
@@ -46,8 +42,8 @@ pub fn new_native_function(x: NativeFunctionType) -> BaseObject {
 
 #[cfg(test)]
 mod tests {
-    use crate::integer::new_integer;
-    use crate::native_function::new_native_function;
+    use crate::builtin_types::integer::new_integer;
+    use crate::builtin_types::native_function::new_native_function;
     use crate::obj::*;
 
     #[test]

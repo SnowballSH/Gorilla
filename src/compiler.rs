@@ -81,6 +81,7 @@ impl<'a> Compiler<'a> {
                 self.update_line(span_to_line(self.source, x.pos));
 
                 self.emit_grammar(Grammar::Function);
+                self.emit_string(x.name);
                 self.emit_unsigned_int(x.args.len() as u64);
 
                 for s in x.args {
@@ -281,6 +282,25 @@ mod tests {
             Grammar::Advance as u8, Grammar::Advance as u8,
             Grammar::Advance as u8,// Grammar::Advance as u8,
             Grammar::Integer as u8, 1, 1,
+            Grammar::Pop as u8,
+        ]);
+    }
+
+    #[test]
+    fn functions() {
+        let code = "fn abc(a, b) a + b";
+        let mut compiler = Compiler::new(code);
+        compiler.compile(parse(code).unwrap_or_else(|x| panic!("{}", x.to_string())));
+        assert_eq!(compiler.result, vec![
+            Grammar::Magic as u8,
+            Grammar::Function as u8,
+            1, 3, b'a', b'b', b'c',
+            1, 2, 1, 1, b'a', 1, 1, b'b',
+            1, 16,
+            Grammar::Getvar as u8, 1, 1, b'b',
+            Grammar::Getvar as u8, 1, 1, b'a',
+            Grammar::GetInstance as u8, 1, 1, b'+',
+            Grammar::Call as u8, 1, 1,
             Grammar::Pop as u8,
         ]);
     }

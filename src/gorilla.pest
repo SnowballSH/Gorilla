@@ -28,14 +28,14 @@ condition_ifelse = {
 }
 
 function_declare = {
-    "fn" ~ NEWLINE* ~ identifier ~ NEWLINE* ~ function_arguments ~ NEWLINE* ~ block
+    "fn" ~ NEWLINE* ~ identifier ~ NEWLINE* ~ function_params ~ NEWLINE* ~ block
 }
 
 call = {
     "(" ~ NEWLINE* ~ (expression ~ NEWLINE* ~ "," ~ NEWLINE*)* ~ NEWLINE* ~ expression? ~ NEWLINE* ~ ")"
 }
 
-function_arguments = {
+function_params = {
     "(" ~ NEWLINE* ~ (identifier~ NEWLINE*  ~ "," ~ NEWLINE*)* ~ NEWLINE* ~ identifier? ~ NEWLINE* ~ ")"
 }
 

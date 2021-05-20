@@ -17,12 +17,14 @@ pub fn not_callable<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>) -> Obj
 pub type ObjResult<'a> = Result<BaseObject<'a>, String>;
 
 pub type NativeFunctionType<'a> = (&'static str, CallFuncType<'a>);
+pub type FunctionType = (String, Vec<String>, Vec<u8>);
 
 #[derive(Clone, Eq, Debug)]
 pub enum ValueType<'a> {
     Int(i64),
     Bool(bool),
     NativeFunction(NativeFunctionType<'a>),
+    Function(FunctionType),
     Str(String),
     Null,
 }
@@ -44,6 +46,10 @@ impl<'a> PartialEq for ValueType<'a> {
             },
             NativeFunction(a) => match other {
                 NativeFunction(i) => a == i,
+                _ => false,
+            },
+            Function(a) => match other {
+                Function(i) => a == i,
                 _ => false,
             },
             Null => match other {

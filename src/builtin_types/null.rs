@@ -2,12 +2,12 @@
 
 use std::collections::HashMap;
 
-use crate::any::any_class;
+use crate::builtin_types::any::any_class;
 use crate::env::Environment;
 use crate::obj::{BaseObject, Class, not_callable, ObjResult};
 use crate::obj::ValueType::*;
-use crate::native_function::new_native_function;
-use crate::string::new_string;
+use crate::builtin_types::native_function::new_native_function;
+use crate::builtin_types::string::new_string;
 
 fn k1(_: BaseObject) -> String {
     "null".to_string()

@@ -1,8 +1,8 @@
 #[cfg(test)]
 mod test_overall {
-    use crate::integer::new_integer;
+    use crate::builtin_types::integer::new_integer;
     use crate::helpers::run_code;
-    use crate::string::new_string;
+    use crate::builtin_types::string::new_string;
 
     #[test]
     fn connect() {

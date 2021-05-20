@@ -4,12 +4,12 @@ use std::collections::HashMap;
 
 use inner::inner;
 
-use crate::any::any_class;
+use crate::builtin_types::any::any_class;
 use crate::env::Environment;
-use crate::native_function::new_native_function;
+use crate::builtin_types::native_function::new_native_function;
 use crate::obj::ValueType::*;
 use crate::obj::*;
-use crate::string::new_string;
+use crate::builtin_types::string::new_string;
 
 #[inline]
 fn add<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
@@ -185,7 +185,7 @@ pub fn new_integer<'a>(x: i64) -> BaseObject<'a> {
 
 #[cfg(test)]
 mod tests {
-    use crate::integer::new_integer;
+    use crate::builtin_types::integer::new_integer;
 
     #[test]
     fn binop() {
