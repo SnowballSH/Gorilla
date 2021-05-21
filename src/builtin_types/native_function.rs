@@ -4,7 +4,6 @@ use crate::env::Environment;
 use crate::obj::ValueType::*;
 use crate::obj::*;
 use inner::inner;
-use crate::vm::VM;
 
 fn k1(this: BaseObject) -> String {
     let x = inner!(this.internal_value, if NativeFunction);
@@ -19,7 +18,7 @@ fn k4<'a>(this: BaseObject<'a>, other: BaseObject<'a>) -> bool {
     this.internal_value == other.internal_value && this.class == other.class
 }
 
-fn call<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, v: VM<'a>) -> ObjResult<'a> {
+fn call<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, v: Environment<'a>) -> ObjResult<'a> {
     let x = inner!(this.internal_value, if NativeFunction);
     x.1(this.clone(), args.clone(), v)
 }
@@ -46,14 +45,14 @@ mod tests {
     use crate::builtin_types::integer::new_integer;
     use crate::builtin_types::native_function::new_native_function;
     use crate::obj::*;
-    use crate::vm::VM;
+    use crate::env::Environment;
 
     #[test]
     fn basic() {
-        fn idk<'a>(_this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: VM) -> ObjResult<'a> {
+        fn idk<'a>(_this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
             Ok(new_integer(1))
         }
         let f = new_native_function(("idk", idk));
-        assert_eq!(f.call(f.clone(), vec![], VM::default()).unwrap(), new_integer(1))
+        assert_eq!(f.call(f.clone(), vec![], Environment::default()).unwrap(), new_integer(1))
     }
 }

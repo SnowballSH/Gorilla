@@ -3,7 +3,7 @@
 use std::env::args;
 use std::fs::File;
 use std::io::Read;
-use std::io;
+use std::{io, thread};
 use crate::helpers::{run_code_with_env, run_code};
 use crate::env::Environment;
 use console::style;
@@ -28,7 +28,7 @@ fn get_input() -> String{
     input.trim_end().to_string()
 }
 
-fn main() {
+fn _main() {
     let argv: Vec<String> = args().collect();
 
     if argv.len() < 2 {
@@ -70,4 +70,15 @@ fn main() {
             println!("| In Line {}:\n| Error: {}", e.1 + 1, e.0);
         }
     };
+}
+
+static STACK_SIZE: usize = 1 << 24;
+
+fn main() {
+    let child = thread::Builder::new()
+        .stack_size(STACK_SIZE)
+        .spawn(_main)
+        .unwrap();
+
+    child.join().unwrap();
 }

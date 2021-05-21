@@ -31,7 +31,7 @@ pub struct VM<'a> {
     pub global: Environment<'a>,
 }
 
-fn print_line<'a>(_this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: VM<'a>) -> ObjResult<'a> {
+fn print_line<'a>(_this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
     let mut strings = vec![];
     for arg in args {
         strings.push(arg.to_string());
@@ -195,7 +195,7 @@ impl<'a> VM<'a> {
                     args.push(self.pop());
                 }
 
-                let res = o.call(o.clone(), args, self.clone());
+                let res = o.call(o.clone(), args, self.env.clone());
                 match res {
                     Err(x) => return Some(x),
                     Ok(x) => self.push(x),

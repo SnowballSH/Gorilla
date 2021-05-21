@@ -8,7 +8,6 @@ use inner::inner;
 use std::collections::HashMap;
 use crate::builtin_types::native_function::new_native_function;
 use crate::builtin_types::integer::new_integer;
-use crate::vm::VM;
 
 fn k1(this: BaseObject) -> String {
     let a = inner!(this.internal_value, if Str);
@@ -42,13 +41,13 @@ fn k4<'a>(this: BaseObject<'a>, other: BaseObject<'a>) -> bool {
 }
 
 #[inline]
-fn to_string<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: VM) -> ObjResult<'a> {
+fn to_string<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
     let a = inner!(this.parent().unwrap().internal_value, if Str);
     Ok(new_string(a))
 }
 
 #[inline]
-fn parse_int<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: VM) -> ObjResult<'a> {
+fn parse_int<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
     let a = inner!(this.parent().unwrap().internal_value, if Str);
     if let Ok(res) = a.parse::<i64>() {
         Ok(new_integer(res))
@@ -58,7 +57,7 @@ fn parse_int<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: VM) -> Obj
 }
 
 #[inline]
-fn add<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: VM) -> ObjResult<'a> {
+fn add<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
     let other = args.first();
     match other {
         Some(x) => {

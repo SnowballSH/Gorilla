@@ -10,10 +10,9 @@ use crate::builtin_types::native_function::new_native_function;
 use crate::obj::ValueType::*;
 use crate::obj::*;
 use crate::builtin_types::string::new_string;
-use crate::vm::VM;
 
 #[inline]
-fn add<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: VM) -> ObjResult<'a> {
+fn add<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
     let other = args.first();
     match other {
         Some(x) => {
@@ -32,7 +31,7 @@ fn add<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: VM) -> ObjResult<
 }
 
 #[inline]
-fn sub<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: VM) -> ObjResult<'a> {
+fn sub<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
     let other = args.first();
     match other {
         Some(x) => {
@@ -51,7 +50,7 @@ fn sub<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: VM) -> ObjResult<
 }
 
 #[inline]
-fn mul<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: VM) -> ObjResult<'a> {
+fn mul<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
     let other = args.first();
     match other {
         Some(x) => {
@@ -70,7 +69,7 @@ fn mul<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: VM) -> ObjResult<
 }
 
 #[inline]
-fn div<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: VM) -> ObjResult<'a> {
+fn div<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
     let other = args.first();
     match other {
         Some(x) => {
@@ -92,7 +91,7 @@ fn div<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: VM) -> ObjResult<
 }
 
 #[inline]
-fn mod_<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: VM) -> ObjResult<'a> {
+fn mod_<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
     let other = args.first();
     match other {
         Some(x) => {
@@ -114,19 +113,19 @@ fn mod_<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: VM) -> ObjResult
 }
 
 #[inline]
-fn neg<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: VM) -> ObjResult<'a> {
+fn neg<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
     let a = inner!(this.parent().unwrap().internal_value, if Int);
     Ok(new_integer(-a))
 }
 
 #[inline]
-fn pos<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: VM) -> ObjResult<'a> {
+fn pos<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
     let a = inner!(this.parent().unwrap().internal_value, if Int);
     Ok(new_integer(a))
 }
 
 #[inline]
-fn to_string<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: VM) -> ObjResult<'a> {
+fn to_string<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
     let a = inner!(this.parent().unwrap().internal_value, if Int);
     Ok(new_string(a.to_string()))
 }
@@ -187,11 +186,11 @@ pub fn new_integer<'a>(x: i64) -> BaseObject<'a> {
 #[cfg(test)]
 mod tests {
     use crate::builtin_types::integer::new_integer;
-    use crate::vm::VM;
+    use crate::env::Environment;
 
     #[test]
     fn binop() {
-        let vv = VM::default();
+        let vv = Environment::default();
 
         let ii = new_integer(10);
         let mut f = ii.instance_get("+".to_string()).unwrap();
