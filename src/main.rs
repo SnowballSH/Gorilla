@@ -77,6 +77,7 @@ static STACK_SIZE: usize = 1 << 24;
 fn main() {
     let child = thread::Builder::new()
         .stack_size(STACK_SIZE)
+        .name(format!("Gorilla Runtime"))
         .spawn(_main)
         .unwrap();
 
