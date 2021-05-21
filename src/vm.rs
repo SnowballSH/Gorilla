@@ -13,6 +13,7 @@ use crate::grammar::Grammar;
 use crate::obj::*;
 
 /// The Virtual Machine
+#[derive(Clone, Debug, Default)]
 pub struct VM<'a> {
     /// Source bytecode
     pub source: Vec<u8>,
@@ -30,7 +31,7 @@ pub struct VM<'a> {
     pub global: Environment<'a>,
 }
 
-fn print_line<'a>(_this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+fn print_line<'a>(_this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: VM<'a>) -> ObjResult<'a> {
     let mut strings = vec![];
     for arg in args {
         strings.push(arg.to_string());
@@ -194,7 +195,7 @@ impl<'a> VM<'a> {
                     args.push(self.pop());
                 }
 
-                let res = o.call(o.clone(), args);
+                let res = o.call(o.clone(), args, self.clone());
                 match res {
                     Err(x) => return Some(x),
                     Ok(x) => self.push(x),

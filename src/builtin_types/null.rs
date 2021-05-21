@@ -8,6 +8,7 @@ use crate::obj::{BaseObject, Class, not_callable, ObjResult};
 use crate::obj::ValueType::*;
 use crate::builtin_types::native_function::new_native_function;
 use crate::builtin_types::string::new_string;
+use crate::vm::VM;
 
 fn k1(_: BaseObject) -> String {
     "null".to_string()
@@ -22,7 +23,7 @@ fn k4<'a>(this: BaseObject<'a>, other: BaseObject<'a>) -> bool {
 }
 
 #[inline]
-fn to_string<'a>(_: BaseObject<'a>, _: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+fn to_string<'a>(_: BaseObject<'a>, _: Vec<BaseObject<'a>>, _: VM) -> ObjResult<'a> {
     Ok(new_string("null".to_string()))
 }
 

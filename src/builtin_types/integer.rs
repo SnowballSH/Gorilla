@@ -10,9 +10,10 @@ use crate::builtin_types::native_function::new_native_function;
 use crate::obj::ValueType::*;
 use crate::obj::*;
 use crate::builtin_types::string::new_string;
+use crate::vm::VM;
 
 #[inline]
-fn add<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+fn add<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: VM) -> ObjResult<'a> {
     let other = args.first();
     match other {
         Some(x) => {
@@ -31,7 +32,7 @@ fn add<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
 }
 
 #[inline]
-fn sub<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+fn sub<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: VM) -> ObjResult<'a> {
     let other = args.first();
     match other {
         Some(x) => {
@@ -50,7 +51,7 @@ fn sub<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
 }
 
 #[inline]
-fn mul<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+fn mul<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: VM) -> ObjResult<'a> {
     let other = args.first();
     match other {
         Some(x) => {
@@ -69,7 +70,7 @@ fn mul<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
 }
 
 #[inline]
-fn div<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+fn div<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: VM) -> ObjResult<'a> {
     let other = args.first();
     match other {
         Some(x) => {
@@ -91,7 +92,7 @@ fn div<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
 }
 
 #[inline]
-fn mod_<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+fn mod_<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: VM) -> ObjResult<'a> {
     let other = args.first();
     match other {
         Some(x) => {
@@ -113,19 +114,19 @@ fn mod_<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
 }
 
 #[inline]
-fn neg<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+fn neg<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: VM) -> ObjResult<'a> {
     let a = inner!(this.parent().unwrap().internal_value, if Int);
     Ok(new_integer(-a))
 }
 
 #[inline]
-fn pos<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+fn pos<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: VM) -> ObjResult<'a> {
     let a = inner!(this.parent().unwrap().internal_value, if Int);
     Ok(new_integer(a))
 }
 
 #[inline]
-fn to_string<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+fn to_string<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: VM) -> ObjResult<'a> {
     let a = inner!(this.parent().unwrap().internal_value, if Int);
     Ok(new_string(a.to_string()))
 }
@@ -186,67 +187,70 @@ pub fn new_integer<'a>(x: i64) -> BaseObject<'a> {
 #[cfg(test)]
 mod tests {
     use crate::builtin_types::integer::new_integer;
+    use crate::vm::VM;
 
     #[test]
     fn binop() {
+        let vv = VM::default();
+
         let ii = new_integer(10);
         let mut f = ii.instance_get("+".to_string()).unwrap();
         f.set_parent(ii);
-        let res = f.clone().call(f, vec![new_integer(1)]);
+        let res = f.clone().call(f, vec![new_integer(1)], vv.clone());
         assert_eq!(res.unwrap().to_string(), "11");
 
         let ii = new_integer(10);
         let mut f = ii.instance_get("-".to_string()).unwrap();
         f.set_parent(ii);
-        let res = f.clone().call(f, vec![new_integer(1)]);
+        let res = f.clone().call(f, vec![new_integer(1)], vv.clone());
         assert_eq!(res.unwrap().to_string(), "9");
 
         let ii = new_integer(10);
         let mut f = ii.instance_get("*".to_string()).unwrap();
         f.set_parent(ii);
-        let res = f.clone().call(f, vec![new_integer(-10)]);
+        let res = f.clone().call(f, vec![new_integer(-10)], vv.clone());
         assert_eq!(res.unwrap().to_string(), "-100");
 
         let ii = new_integer(10);
         let mut f = ii.instance_get("/".to_string()).unwrap();
         f.set_parent(ii);
-        let res = f.clone().call(f, vec![new_integer(2)]);
+        let res = f.clone().call(f, vec![new_integer(2)], vv.clone());
         assert_eq!(res.unwrap().to_string(), "5");
 
         let ii = new_integer(10);
         let mut f = ii.instance_get("%".to_string()).unwrap();
         f.set_parent(ii);
-        let res = f.clone().call(f, vec![new_integer(3)]);
+        let res = f.clone().call(f, vec![new_integer(3)], vv.clone());
         assert_eq!(res.unwrap().to_string(), "1");
 
         let ii = new_integer(10);
         let mut f = ii.instance_get("/".to_string()).unwrap();
         f.set_parent(ii);
-        let res = f.clone().call(f, vec![new_integer(0)]);
+        let res = f.clone().call(f, vec![new_integer(0)], vv.clone());
         assert!(res.is_err());
 
         let ii = new_integer(10);
         let mut f = ii.instance_get("%".to_string()).unwrap();
         f.set_parent(ii);
-        let res = f.clone().call(f, vec![new_integer(0)]);
+        let res = f.clone().call(f, vec![new_integer(0)], vv.clone());
         assert!(res.is_err());
 
         let ii = new_integer(10);
         let mut f = ii.instance_get("%".to_string()).unwrap();
         f.set_parent(ii);
-        let res = f.clone().call(f, vec![]);
+        let res = f.clone().call(f, vec![], vv.clone());
         assert!(res.is_err()); // 0 arguments
 
         let ii = new_integer(10);
         let mut f = ii.instance_get("==".to_string()).unwrap();
         f.set_parent(ii);
-        let res = f.clone().call(f, vec![new_integer(10)]);
+        let res = f.clone().call(f, vec![new_integer(10)], vv.clone());
         assert_eq!(res.unwrap().to_string(), "true");
 
         let ii = new_integer(10);
         let mut f = ii.instance_get("!=".to_string()).unwrap();
         f.set_parent(ii);
-        let res = f.clone().call(f, vec![new_integer(10)]);
+        let res = f.clone().call(f, vec![new_integer(10)], vv.clone());
         assert_eq!(res.unwrap().to_string(), "false");
     }
 }

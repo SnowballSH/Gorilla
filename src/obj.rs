@@ -2,11 +2,12 @@
 
 use crate::env::*;
 use crate::obj::ValueType::*;
+use crate::vm::VM;
 
-pub type CallFuncType<'a> = fn(BaseObject<'a>, Vec<BaseObject<'a>>) -> ObjResult<'a>;
+pub type CallFuncType<'a> = fn(BaseObject<'a>, Vec<BaseObject<'a>>, VM<'a>) -> ObjResult<'a>;
 
 #[inline]
-pub fn not_callable<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+pub fn not_callable<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: VM) -> ObjResult<'a> {
     Err(format!(
         "'{}' ({}) is not callable",
         this.to_string(),
@@ -16,7 +17,6 @@ pub fn not_callable<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>) -> Obj
 
 pub type ObjResult<'a> = Result<BaseObject<'a>, String>;
 
-// TODO BUG: Add VM
 pub type NativeFunctionType<'a> = (&'static str, CallFuncType<'a>);
 pub type FunctionType = (String, Vec<String>, Vec<u8>);
 
@@ -103,8 +103,9 @@ impl<'a> BaseObject<'a> {
         &self,
         this: BaseObject<'a>,
         args: Vec<BaseObject<'a>>,
+        vm: VM<'a>
     ) -> Result<BaseObject<'a>, String> {
-        (self.call_func)(this, args)
+        (self.call_func)(this, args, vm)
     }
 
     #[inline]

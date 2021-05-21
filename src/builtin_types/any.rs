@@ -7,8 +7,9 @@ use crate::env::Environment;
 use crate::builtin_types::native_function::new_native_function;
 use crate::obj::*;
 use crate::obj::ValueType::*;
+use crate::vm::VM;
 
-fn dbeq<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+fn dbeq<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: VM) -> ObjResult<'a> {
     let other = args.first();
     match other {
         Some(x) => Ok(new_boolean(this.parent().unwrap().equal_to(x.clone()))),
@@ -19,7 +20,7 @@ fn dbeq<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
     }
 }
 
-fn neq<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+fn neq<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: VM) -> ObjResult<'a> {
     let other = args.first();
     match other {
         Some(x) => Ok(new_boolean(!this.parent().unwrap().equal_to(x.clone()))),

@@ -21,15 +21,18 @@ fn k4<'a>(this: BaseObject<'a>, other: BaseObject<'a>) -> bool {
     this.internal_value == other.internal_value && this.class == other.class
 }
 
-fn call<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
+fn call<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, vm: VM<'a>) -> ObjResult<'a> {
     let x = inner!(this.clone().internal_value, if Function);
-    let mut s = x.2;
-    s.insert(0, Grammar::Magic as u8);
-    let mut v = VM::new(s);
 
     if x.1.len() != args.len() {
         return Err(format!("{} expected {} arguments, got {}", this.to_inspect_string(), x.1.len(), args.len()))
     }
+
+    let mut s = x.2;
+    s.insert(0, Grammar::Magic as u8);
+    let mut v = VM::new(s);
+    v.global = vm.global.clone();
+    v.env = vm.env.clone();
 
     let mut i = 0;
     for name in x.1 {
@@ -38,6 +41,7 @@ fn call<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>) -> ObjResult<'a> {
     }
 
     let res = v.run();
+
     match res {
         Ok(x) => {
             Ok(x.unwrap_or(new_null()))
