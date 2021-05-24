@@ -10,6 +10,7 @@ use crate::builtin_types::native_function::new_native_function;
 use crate::obj::ValueType::*;
 use crate::obj::*;
 use crate::builtin_types::string::new_string;
+use crate::builtin_types::bool::new_boolean;
 
 #[inline]
 fn add<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
@@ -113,6 +114,82 @@ fn mod_<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment<'a>)
 }
 
 #[inline]
+fn gt<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
+    let other = args.first();
+    match other {
+        Some(x) => {
+            let a = inner!(this.parent().unwrap().internal_value, if Int);
+            let b = inner!(x.internal_value, if Int, else {
+            let g = inner!(this.internal_value, if NativeFunction);
+                return Err(format!("{} expects an integer", g.0))
+            });
+            Ok(new_boolean(a > b))
+        }
+        None => {
+            let x = inner!(this.internal_value, if NativeFunction);
+            Err(format!("{} expects 1 argument, got 0", x.0))
+        }
+    }
+}
+
+#[inline]
+fn lt<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
+    let other = args.first();
+    match other {
+        Some(x) => {
+            let a = inner!(this.parent().unwrap().internal_value, if Int);
+            let b = inner!(x.internal_value, if Int, else {
+            let g = inner!(this.internal_value, if NativeFunction);
+                return Err(format!("{} expects an integer", g.0))
+            });
+            Ok(new_boolean(a < b))
+        }
+        None => {
+            let x = inner!(this.internal_value, if NativeFunction);
+            Err(format!("{} expects 1 argument, got 0", x.0))
+        }
+    }
+}
+
+#[inline]
+fn gteq<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
+    let other = args.first();
+    match other {
+        Some(x) => {
+            let a = inner!(this.parent().unwrap().internal_value, if Int);
+            let b = inner!(x.internal_value, if Int, else {
+            let g = inner!(this.internal_value, if NativeFunction);
+                return Err(format!("{} expects an integer", g.0))
+            });
+            Ok(new_boolean(a >= b))
+        }
+        None => {
+            let x = inner!(this.internal_value, if NativeFunction);
+            Err(format!("{} expects 1 argument, got 0", x.0))
+        }
+    }
+}
+
+#[inline]
+fn lteq<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
+    let other = args.first();
+    match other {
+        Some(x) => {
+            let a = inner!(this.parent().unwrap().internal_value, if Int);
+            let b = inner!(x.internal_value, if Int, else {
+            let g = inner!(this.internal_value, if NativeFunction);
+                return Err(format!("{} expects an integer", g.0))
+            });
+            Ok(new_boolean(a <= b))
+        }
+        None => {
+            let x = inner!(this.internal_value, if NativeFunction);
+            Err(format!("{} expects 1 argument, got 0", x.0))
+        }
+    }
+}
+
+#[inline]
 fn neg<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
     let a = inner!(this.parent().unwrap().internal_value, if Int);
     Ok(new_integer(-a))
@@ -159,6 +236,11 @@ pub fn new_integer<'a>(x: i64) -> BaseObject<'a> {
     int_env.insert("/".to_string(), new_native_function(("Integer./", div)));
 
     int_env.insert("%".to_string(), new_native_function(("Integer.%", mod_)));
+
+    int_env.insert(">".to_string(), new_native_function(("Integer.>", gt)));
+    int_env.insert("<".to_string(), new_native_function(("Integer.<", lt)));
+    int_env.insert(">=".to_string(), new_native_function(("Integer.>=", gteq)));
+    int_env.insert("<=".to_string(), new_native_function(("Integer.<=", lteq)));
 
     int_env.insert("-@".to_string(), new_native_function(("- Integer", neg)));
 

@@ -64,10 +64,14 @@ div = { "/" }
 modulo = { "%" }
 dbeq = { "==" }
 neq = { "!=" }
+gt = { ">" }
+lt = { "<" }
+gteq = { ">=" }
+lteq = { "<=" }
 
 operators = _{
     add | sub | mul | div | modulo
-    | dbeq | neq
+    | dbeq | neq | gteq | lteq | gt | lt
 }
 
 prefix_operators = _{

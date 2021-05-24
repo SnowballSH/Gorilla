@@ -14,6 +14,7 @@ lazy_static! {
 
         PrecClimber::new(vec![
             Operator::new(dbeq, Left) | Operator::new(neq, Left),
+            Operator::new(gt, Left) | Operator::new(lt, Left) | Operator::new(gteq, Left) | Operator::new(lteq, Left),
             Operator::new(add, Left) | Operator::new(sub, Left),
             Operator::new(mul, Left) | Operator::new(div, Left) | Operator::new(modulo, Left),
         ])
