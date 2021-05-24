@@ -223,12 +223,12 @@ impl<'a> VM<'a> {
 
             Grammar::Jump => {
                 let where_ = self.read_unsigned_int();
-                self.ip = (where_ + 1) as usize
+                self.ip += where_ as usize
             }
             Grammar::JumpIfFalse => {
                 let where_ = self.read_unsigned_int();
                 if !self.pop().is_truthy() {
-                    self.ip = (where_ + 1) as usize
+                    self.ip += where_ as usize
                 }
             }
             _ => {
@@ -388,32 +388,37 @@ mod tests {
     fn test_jump() {
         let mut vm = VM::new(vec![
             Grammar::Magic as u8,
-            Grammar::Integer as u8,
-            1,
-            0x01,
-            Grammar::JumpIfFalse as u8,
-            1,
-            12,
-            Grammar::Integer as u8,
-            1,
-            0x03,
-            Grammar::Jump as u8,
-            1,
-            20,
+            Grammar::Integer as u8, 1, 0,
+            Grammar::JumpIfFalse as u8, 1, 4,
+            Grammar::Null as u8,
+            Grammar::Jump as u8, 1, 4,
             Grammar::Advance as u8,
-            Grammar::Advance as u8,
-            Grammar::Integer as u8,
-            1,
-            0x04,
-            Grammar::Noop as u8,
-            Grammar::Back as u8,
-            Grammar::Back as u8,
+            Grammar::Integer as u8, 1, 5,
             Grammar::Pop as u8,
         ]);
         let res = vm.run();
         match res {
             Err(x) => panic!("Error: {}", x),
-            Ok(x) => assert_eq!(x.expect("No popped").internal_value, Int(3)),
+            Ok(x) => assert_eq!(x.expect("No popped").internal_value, Int(5)),
+        }
+
+        let mut vm = VM::new(vec![
+            Grammar::Magic as u8,
+            Grammar::Integer as u8, 1, 0,
+            Grammar::JumpIfFalse as u8, 1, 6,
+            Grammar::Integer as u8, 1, 1,
+            Grammar::Jump as u8, 1, 15,
+            Grammar::Integer as u8, 1, 1,
+            Grammar::JumpIfFalse as u8, 1, 6,
+            Grammar::Integer as u8, 1, 2,
+            Grammar::Jump as u8, 1, 3,
+            Grammar::Integer as u8, 1, 3,
+            Grammar::Pop as u8,
+        ]);
+        let res = vm.run();
+        match res {
+            Err(x) => panic!("Error: {}", x),
+            Ok(x) => assert_eq!(x.expect("No popped").internal_value, Int(2)),
         }
     }
 }

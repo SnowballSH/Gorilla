@@ -186,57 +186,48 @@ impl<'a> Compiler<'a> {
                 self.compile_expr(x.cond);
 
                 {
-                    let mut compi = Compiler {
-                        result: vec![],
-                        last_line: self.last_line,
-                        source: self.source,
-                    };
-
-                    let mut compe = Compiler {
-                        result: vec![],
-                        last_line: self.last_line,
-                        source: self.source,
-                    };
-
-                    compi.compile(x.body);
-                    compe.compile(x.other);
-
-                    if compi.result.len() > 0 && *compi.result.last().unwrap() == Grammar::Pop as u8 {
-                        compi.result.pop();
-                        compi.emit_grammar(Grammar::Noop);
-                    } else {
-                        compi.emit_grammar(Grammar::Null)
-                    }
-
-                    if compe.result.len() > 0 && *compe.result.last().unwrap() == Grammar::Pop as u8 {
-                        compe.result.pop();
-                        compe.emit_grammar(Grammar::Noop);
-                    } else {
-                        compe.emit_grammar(Grammar::Null)
-                    }
-
-                    compi.update_line(pos);
-                    compe.update_line(pos);
-
                     self.emit_grammar(Grammar::JumpIfFalse);
 
-                    compi.emit_grammar(Grammar::Jump);
+                    let jump_false_pos = self.result.len();
 
-                    let k = (self.result.len() + compi.result.len() + 1) as u64;
-                    compi.emit_unsigned_int(
-                        (
-                            self.result.len() + 2 +
-                                leb128_unsigned(
-                                    k
-                                ).len() + compi.result.len() + compe.result.len()
-                        ) as u64
-                    );
+                    self.compile(x.body);
 
-                    let k = (self.result.len() + compi.result.len() + 1) as u64;
-                    self.emit_unsigned_int(k);
+                    if self.result.len() > 0 && *self.result.last().unwrap() == Grammar::Pop as u8 {
+                        self.result.pop();
+                    } else {
+                        self.emit_grammar(Grammar::Null)
+                    }
 
-                    self.result.extend(compi.result);
-                    self.result.extend(compe.result);
+                    self.update_line(pos);
+
+                    self.emit_grammar(Grammar::Jump);
+
+                    let jump_pos = self.result.len();
+
+                    self.compile(x.other);
+
+                    if self.result.len() > 0 && *self.result.last().unwrap() == Grammar::Pop as u8 {
+                        self.result.pop();
+                    } else {
+                        self.emit_grammar(Grammar::Null)
+                    }
+
+                    let k = leb128_unsigned((self.result.len() - jump_pos) as u64);
+                    self.result.insert(jump_pos, k.len() as u8);
+                    let mut i: usize = 1;
+                    for e in k {
+                        self.result.insert(jump_pos + i, e);
+                        i += 1;
+                    }
+
+                    let amount = jump_pos + i - jump_false_pos;
+                    let k = leb128_unsigned(amount as u64);
+                    self.result.insert(jump_false_pos, k.len() as u8);
+                    let mut i: usize = 1;
+                    for e in k {
+                        self.result.insert(jump_false_pos + i, e);
+                        i += 1;
+                    }
                 }
             }
         }
@@ -272,15 +263,31 @@ mod tests {
         assert_eq!(compiler.result, vec![
             Grammar::Magic as u8,
             Grammar::Integer as u8, 1, 1,
-            Grammar::JumpIfFalse as u8, 1, 10,
+            Grammar::JumpIfFalse as u8, 1, 4,
             Grammar::Null as u8,
-            Grammar::Jump as u8, 1, 16,
-            Grammar::Advance as u8,// Grammar::Advance as u8,
-            Grammar::Integer as u8, 1, 5, Grammar::Noop as u8,
-            Grammar::Back as u8,// Grammar::Back as u8,
+            Grammar::Jump as u8, 1, 4,
+            Grammar::Advance as u8,
+            Grammar::Integer as u8, 1, 5,
             Grammar::Pop as u8,
-            Grammar::Advance as u8, Grammar::Advance as u8,
-            Grammar::Advance as u8,// Grammar::Advance as u8,
+            Grammar::Advance as u8,
+            Grammar::Advance as u8,
+            Grammar::Integer as u8, 1, 1,
+            Grammar::Pop as u8,
+        ]);
+
+        let code = "if 1 1 else if 1 1 else 1";
+        let mut compiler = Compiler::new(code);
+        compiler.compile(parse(code).unwrap_or_else(|x| panic!("{}", x.to_string())));
+        assert_eq!(compiler.result, vec![
+            Grammar::Magic as u8,
+            Grammar::Integer as u8, 1, 1,
+            Grammar::JumpIfFalse as u8, 1, 6,
+            Grammar::Integer as u8, 1, 1,
+            Grammar::Jump as u8, 1, 15,
+            Grammar::Integer as u8, 1, 1,
+            Grammar::JumpIfFalse as u8, 1, 6,
+            Grammar::Integer as u8, 1, 1,
+            Grammar::Jump as u8, 1, 3,
             Grammar::Integer as u8, 1, 1,
             Grammar::Pop as u8,
         ]);
