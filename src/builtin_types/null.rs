@@ -4,10 +4,8 @@ use std::collections::HashMap;
 
 use crate::builtin_types::any::any_class;
 use crate::env::Environment;
-use crate::obj::{BaseObject, Class, not_callable, ObjResult};
+use crate::obj::{BaseObject, Class, not_callable};
 use crate::obj::ValueType::*;
-use crate::builtin_types::native_function::new_native_function;
-use crate::builtin_types::string::new_string;
 
 fn k1(_: BaseObject) -> String {
     "null".to_string()
@@ -21,15 +19,8 @@ fn k4<'a>(this: BaseObject<'a>, other: BaseObject<'a>) -> bool {
     this.internal_value == other.internal_value && this.class == other.class
 }
 
-#[inline]
-fn to_string<'a>(_: BaseObject<'a>, _: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
-    Ok(new_string("null".to_string()))
-}
-
 pub fn new_null<'a>() -> BaseObject<'a> {
     let mut _env = HashMap::default();
-
-    _env.insert("s".to_string(), new_native_function(("Null.s", to_string)));
 
     BaseObject {
         class: Class {

@@ -11,6 +11,7 @@ use crate::builtin_types::string::new_string;
 use crate::env::Environment;
 use crate::grammar::Grammar;
 use crate::obj::*;
+use crate::modules::prelude::{print, print_line, print_inspect_line, puts};
 
 /// The Virtual Machine
 #[derive(Clone, Debug, Default)]
@@ -31,16 +32,6 @@ pub struct VM<'a> {
     pub global: Environment<'a>,
 }
 
-fn print_line<'a>(_this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
-    let mut strings = vec![];
-    for arg in args {
-        strings.push(arg.to_string());
-    }
-    let string = strings.join(" ");
-    println!("{}", string);
-    Ok(new_string(string))
-}
-
 impl<'a> VM<'a> {
     /// New VM from vector of bytes
     pub fn new(source: Vec<u8>) -> Self {
@@ -50,6 +41,9 @@ impl<'a> VM<'a> {
         global.set("null".to_string(), new_null());
 
         global.set("println".to_string(), new_native_function(("println", print_line)));
+        global.set("puts".to_string(), new_native_function(("puts", puts)));
+        global.set("dbg".to_string(), new_native_function(("dbg", print_inspect_line)));
+        global.set("print".to_string(), new_native_function(("print", print)));
 
         VM {
             source,

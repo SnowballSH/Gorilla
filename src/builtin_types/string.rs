@@ -41,12 +41,6 @@ fn k4<'a>(this: BaseObject<'a>, other: BaseObject<'a>) -> bool {
 }
 
 #[inline]
-fn to_string<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
-    let a = inner!(this.parent().unwrap().internal_value, if Str);
-    Ok(new_string(a))
-}
-
-#[inline]
 fn parse_int<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
     let a = inner!(this.parent().unwrap().internal_value, if Str);
     if let Ok(res) = a.parse::<i64>() {
@@ -78,7 +72,6 @@ fn add<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment<'a>) 
 pub fn new_string<'a>(x: String) -> BaseObject<'a> {
     let mut _env = HashMap::default();
 
-    _env.insert("s".to_string(), new_native_function(("String.s", to_string)));
     _env.insert("i".to_string(), new_native_function(("String.i", parse_int)));
 
     _env.insert("+".to_string(), new_native_function(("String.+", add)));

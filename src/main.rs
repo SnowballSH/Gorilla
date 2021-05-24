@@ -11,6 +11,7 @@ use console::style;
 pub mod env;
 pub mod grammar;
 pub mod builtin_types;
+pub mod modules;
 pub mod obj;
 pub mod vm;
 pub mod parser;
