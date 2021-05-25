@@ -217,12 +217,12 @@ impl<'a> VM<'a> {
 
             Grammar::Jump => {
                 let where_ = self.read_unsigned_int();
-                self.ip += where_ as usize
+                self.ip += where_ as usize;
             }
             Grammar::JumpIfFalse => {
                 let where_ = self.read_unsigned_int();
                 if !self.pop().is_truthy() {
-                    self.ip += where_ as usize
+                    self.ip += where_ as usize;
                 }
             }
             _ => {

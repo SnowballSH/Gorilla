@@ -19,6 +19,12 @@ It is made for creating async, efficient, and simple apps.
 
 ---
 
+Benchmark: 21th Fibonacci using the recursive strategy: 2.98s
+
+Known issue: extremely slow runtime on if/else statements (slows down 0.2s)
+
+---
+
 The following links are all based on gorilla 0.4.0.1:
 
 #### View more on the [website](https://snowballsh.me/Gorilla/)
