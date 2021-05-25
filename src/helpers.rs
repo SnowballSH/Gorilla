@@ -1,10 +1,10 @@
 use pest::Span;
 
 use crate::compiler::Compiler;
+use crate::env::Environment;
 use crate::obj::BaseObject;
 use crate::parser::parse;
 use crate::vm::VM;
-use crate::env::Environment;
 
 #[inline]
 pub fn span_to_line(source: &str, span: Span) -> usize {
@@ -52,16 +52,44 @@ pub fn run_code(code: &str) -> Result<Option<BaseObject>, (String, usize)> {
     }
 }
 
-pub fn run_code_with_env<'a>(code: &str, env: Environment<'a>)
-    -> (Result<Option<BaseObject<'a>>, String>, Environment<'a>) {
+pub fn compile_code(code: &str) -> Result<Vec<u8>, (String, usize)> {
     let mut compiler = Compiler::new(code);
     let p = parse(code);
     if let Err(e) = p {
-        return (Err(e.to_string()), env);
+        return Err((e.to_string(), 0));
+    }
+    compiler.compile(p.unwrap());
+    return Ok(compiler.result);
+}
+
+pub fn run_bytecode<'a>(code: Vec<u8>) -> Result<Option<BaseObject<'a>>, (String, usize)> {
+    let mut vm = VM::new(code);
+    let result = vm.run();
+    if let Ok(x) = result {
+        Ok(x)
+    } else if let Err(x) = result {
+        Err((x, vm.line))
+    } else {
+        unreachable!()
+    }
+}
+
+pub fn run_code_with_env<'a>(code: &str, env: Environment<'a>)
+                             -> (Result<Option<BaseObject<'a>>, (String, usize)>, Environment<'a>) {
+    let mut compiler = Compiler::new(code);
+    let p = parse(code);
+    if let Err(e) = p {
+        return (Err((e.to_string(), 0)), env);
     }
     compiler.compile(p.unwrap());
     let mut vm = VM::new(compiler.result);
     vm.env = env;
     let result = vm.run();
-    (result, vm.env)
+    if let Ok(x) = result {
+        (Ok(x), vm.env)
+    } else if let Err(x) = result {
+        (Err((x, vm.line)), vm.env)
+    } else {
+        unreachable!()
+    }
 }
