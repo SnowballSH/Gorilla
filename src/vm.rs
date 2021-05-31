@@ -225,6 +225,10 @@ impl<'a> VM<'a> {
                     self.ip += where_ as usize;
                 }
             }
+            Grammar::JumpTo => {
+                let where_ = self.read_unsigned_int();
+                self.ip = where_ as usize;
+            }
             _ => {
                 dbg!(&self.source);
                 return Some(format!("Invalid instruction: {}", type_ as u8));

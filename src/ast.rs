@@ -12,6 +12,7 @@ pub enum Expression<'a> {
     GetInstance(Box<GetInstance<'a>>),
 
     If(Box<If<'a>>),
+    While(Box<While<'a>>)
 }
 
 #[derive(Debug, Clone)]
@@ -19,6 +20,13 @@ pub struct If<'a> {
     pub cond: Expression<'a>,
     pub body: Program<'a>,
     pub other: Program<'a>,
+    pub pos: Span<'a>,
+}
+
+#[derive(Debug, Clone)]
+pub struct While<'a> {
+    pub cond: Expression<'a>,
+    pub body: Program<'a>,
     pub pos: Span<'a>,
 }
 

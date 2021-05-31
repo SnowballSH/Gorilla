@@ -21,6 +21,7 @@ pub enum Grammar {
     Call,
     JumpIfFalse,
     Jump,
+    JumpTo,
     Function,
 }
 

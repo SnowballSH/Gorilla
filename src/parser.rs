@@ -116,10 +116,9 @@ fn others(pair: Pair<Rule>) -> Expression {
             let mut inner = pair.clone().into_inner();
             let cond = inner.next().unwrap();
             let res = inner.next().unwrap();
-            Expression::If(Box::new(If {
+            Expression::While(Box::new(While {
                 cond: parse_expression(cond),
                 body: parse_program(res.into_inner()),
-                other: vec![],
                 pos: pair.as_span(),
             }))
         }

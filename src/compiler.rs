@@ -230,6 +230,34 @@ impl<'a> Compiler<'a> {
                     }
                 }
             }
+
+            Expression::While(x) => {
+                let start = self.result.len();
+                let p = x.pos;
+                let pos = span_to_line(self.source, p);
+                self.update_line(pos);
+                self.compile_expr(x.cond);
+
+                self.emit_grammar(Grammar::JumpIfFalse);
+                let jump_false_pos = self.result.len();
+
+                self.compile(x.body);
+
+                self.emit_grammar(Grammar::JumpTo);
+
+                self.emit_unsigned_int(start as u64);
+
+                let amount = self.result.len() - jump_false_pos;
+                let k = leb128_unsigned(amount as u64);
+                self.result.insert(jump_false_pos, k.len() as u8);
+                let mut i: usize = 1;
+                for e in k {
+                    self.result.insert(jump_false_pos + i, e);
+                    i += 1;
+                }
+
+                self.emit_grammar(Grammar::Null);
+            }
         }
     }
 }
@@ -289,6 +317,23 @@ mod tests {
             Grammar::Integer as u8, 1, 1,
             Grammar::Jump as u8, 1, 3,
             Grammar::Integer as u8, 1, 1,
+            Grammar::Pop as u8,
+        ]);
+    }
+
+    #[test]
+    fn whiles() {
+        let code = "while 1 2";
+        let mut compiler = Compiler::new(code);
+        compiler.compile(parse(code).unwrap_or_else(|x| panic!("{}", x.to_string())));
+        assert_eq!(compiler.result, vec![
+            Grammar::Magic as u8,
+            Grammar::Integer as u8, 1, 1,
+            Grammar::JumpIfFalse as u8, 1, 7,
+            Grammar::Integer as u8, 1, 2,
+            Grammar::Pop as u8,
+            Grammar::JumpTo as u8, 1, 1,
+            Grammar::Null as u8,
             Grammar::Pop as u8,
         ]);
     }
