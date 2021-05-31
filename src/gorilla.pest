@@ -55,7 +55,8 @@ term = _{ string_literal | integer | identifier | "(" ~ expression ~ ")" }
 
 prefix = { prefix_operators+ ~ expression_inner }
 
-expression_inner = _{ suffix | prefix | term | condition_ifelse | condition_if }
+// condition_ifelse must be before condition_if
+expression_inner = _{ condition_ifelse | condition_if | assign | suffix | prefix | term }
 
 add = { "+" }
 sub = { "-" }
@@ -82,8 +83,7 @@ infix = _{ expression_inner ~ (operators ~ expression_inner)+ }
 
 assign = { identifier ~ "=" ~ expression }
 
-// condition_ifelse must be before condition_if
-expression = { assign | infix | expression_inner }
+expression = { infix | expression_inner }
 
 expression_stmt = { expression }
 
