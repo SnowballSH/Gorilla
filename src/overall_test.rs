@@ -45,6 +45,17 @@ z";
         let result = run_code(code);
         assert!(result.is_err());
 
+        let code = "result = 0
+counter = 5
+while counter > 0 {
+    result = result + counter
+    counter = counter - 1
+}
+result
+";
+        let result = run_code(code);
+        assert_eq!(result, Ok(Some(new_integer(15))));
+
         let code = "fn add_anything(item1, item2) item1 + item2
 add_anything(\"LOL \", \"ALR\")";
         let result = run_code(code);
