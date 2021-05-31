@@ -27,6 +27,10 @@ condition_ifelse = {
     "if" ~ NEWLINE* ~ expression ~ NEWLINE* ~ block ~ NEWLINE* ~ "else" ~ NEWLINE* ~ block
 }
 
+while_loop = {
+    "while" ~ NEWLINE* ~ expression ~ NEWLINE* ~ block
+}
+
 function_declare = {
     "fn" ~ NEWLINE* ~ identifier ~ NEWLINE* ~ function_params ~ NEWLINE* ~ block
 }
@@ -56,7 +60,7 @@ term = _{ string_literal | integer | identifier | "(" ~ expression ~ ")" }
 prefix = { prefix_operators+ ~ expression_inner }
 
 // condition_ifelse must be before condition_if
-expression_inner = _{ condition_ifelse | condition_if | assign | suffix | prefix | term }
+expression_inner = _{ condition_ifelse | condition_if | while_loop | assign | suffix | prefix | term }
 
 add = { "+" }
 sub = { "-" }

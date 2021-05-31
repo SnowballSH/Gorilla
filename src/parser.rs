@@ -112,6 +112,18 @@ fn others(pair: Pair<Rule>) -> Expression {
             }))
         }
 
+        Rule::while_loop => {
+            let mut inner = pair.clone().into_inner();
+            let cond = inner.next().unwrap();
+            let res = inner.next().unwrap();
+            Expression::If(Box::new(If {
+                cond: parse_expression(cond),
+                body: parse_program(res.into_inner()),
+                other: vec![],
+                pos: pair.as_span(),
+            }))
+        }
+
         Rule::prefix => {
             let mut inner: Vec<Pair<Rule>> = pair.clone().into_inner().collect();
             let last = inner.pop().unwrap();
