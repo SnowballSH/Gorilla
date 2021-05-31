@@ -1,6 +1,24 @@
-fn fib(n) {
+fn fib(n)
     if n <= 1 1
     else fib(n - 1) + fib(n - 2)
-}
 
-println(fib(21))
+fn all_fib(n, max)
+	if n != max {
+		puts(fib_cache(n))
+		all_fib(n + 1, max)
+	}
+	
+fn fib_cache(n)
+	if n <= 1 1
+	else if n == 2 n
+	else if n == 3 n
+	else if n == 4 5
+	else if n == 5 8
+	else if n == 6 13
+	else if n == 7 21
+	else if n == 8 34
+	else if n == 9 55
+    else fib_cache(n - 1) + fib_cache(n - 2)
+
+puts(all_fib(0, 30))
+# puts(fib_cache(21))

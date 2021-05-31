@@ -4,6 +4,7 @@ use strum_macros::EnumIter;
 use crate::grammar::Grammar::*;
 
 #[derive(Debug, EnumIter, Copy, Clone)]
+#[repr(u8)]
 #[doc = "Bytecode grammar for Gorilla, ported from Go"]
 pub enum Grammar {
     Magic = 0x69,
