@@ -220,20 +220,20 @@ fn k4<'a>(this: BaseObject<'a>, other: BaseObject<'a>) -> bool {
 pub fn new_integer<'a>(x: i64) -> BaseObject<'a> {
     let mut int_env = HashMap::default();
 
-    int_env.insert("+".to_string(), new_native_function(("Integer.+", add)));
+    int_env.insert("add".to_string(), new_native_function(("Integer.+", add)));
 
-    int_env.insert("-".to_string(), new_native_function(("Integer.-", sub)));
+    int_env.insert("sub".to_string(), new_native_function(("Integer.-", sub)));
 
-    int_env.insert("*".to_string(), new_native_function(("Integer.*", mul)));
+    int_env.insert("mul".to_string(), new_native_function(("Integer.*", mul)));
 
-    int_env.insert("/".to_string(), new_native_function(("Integer./", div)));
+    int_env.insert("div".to_string(), new_native_function(("Integer./", div)));
 
-    int_env.insert("%".to_string(), new_native_function(("Integer.%", mod_)));
+    int_env.insert("modulo".to_string(), new_native_function(("Integer.%", mod_)));
 
-    int_env.insert(">".to_string(), new_native_function(("Integer.>", gt)));
-    int_env.insert("<".to_string(), new_native_function(("Integer.<", lt)));
-    int_env.insert(">=".to_string(), new_native_function(("Integer.>=", gteq)));
-    int_env.insert("<=".to_string(), new_native_function(("Integer.<=", lteq)));
+    int_env.insert("gt".to_string(), new_native_function(("Integer.>", gt)));
+    int_env.insert("lt".to_string(), new_native_function(("Integer.<", lt)));
+    int_env.insert("gteq".to_string(), new_native_function(("Integer.>=", gteq)));
+    int_env.insert("lteq".to_string(), new_native_function(("Integer.<=", lteq)));
 
     int_env.insert("-@".to_string(), new_native_function(("- Integer", neg)));
 
@@ -267,61 +267,61 @@ mod tests {
         let vv = Environment::default();
 
         let ii = new_integer(10);
-        let mut f = ii.instance_get("+".to_string()).unwrap();
+        let mut f = ii.instance_get("add".to_string()).unwrap();
         f.set_parent(ii);
         let res = f.clone().call(f, vec![new_integer(1)], vv.clone());
         assert_eq!(res.unwrap().to_string(), "11");
 
         let ii = new_integer(10);
-        let mut f = ii.instance_get("-".to_string()).unwrap();
+        let mut f = ii.instance_get("sub".to_string()).unwrap();
         f.set_parent(ii);
         let res = f.clone().call(f, vec![new_integer(1)], vv.clone());
         assert_eq!(res.unwrap().to_string(), "9");
 
         let ii = new_integer(10);
-        let mut f = ii.instance_get("*".to_string()).unwrap();
+        let mut f = ii.instance_get("mul".to_string()).unwrap();
         f.set_parent(ii);
         let res = f.clone().call(f, vec![new_integer(-10)], vv.clone());
         assert_eq!(res.unwrap().to_string(), "-100");
 
         let ii = new_integer(10);
-        let mut f = ii.instance_get("/".to_string()).unwrap();
+        let mut f = ii.instance_get("div".to_string()).unwrap();
         f.set_parent(ii);
         let res = f.clone().call(f, vec![new_integer(2)], vv.clone());
         assert_eq!(res.unwrap().to_string(), "5");
 
         let ii = new_integer(10);
-        let mut f = ii.instance_get("%".to_string()).unwrap();
+        let mut f = ii.instance_get("modulo".to_string()).unwrap();
         f.set_parent(ii);
         let res = f.clone().call(f, vec![new_integer(3)], vv.clone());
         assert_eq!(res.unwrap().to_string(), "1");
 
         let ii = new_integer(10);
-        let mut f = ii.instance_get("/".to_string()).unwrap();
+        let mut f = ii.instance_get("div".to_string()).unwrap();
         f.set_parent(ii);
         let res = f.clone().call(f, vec![new_integer(0)], vv.clone());
         assert!(res.is_err());
 
         let ii = new_integer(10);
-        let mut f = ii.instance_get("%".to_string()).unwrap();
+        let mut f = ii.instance_get("modulo".to_string()).unwrap();
         f.set_parent(ii);
         let res = f.clone().call(f, vec![new_integer(0)], vv.clone());
         assert!(res.is_err());
 
         let ii = new_integer(10);
-        let mut f = ii.instance_get("%".to_string()).unwrap();
+        let mut f = ii.instance_get("modulo".to_string()).unwrap();
         f.set_parent(ii);
         let res = f.clone().call(f, vec![], vv.clone());
         assert!(res.is_err()); // 0 arguments
 
         let ii = new_integer(10);
-        let mut f = ii.instance_get("==".to_string()).unwrap();
+        let mut f = ii.instance_get("eq".to_string()).unwrap();
         f.set_parent(ii);
         let res = f.clone().call(f, vec![new_integer(10)], vv.clone());
         assert_eq!(res.unwrap().to_string(), "true");
 
         let ii = new_integer(10);
-        let mut f = ii.instance_get("!=".to_string()).unwrap();
+        let mut f = ii.instance_get("neq".to_string()).unwrap();
         f.set_parent(ii);
         let res = f.clone().call(f, vec![new_integer(10)], vv.clone());
         assert_eq!(res.unwrap().to_string(), "false");

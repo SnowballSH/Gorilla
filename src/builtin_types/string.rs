@@ -74,7 +74,7 @@ pub fn new_string<'a>(x: String) -> BaseObject<'a> {
 
     _env.insert("i".to_string(), new_native_function(("String.i", parse_int)));
 
-    _env.insert("+".to_string(), new_native_function(("String.+", add)));
+    _env.insert("add".to_string(), new_native_function(("String.+", add)));
 
     BaseObject {
         class: Class {

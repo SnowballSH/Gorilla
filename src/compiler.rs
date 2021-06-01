@@ -140,7 +140,7 @@ impl<'a> Compiler<'a> {
                 self.update_line(line);
 
                 self.emit_grammar(Grammar::GetInstance);
-                self.emit_string(x.operator);
+                self.emit_string(infix_map(x.operator));
 
                 self.emit_grammar(Grammar::Call);
                 self.emit_unsigned_int(1);
@@ -348,10 +348,10 @@ mod tests {
             Grammar::Function as u8,
             1, 3, b'a', b'b', b'c',
             1, 2, 1, 1, b'a', 1, 1, b'b',
-            1, 16,
+            1, 18,
             Grammar::Getvar as u8, 1, 1, b'b',
             Grammar::Getvar as u8, 1, 1, b'a',
-            Grammar::GetInstance as u8, 1, 1, b'+',
+            Grammar::GetInstance as u8, 1, 3, b'a', b'd', b'd',
             Grammar::Call as u8, 1, 1,
             Grammar::Pop as u8,
         ]);

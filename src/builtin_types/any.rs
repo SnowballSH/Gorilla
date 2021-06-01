@@ -43,8 +43,8 @@ fn to_inspect_string<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: En
 
 pub fn any_class<'a>() -> Box<Class<'a>> {
     let mut store = Environment::default();
-    store.set("==".to_string(), new_native_function(("Object.==", dbeq)));
-    store.set("!=".to_string(), new_native_function(("Object.!=", neq)));
+    store.set("eq".to_string(), new_native_function(("Object.==", dbeq)));
+    store.set("neq".to_string(), new_native_function(("Object.!=", neq)));
     store.set("s".to_string(), new_native_function(("Object.s", to_string)));
     store.set("inspect".to_string(), new_native_function(("Object.inspect", to_inspect_string)));
     Box::new(Class {

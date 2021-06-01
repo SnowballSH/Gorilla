@@ -93,3 +93,20 @@ pub fn run_code_with_env<'a>(code: &str, env: Environment<'a>)
         unreachable!()
     }
 }
+
+pub fn infix_map(op: &str) -> &str {
+    match op {
+        "+" => "add",
+        "-" => "sub",
+        "*" => "mul",
+        "/" => "div",
+        "%" => "modulo",
+        "==" => "eq",
+        "!=" => "neq",
+        "<" => "lt",
+        ">" => "gt",
+        "<=" => "lteq",
+        ">=" => "gteq",
+        _ => op
+    }
+}
