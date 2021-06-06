@@ -3,11 +3,11 @@
 use inner::inner;
 
 use crate::builtin_types::bool::new_boolean;
-use crate::env::Environment;
 use crate::builtin_types::native_function::new_native_function;
+use crate::builtin_types::string::new_string;
+use crate::env::Environment;
 use crate::obj::*;
 use crate::obj::ValueType::*;
-use crate::builtin_types::string::new_string;
 
 fn dbeq<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
     let other = args.first();

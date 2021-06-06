@@ -26,6 +26,7 @@ pub enum ValueType<'a> {
     NativeFunction(NativeFunctionType<'a>),
     Function(FunctionType),
     Str(String),
+    Vector(Vec<&'a BaseObject<'a>>),
     Null,
 }
 
@@ -50,6 +51,10 @@ impl<'a> PartialEq for ValueType<'a> {
             },
             Function(a) => match other {
                 Function(i) => a == i,
+                _ => false,
+            },
+            Vector(a) => match other {
+                Vector(i) => a == i,
                 _ => false,
             },
             Null => match other {
@@ -102,7 +107,7 @@ impl<'a> BaseObject<'a> {
         &self,
         this: BaseObject<'a>,
         args: Vec<BaseObject<'a>>,
-        vm: Environment<'a>
+        vm: Environment<'a>,
     ) -> Result<BaseObject<'a>, String> {
         (self.call_func)(this, args, vm)
     }

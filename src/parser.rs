@@ -236,10 +236,10 @@ fn parse_statement(pair: Pair<Rule>) -> Statement {
             let mut inner = pair.clone().into_inner();
             Statement::FunctionDeclare(FunctionDeclare {
                 name: inner.next().unwrap().as_str(),
-                args: inner.next().unwrap().into_inner().map(|w|w.as_str())
+                args: inner.next().unwrap().into_inner().map(|w| w.as_str())
                     .collect(),
                 body: parse_program(inner.next().unwrap().into_inner()),
-                pos: pair.as_span()
+                pos: pair.as_span(),
             })
         }
         _ => unreachable!()

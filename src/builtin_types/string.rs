@@ -3,6 +3,7 @@
 use std::collections::HashMap;
 
 use inner::inner;
+use unicode_segmentation::UnicodeSegmentation;
 
 use crate::builtin_types::any::any_class;
 use crate::builtin_types::integer::new_integer;
@@ -10,7 +11,6 @@ use crate::builtin_types::native_function::new_native_function;
 use crate::env::Environment;
 use crate::obj::{BaseObject, Class, not_callable, ObjResult};
 use crate::obj::ValueType::*;
-use unicode_segmentation::UnicodeSegmentation;
 
 fn k1(this: BaseObject) -> String {
     let a = inner!(this.internal_value, if Str);
@@ -82,7 +82,7 @@ fn get_index<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment
                 let g = inner!(this.internal_value, if NativeFunction);
                 return Err(format!("{} expects an integer", g.0))
             });
-            let c = if *b < 0 {a.graphemes(true).count() as i64 + *b} else {*b};
+            let c = if *b < 0 { a.graphemes(true).count() as i64 + *b } else { *b };
             let res = a.chars().nth(c as usize);
             match res {
                 Some(res) => {
@@ -126,5 +126,47 @@ pub fn new_string<'a>(x: String) -> BaseObject<'a> {
         equal_func: k4,
         call_func: not_callable,
         parent_obj: None,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::builtin_types::integer::new_integer;
+    use crate::builtin_types::string::new_string;
+    use crate::env::Environment;
+
+    #[test]
+    fn methods() {
+        let vv = Environment::default();
+
+        let my_string = new_string("Hello, 世界!".to_string());
+
+        let mut f = my_string.instance_get("add".to_string()).unwrap();
+        f.set_parent(my_string);
+        let res = f.clone().call(f, vec![new_string("?!".to_string())], vv.clone());
+        assert_eq!(res.unwrap().to_string(), "Hello, 世界!?!");
+
+        let my_string = new_string("Hello, 世界!".to_string());
+
+        let mut f = my_string.instance_get("len".to_string()).unwrap();
+        f.set_parent(my_string);
+        let res = f.clone().call(f, vec![], vv.clone());
+        assert_eq!(res.unwrap(), new_integer(10));
+
+        let my_string = new_string("Hello, 世界!".to_string());
+
+        let mut f = my_string.instance_get("get_index".to_string()).unwrap();
+        f.set_parent(my_string);
+        let res = f.clone().call(f.clone(), vec![new_integer(-2)], vv.clone());
+        assert_eq!(res.unwrap().to_string(), "界");
+        let res = f.clone().call(f, vec![new_integer(2)], vv.clone());
+        assert_eq!(res.unwrap().to_string(), "l");
+
+        let my_string = new_string("1230".to_string());
+
+        let mut f = my_string.instance_get("i".to_string()).unwrap();
+        f.set_parent(my_string);
+        let res = f.clone().call(f, vec![], vv.clone());
+        assert_eq!(res.unwrap(), new_integer(1230));
     }
 }

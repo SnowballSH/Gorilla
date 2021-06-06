@@ -5,3 +5,4 @@ pub mod string;
 pub mod null;
 pub mod native_function;
 pub mod function;
+pub mod vec;

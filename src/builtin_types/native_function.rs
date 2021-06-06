@@ -1,9 +1,10 @@
 #![forbid(unsafe_code)]
 
-use crate::env::Environment;
-use crate::obj::ValueType::*;
-use crate::obj::*;
 use inner::inner;
+
+use crate::env::Environment;
+use crate::obj::*;
+use crate::obj::ValueType::*;
 
 fn k1(this: BaseObject) -> String {
     let x = inner!(this.internal_value, if NativeFunction);
@@ -44,8 +45,8 @@ pub fn new_native_function(x: NativeFunctionType) -> BaseObject {
 mod tests {
     use crate::builtin_types::integer::new_integer;
     use crate::builtin_types::native_function::new_native_function;
-    use crate::obj::*;
     use crate::env::Environment;
+    use crate::obj::*;
 
     #[test]
     fn basic() {

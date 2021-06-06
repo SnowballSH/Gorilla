@@ -6,11 +6,11 @@ use inner::inner;
 use lazy_static::*;
 
 use crate::builtin_types::any::any_class;
-use crate::env::Environment;
 use crate::builtin_types::integer::new_integer;
+use crate::builtin_types::native_function::new_native_function;
+use crate::env::Environment;
 use crate::obj::{BaseObject, Class, not_callable, ObjResult};
 use crate::obj::ValueType::*;
-use crate::builtin_types::native_function::new_native_function;
 
 fn k1(this: BaseObject) -> String {
     let a = inner!(this.internal_value, if Bool);

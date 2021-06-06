@@ -1,12 +1,12 @@
 use inner::inner;
 
+use crate::builtin_types::any::any_class;
 use crate::builtin_types::null::new_null;
 use crate::env::Environment;
 use crate::grammar::Grammar;
 use crate::obj::*;
 use crate::obj::ValueType::*;
 use crate::vm::VM;
-use crate::builtin_types::any::any_class;
 
 fn k1(this: BaseObject) -> String {
     let x = inner!(this.internal_value, if Function);
@@ -25,7 +25,7 @@ fn call<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, e: Environment<'a>)
     let x = inner!(this.clone().internal_value, if Function);
 
     if x.1.len() != args.len() {
-        return Err(format!("{} expected {} arguments, got {}", this.to_inspect_string(), x.1.len(), args.len()))
+        return Err(format!("{} expected {} arguments, got {}", this.to_inspect_string(), x.1.len(), args.len()));
     }
 
     let mut s = x.2;

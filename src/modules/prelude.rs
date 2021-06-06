@@ -1,7 +1,7 @@
-use crate::obj::{BaseObject, ObjResult};
+use crate::builtin_types::null::new_null;
 use crate::builtin_types::string::new_string;
 use crate::env::Environment;
-use crate::builtin_types::null::new_null;
+use crate::obj::{BaseObject, ObjResult};
 
 pub fn print_line<'a>(_this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
     let mut strings = vec![];

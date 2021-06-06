@@ -10,8 +10,8 @@ use crate::builtin_types::null::new_null;
 use crate::builtin_types::string::new_string;
 use crate::env::Environment;
 use crate::grammar::Grammar;
+use crate::modules::prelude::{print, print_inspect_line, print_line, puts};
 use crate::obj::*;
-use crate::modules::prelude::{print, print_line, print_inspect_line, puts};
 
 /// The Virtual Machine
 #[derive(Clone, Debug, Default)]

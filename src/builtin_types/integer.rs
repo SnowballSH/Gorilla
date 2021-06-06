@@ -5,11 +5,11 @@ use std::collections::HashMap;
 use inner::inner;
 
 use crate::builtin_types::any::any_class;
-use crate::env::Environment;
-use crate::builtin_types::native_function::new_native_function;
-use crate::obj::ValueType::*;
-use crate::obj::*;
 use crate::builtin_types::bool::new_boolean;
+use crate::builtin_types::native_function::new_native_function;
+use crate::env::Environment;
+use crate::obj::*;
+use crate::obj::ValueType::*;
 
 #[inline]
 fn add<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {

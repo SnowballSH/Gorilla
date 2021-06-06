@@ -13,7 +13,7 @@ pub enum Expression<'a> {
     Index(Box<Index<'a>>),
 
     If(Box<If<'a>>),
-    While(Box<While<'a>>)
+    While(Box<While<'a>>),
 }
 
 #[derive(Debug, Clone)]

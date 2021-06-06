@@ -8,7 +8,7 @@ use std::io::{Read, Write};
 use console::style;
 
 use crate::env::Environment;
-use crate::helpers::{compile_code, run_code, run_code_with_env, run_bytecode};
+use crate::helpers::{compile_code, run_bytecode, run_code, run_code_with_env};
 
 pub mod env;
 pub mod grammar;
