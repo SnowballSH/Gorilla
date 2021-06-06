@@ -51,8 +51,12 @@ field = {
     "." ~ identifier
 }
 
+indexing = {
+    "[" ~ NEWLINE* ~ expression ~ NEWLINE* ~ "]"
+}
+
 suffix = {
-    term ~ (call | field | empty_call)+
+    term ~ (call | field | empty_call | indexing)+
 }
 
 term = _{ string_literal | integer | identifier | "(" ~ expression ~ ")" }

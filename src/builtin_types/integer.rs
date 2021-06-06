@@ -235,9 +235,9 @@ pub fn new_integer<'a>(x: i64) -> BaseObject<'a> {
     int_env.insert("gteq".to_string(), new_native_function(("Integer.>=", gteq)));
     int_env.insert("lteq".to_string(), new_native_function(("Integer.<=", lteq)));
 
-    int_env.insert("-@".to_string(), new_native_function(("- Integer", neg)));
+    int_env.insert("to_neg".to_string(), new_native_function(("- Integer", neg)));
 
-    int_env.insert("+@".to_string(), new_native_function(("+ Integer", pos)));
+    int_env.insert("to_pos".to_string(), new_native_function(("+ Integer", pos)));
 
     int_env.insert("i".to_string(), new_native_function(("Integer.i", pos)));
 

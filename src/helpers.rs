@@ -110,3 +110,11 @@ pub fn infix_map(op: &str) -> &str {
         _ => op
     }
 }
+
+pub fn prefix_map(op: &str) -> &str {
+    match op {
+        "+" => "to_pos",
+        "-" => "to_neg",
+        _ => op
+    }
+}

@@ -154,7 +154,7 @@ impl<'a> Compiler<'a> {
                 self.update_line(line);
 
                 self.emit_grammar(Grammar::GetInstance);
-                self.emit_string(&*(x.operator.to_owned() + "@"));
+                self.emit_string(prefix_map(x.operator));
 
                 self.emit_grammar(Grammar::Call);
                 self.emit_unsigned_int(0);
@@ -177,6 +177,22 @@ impl<'a> Compiler<'a> {
                 self.compile_expr(x.parent);
                 self.emit_grammar(Grammar::GetInstance);
                 self.emit_string(x.name);
+            }
+
+            Expression::Index(x) => {
+                let line = span_to_line(self.source, x.pos);
+                self.update_line(line);
+
+                self.compile_expr(x.index);
+                self.update_line(line);
+                self.compile_expr(x.callee);
+                self.update_line(line);
+
+                self.emit_grammar(Grammar::GetInstance);
+                self.emit_string("get_index");
+
+                self.emit_grammar(Grammar::Call);
+                self.emit_unsigned_int(1);
             }
 
             Expression::If(x) => {

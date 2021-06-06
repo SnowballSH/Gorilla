@@ -163,6 +163,11 @@ fn others(pair: Pair<Rule>) -> Expression {
                     arguments: vec![],
                     pos: pair.as_span(),
                 })),
+                Rule::indexing => Expression::Index(Box::new(Index {
+                    callee: parse_expression(res),
+                    index: parse_expression(n.into_inner().next().unwrap()),
+                    pos: pair.as_span(),
+                })),
                 _ => unreachable!()
             };
 

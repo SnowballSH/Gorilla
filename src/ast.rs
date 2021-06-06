@@ -10,6 +10,7 @@ pub enum Expression<'a> {
     Prefix(Box<Prefix<'a>>),
     Call(Box<Call<'a>>),
     GetInstance(Box<GetInstance<'a>>),
+    Index(Box<Index<'a>>),
 
     If(Box<If<'a>>),
     While(Box<While<'a>>)
@@ -74,6 +75,13 @@ pub struct SetVar<'a> {
 pub struct Call<'a> {
     pub callee: Expression<'a>,
     pub arguments: Vec<Expression<'a>>,
+    pub pos: Span<'a>,
+}
+
+#[derive(Debug, Clone)]
+pub struct Index<'a> {
+    pub callee: Expression<'a>,
+    pub index: Expression<'a>,
     pub pos: Span<'a>,
 }
 
