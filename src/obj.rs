@@ -26,7 +26,7 @@ pub enum ValueType<'a> {
     NativeFunction(NativeFunctionType<'a>),
     Function(FunctionType),
     Str(String),
-    Vector(Vec<&'a BaseObject<'a>>),
+    Vector(Vec<BaseObject<'a>>),
     Null,
 }
 

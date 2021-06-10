@@ -12,6 +12,7 @@ use crate::env::Environment;
 use crate::grammar::Grammar;
 use crate::modules::prelude::{print, print_inspect_line, print_line, puts};
 use crate::obj::*;
+use crate::builtin_types::vec::new_vector;
 
 /// The Virtual Machine
 #[derive(Clone, Debug, Default)]
@@ -135,6 +136,15 @@ impl<'a> VM<'a> {
             Grammar::String => {
                 let i = self.read_string();
                 self.push(new_string(i));
+            }
+
+            Grammar::Vector => {
+                let am = self.read_unsigned_int();
+                let mut v = vec![];
+                for _ in 0..am {
+                    v.push(self.pop());
+                }
+                self.push(new_vector(v));
             }
 
             Grammar::Getvar => {

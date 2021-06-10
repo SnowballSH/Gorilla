@@ -47,7 +47,9 @@ fn add<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment<'a>) 
                 let g = inner!(this.internal_value, if NativeFunction);
                 return Err(format!("{} expects a vector", g.0))
             });
-            a.extend(b);
+            for y in b {
+                a.push(y.clone());
+            }
             Ok(new_vector(a))
         }
         None => {
@@ -89,7 +91,7 @@ fn length<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: Environment<'
     Ok(new_integer(a.len() as i64))
 }
 
-pub fn new_vector<'a>(x: Vec<&'a BaseObject<'a>>) -> BaseObject<'a> {
+pub fn new_vector(x: Vec<BaseObject>) -> BaseObject {
     let mut _env = HashMap::default();
     _env.insert("len".to_string(), new_native_function(("Vec.len", length)));
 

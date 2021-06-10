@@ -123,6 +123,14 @@ fn others(pair: Pair<Rule>) -> Expression {
             }))
         }
 
+        Rule::vector => {
+            let inner = pair.clone().into_inner();
+            Expression::Vec_(Box::new(VectorDec {
+                values: inner.map(|x| parse_expression(x)).collect(),
+                pos: pair.as_span(),
+            }))
+        }
+
         Rule::prefix => {
             let mut inner: Vec<Pair<Rule>> = pair.clone().into_inner().collect();
             let last = inner.pop().unwrap();

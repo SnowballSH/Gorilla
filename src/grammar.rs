@@ -14,6 +14,7 @@ pub enum Grammar {
     Back,
     Integer,
     String,
+    Vector,
     Null,
     Getvar,
     Setvar,

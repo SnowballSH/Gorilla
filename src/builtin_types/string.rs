@@ -8,6 +8,7 @@ use unicode_segmentation::UnicodeSegmentation;
 use crate::builtin_types::any::any_class;
 use crate::builtin_types::integer::new_integer;
 use crate::builtin_types::native_function::new_native_function;
+use crate::builtin_types::vec::new_vector;
 use crate::env::Environment;
 use crate::obj::{BaseObject, Class, not_callable, ObjResult};
 use crate::obj::ValueType::*;
@@ -104,6 +105,41 @@ fn length<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: Environment<'
     Ok(new_integer(a.graphemes(true).count() as i64))
 }
 
+#[inline]
+fn chars<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
+    let mut v = vec![];
+    for x in inner!(this.parent().unwrap().internal_value, if Str).chars() {
+        v.push(new_string(x.to_string()));
+    }
+    Ok(new_vector(v))
+}
+
+#[inline]
+fn split<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
+    let other = args.first();
+    match other {
+        Some(x) => {
+            let a = inner!(this.parent().unwrap().internal_value, if Str);
+            let b = inner!(&x.internal_value, if Str, else {
+                let g = inner!(this.internal_value, if NativeFunction);
+                return Err(format!("{} expects a string", g.0))
+            });
+            let mut v = vec![];
+            for x in a.split(b) {
+                v.push(new_string(x.to_string()));
+            }
+            Ok(new_vector(v))
+        }
+        None => {
+            let mut v = vec![];
+            for x in inner!(this.parent().unwrap().internal_value, if Str).split_ascii_whitespace() {
+                v.push(new_string(x.to_string()));
+            }
+            Ok(new_vector(v))
+        }
+    }
+}
+
 pub fn new_string<'a>(x: String) -> BaseObject<'a> {
     let mut _env = HashMap::default();
 
@@ -112,6 +148,8 @@ pub fn new_string<'a>(x: String) -> BaseObject<'a> {
 
     _env.insert("add".to_string(), new_native_function(("String.+", add)));
     _env.insert("get_index".to_string(), new_native_function(("String.get_index", get_index)));
+    _env.insert("chars".to_string(), new_native_function(("String.chars", chars)));
+    _env.insert("split".to_string(), new_native_function(("String.split", split)));
 
     BaseObject {
         class: Class {

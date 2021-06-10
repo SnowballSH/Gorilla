@@ -195,6 +195,22 @@ impl<'a> Compiler<'a> {
                 self.emit_unsigned_int(1);
             }
 
+            Expression::Vec_(mut x) => {
+                let line = span_to_line(self.source, x.pos);
+                self.update_line(line);
+
+                let l = x.values.len();
+
+                x.values.reverse();
+
+                for y in x.values {
+                    self.compile_expr(y);
+                }
+
+                self.emit_grammar(Grammar::Vector);
+                self.emit_unsigned_int(l as u64);
+            }
+
             Expression::If(x) => {
                 let p = x.pos;
                 let pos = span_to_line(self.source, p);
