@@ -8,11 +8,11 @@ use crate::builtin_types::integer::new_integer;
 use crate::builtin_types::native_function::new_native_function;
 use crate::builtin_types::null::new_null;
 use crate::builtin_types::string::new_string;
+use crate::builtin_types::vec::new_vector;
 use crate::env::Environment;
 use crate::grammar::Grammar;
 use crate::modules::prelude::{print, print_inspect_line, print_line, puts};
 use crate::obj::*;
-use crate::builtin_types::vec::new_vector;
 
 /// The Virtual Machine
 #[derive(Clone, Debug, Default)]
@@ -41,9 +41,15 @@ impl<'a> VM<'a> {
         global.set("false".to_string(), new_boolean(false));
         global.set("null".to_string(), new_null());
 
-        global.set("println".to_string(), new_native_function(("println", print_line)));
+        global.set(
+            "println".to_string(),
+            new_native_function(("println", print_line)),
+        );
         global.set("puts".to_string(), new_native_function(("puts", puts)));
-        global.set("dbg".to_string(), new_native_function(("dbg", print_inspect_line)));
+        global.set(
+            "dbg".to_string(),
+            new_native_function(("dbg", print_inspect_line)),
+        );
         global.set("print".to_string(), new_native_function(("print", print)));
 
         VM {
@@ -199,7 +205,7 @@ impl<'a> VM<'a> {
                     args.push(self.pop());
                 }
 
-                let res = o.call(o.clone(), args, self.env.clone());
+                let res = o.call(o, args, self.env.clone());
                 match res {
                     Err(x) => return Some(x),
                     Ok(x) => self.push(x),
@@ -219,9 +225,7 @@ impl<'a> VM<'a> {
                     code.push(self.read());
                 }
 
-                let f = new_function((
-                    name.clone(), params,
-                    code));
+                let f = new_function((name.clone(), params, code));
                 self.env.set(name, f);
             }
 
@@ -259,7 +263,11 @@ mod tests {
     fn test_integer_encoding() {
         let bc = vec![
             Grammar::Magic as u8,
-            Grammar::Integer as u8, 3, 0xe5, 0x8e, 0x26,
+            Grammar::Integer as u8,
+            3,
+            0xe5,
+            0x8e,
+            0x26,
             Grammar::Pop as u8,
         ];
         let mut vm = VM::new(bc);
@@ -278,7 +286,8 @@ mod tests {
             1,
             0x03,
             Grammar::Setvar as u8,
-            1, 2,
+            1,
+            2,
             'a' as u8,
             'b' as u8,
             Grammar::Pop as u8,
@@ -295,12 +304,14 @@ mod tests {
             1,
             0x04,
             Grammar::Setvar as u8,
-            1, 2,
+            1,
+            2,
             'a' as u8,
             'b' as u8,
             Grammar::Pop as u8,
             Grammar::Getvar as u8,
-            1, 2,
+            1,
+            2,
             'a' as u8,
             'b' as u8,
             Grammar::Pop as u8,
@@ -317,7 +328,8 @@ mod tests {
             1,
             0x04,
             Grammar::Getvar as u8,
-            1, 2,
+            1,
+            2,
             'a' as u8,
             'b' as u8,
             Grammar::Pop as u8,
@@ -356,7 +368,8 @@ mod tests {
             1,
             0x04,
             Grammar::GetInstance as u8,
-            1, 1,
+            1,
+            1,
             '?' as u8,
             Grammar::Pop as u8,
         ]);
@@ -378,8 +391,11 @@ mod tests {
             1,
             0x06,
             Grammar::GetInstance as u8,
-            1, 3,
-            b'a', b'd', b'd',
+            1,
+            3,
+            b'a',
+            b'd',
+            b'd',
             Grammar::Call as u8,
             1,
             0x01,
@@ -396,12 +412,20 @@ mod tests {
     fn test_jump() {
         let mut vm = VM::new(vec![
             Grammar::Magic as u8,
-            Grammar::Integer as u8, 1, 0,
-            Grammar::JumpIfFalse as u8, 1, 4,
+            Grammar::Integer as u8,
+            1,
+            0,
+            Grammar::JumpIfFalse as u8,
+            1,
+            4,
             Grammar::Null as u8,
-            Grammar::Jump as u8, 1, 4,
+            Grammar::Jump as u8,
+            1,
+            4,
             Grammar::Advance as u8,
-            Grammar::Integer as u8, 1, 5,
+            Grammar::Integer as u8,
+            1,
+            5,
             Grammar::Pop as u8,
         ]);
         let res = vm.run();
@@ -412,15 +436,33 @@ mod tests {
 
         let mut vm = VM::new(vec![
             Grammar::Magic as u8,
-            Grammar::Integer as u8, 1, 0,
-            Grammar::JumpIfFalse as u8, 1, 6,
-            Grammar::Integer as u8, 1, 1,
-            Grammar::Jump as u8, 1, 15,
-            Grammar::Integer as u8, 1, 1,
-            Grammar::JumpIfFalse as u8, 1, 6,
-            Grammar::Integer as u8, 1, 2,
-            Grammar::Jump as u8, 1, 3,
-            Grammar::Integer as u8, 1, 3,
+            Grammar::Integer as u8,
+            1,
+            0,
+            Grammar::JumpIfFalse as u8,
+            1,
+            6,
+            Grammar::Integer as u8,
+            1,
+            1,
+            Grammar::Jump as u8,
+            1,
+            15,
+            Grammar::Integer as u8,
+            1,
+            1,
+            Grammar::JumpIfFalse as u8,
+            1,
+            6,
+            Grammar::Integer as u8,
+            1,
+            2,
+            Grammar::Jump as u8,
+            1,
+            3,
+            Grammar::Integer as u8,
+            1,
+            3,
             Grammar::Pop as u8,
         ]);
         let res = vm.run();

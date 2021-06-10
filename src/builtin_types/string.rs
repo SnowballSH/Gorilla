@@ -10,8 +10,8 @@ use crate::builtin_types::integer::new_integer;
 use crate::builtin_types::native_function::new_native_function;
 use crate::builtin_types::vec::new_vector;
 use crate::env::Environment;
-use crate::obj::{BaseObject, Class, not_callable, ObjResult};
 use crate::obj::ValueType::*;
+use crate::obj::{not_callable, BaseObject, Class, ObjResult};
 
 fn k1(this: BaseObject) -> String {
     let a = inner!(this.internal_value, if Str);
@@ -45,7 +45,11 @@ fn k4<'a>(this: BaseObject<'a>, other: BaseObject<'a>) -> bool {
 }
 
 #[inline]
-fn parse_int<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
+fn parse_int<'a>(
+    this: BaseObject<'a>,
+    _args: Vec<BaseObject<'a>>,
+    _: Environment<'a>,
+) -> ObjResult<'a> {
     let a = inner!(this.parent().unwrap().internal_value, if Str);
     if let Ok(res) = a.parse::<i64>() {
         Ok(new_integer(res))
@@ -74,7 +78,11 @@ fn add<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment<'a>) 
 }
 
 #[inline]
-fn get_index<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
+fn get_index<'a>(
+    this: BaseObject<'a>,
+    args: Vec<BaseObject<'a>>,
+    _: Environment<'a>,
+) -> ObjResult<'a> {
     let other = args.first();
     match other {
         Some(x) => {
@@ -83,13 +91,15 @@ fn get_index<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment
                 let g = inner!(this.internal_value, if NativeFunction);
                 return Err(format!("{} expects an integer", g.0))
             });
-            let c = if *b < 0 { a.graphemes(true).count() as i64 + *b } else { *b };
+            let c = if *b < 0 {
+                a.graphemes(true).count() as i64 + *b
+            } else {
+                *b
+            };
             let res = a.chars().nth(c as usize);
             match res {
-                Some(res) => {
-                    Ok(new_string(res.to_string()))
-                }
-                None => Err(format!("String index {} is out of range", b))
+                Some(res) => Ok(new_string(res.to_string())),
+                None => Err(format!("String index {} is out of range", b)),
             }
         }
         None => {
@@ -100,13 +110,21 @@ fn get_index<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment
 }
 
 #[inline]
-fn length<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
+fn length<'a>(
+    this: BaseObject<'a>,
+    _args: Vec<BaseObject<'a>>,
+    _: Environment<'a>,
+) -> ObjResult<'a> {
     let a = inner!(this.parent().unwrap().internal_value, if Str);
     Ok(new_integer(a.graphemes(true).count() as i64))
 }
 
 #[inline]
-fn chars<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
+fn chars<'a>(
+    this: BaseObject<'a>,
+    _args: Vec<BaseObject<'a>>,
+    _: Environment<'a>,
+) -> ObjResult<'a> {
     let mut v = vec![];
     for x in inner!(this.parent().unwrap().internal_value, if Str).chars() {
         v.push(new_string(x.to_string()));
@@ -132,7 +150,8 @@ fn split<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment<'a>
         }
         None => {
             let mut v = vec![];
-            for x in inner!(this.parent().unwrap().internal_value, if Str).split_ascii_whitespace() {
+            for x in inner!(this.parent().unwrap().internal_value, if Str).split_ascii_whitespace()
+            {
                 v.push(new_string(x.to_string()));
             }
             Ok(new_vector(v))
@@ -143,13 +162,28 @@ fn split<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment<'a>
 pub fn new_string<'a>(x: String) -> BaseObject<'a> {
     let mut _env = HashMap::default();
 
-    _env.insert("i".to_string(), new_native_function(("String.i", parse_int)));
-    _env.insert("len".to_string(), new_native_function(("String.len", length)));
+    _env.insert(
+        "i".to_string(),
+        new_native_function(("String.i", parse_int)),
+    );
+    _env.insert(
+        "len".to_string(),
+        new_native_function(("String.len", length)),
+    );
 
     _env.insert("add".to_string(), new_native_function(("String.+", add)));
-    _env.insert("get_index".to_string(), new_native_function(("String.get_index", get_index)));
-    _env.insert("chars".to_string(), new_native_function(("String.chars", chars)));
-    _env.insert("split".to_string(), new_native_function(("String.split", split)));
+    _env.insert(
+        "get_index".to_string(),
+        new_native_function(("String.get_index", get_index)),
+    );
+    _env.insert(
+        "chars".to_string(),
+        new_native_function(("String.chars", chars)),
+    );
+    _env.insert(
+        "split".to_string(),
+        new_native_function(("String.split", split)),
+    );
 
     BaseObject {
         class: Class {
@@ -181,7 +215,9 @@ mod tests {
 
         let mut f = my_string.instance_get("add".to_string()).unwrap();
         f.set_parent(my_string);
-        let res = f.clone().call(f, vec![new_string("?!".to_string())], vv.clone());
+        let res = f
+            .clone()
+            .call(f, vec![new_string("?!".to_string())], vv.clone());
         assert_eq!(res.unwrap().to_string(), "Hello, 世界!?!");
 
         let my_string = new_string("Hello, 世界!".to_string());

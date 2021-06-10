@@ -8,14 +8,18 @@ use crate::builtin_types::any::any_class;
 use crate::builtin_types::integer::new_integer;
 use crate::builtin_types::native_function::new_native_function;
 use crate::env::Environment;
-use crate::obj::{BaseObject, Class, not_callable, ObjResult};
 use crate::obj::ValueType::*;
+use crate::obj::{not_callable, BaseObject, Class, ObjResult};
 
 fn k1(this: BaseObject) -> String {
     let a = inner!(this.internal_value, if Vector);
     let mut rs = String::new();
     rs += "[";
-    rs += &a.iter().map(|x| x.to_string()).collect::<Vec<String>>().join(", ");
+    rs += &a
+        .iter()
+        .map(|x| x.to_string())
+        .collect::<Vec<String>>()
+        .join(", ");
     rs += "]";
     rs
 }
@@ -24,7 +28,11 @@ fn k2(this: BaseObject) -> String {
     let a = inner!(this.internal_value, if Vector);
     let mut rs = String::new();
     rs += "[";
-    rs += &a.iter().map(|x| x.to_inspect_string()).collect::<Vec<String>>().join(", ");
+    rs += &a
+        .iter()
+        .map(|x| x.to_inspect_string())
+        .collect::<Vec<String>>()
+        .join(", ");
     rs += "]";
     rs
 }
@@ -60,7 +68,11 @@ fn add<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment<'a>) 
 }
 
 #[inline]
-fn get_index<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
+fn get_index<'a>(
+    this: BaseObject<'a>,
+    args: Vec<BaseObject<'a>>,
+    _: Environment<'a>,
+) -> ObjResult<'a> {
     let other = args.first();
     match other {
         Some(x) => {
@@ -72,10 +84,8 @@ fn get_index<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment
             let c = if *b < 0 { a.len() as i64 + *b } else { *b };
             let res = a.get(c as usize);
             match res {
-                Some(res) => {
-                    Ok((*res).clone())
-                }
-                None => Err(format!("Vector index {} is out of range", b))
+                Some(res) => Ok((*res).clone()),
+                None => Err(format!("Vector index {} is out of range", b)),
             }
         }
         None => {
@@ -86,7 +96,11 @@ fn get_index<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment
 }
 
 #[inline]
-fn length<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
+fn length<'a>(
+    this: BaseObject<'a>,
+    _args: Vec<BaseObject<'a>>,
+    _: Environment<'a>,
+) -> ObjResult<'a> {
     let a = inner!(this.parent().unwrap().internal_value, if Vector);
     Ok(new_integer(a.len() as i64))
 }
@@ -96,7 +110,10 @@ pub fn new_vector(x: Vec<BaseObject>) -> BaseObject {
     _env.insert("len".to_string(), new_native_function(("Vec.len", length)));
 
     _env.insert("add".to_string(), new_native_function(("Vec.+", add)));
-    _env.insert("get_index".to_string(), new_native_function(("Vec.get_index", get_index)));
+    _env.insert(
+        "get_index".to_string(),
+        new_native_function(("Vec.get_index", get_index)),
+    );
 
     BaseObject {
         class: Class {

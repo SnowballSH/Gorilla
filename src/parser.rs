@@ -1,7 +1,7 @@
 use lazy_static::*;
 use pest::iterators::{Pair, Pairs};
-use pest::Parser;
 use pest::prec_climber::*;
+use pest::Parser;
 use pest_derive::*;
 
 use Rule::*;
@@ -14,7 +14,10 @@ lazy_static! {
 
         PrecClimber::new(vec![
             Operator::new(dbeq, Left) | Operator::new(neq, Left),
-            Operator::new(gt, Left) | Operator::new(lt, Left) | Operator::new(gteq, Left) | Operator::new(lteq, Left),
+            Operator::new(gt, Left)
+                | Operator::new(lt, Left)
+                | Operator::new(gteq, Left)
+                | Operator::new(lteq, Left),
             Operator::new(add, Left) | Operator::new(sub, Left),
             Operator::new(mul, Left) | Operator::new(div, Left) | Operator::new(modulo, Left),
         ])
@@ -55,13 +58,13 @@ fn others(pair: Pair<Rule>) -> Expression {
                         'r' => '\r',
                         't' => '\t',
                         '0' => '\0',
-                        _ => ch
+                        _ => ch,
                     });
                     escape = false;
                 } else {
                     match ch {
                         '\\' => escape = true,
-                        _ => rs.push(ch)
+                        _ => rs.push(ch),
                     }
                 }
             }
@@ -156,9 +159,7 @@ fn others(pair: Pair<Rule>) -> Expression {
             let mut callee = match n.as_rule() {
                 Rule::call => Expression::Call(Box::new(Call {
                     callee: parse_expression(res),
-                    arguments: n.into_inner()
-                        .map(|w| parse_expression(w))
-                        .collect(),
+                    arguments: n.into_inner().map(|w| parse_expression(w)).collect(),
                     pos: pair.as_span(),
                 })),
                 Rule::field => Expression::GetInstance(Box::new(GetInstance {
@@ -176,16 +177,14 @@ fn others(pair: Pair<Rule>) -> Expression {
                     index: parse_expression(n.into_inner().next().unwrap()),
                     pos: pair.as_span(),
                 })),
-                _ => unreachable!()
+                _ => unreachable!(),
             };
 
             while let Some(xx) = args_iter.next() {
                 callee = match xx.as_rule() {
                     Rule::call => Expression::Call(Box::new(Call {
                         callee,
-                        arguments: xx.into_inner()
-                            .map(|w| parse_expression(w))
-                            .collect(),
+                        arguments: xx.into_inner().map(|w| parse_expression(w)).collect(),
                         pos: pair.as_span(),
                     })),
                     Rule::field => Expression::GetInstance(Box::new(GetInstance {
@@ -198,7 +197,7 @@ fn others(pair: Pair<Rule>) -> Expression {
                         arguments: vec![],
                         pos: pair.as_span(),
                     })),
-                    _ => unreachable!()
+                    _ => unreachable!(),
                 }
             }
 
@@ -233,24 +232,26 @@ fn parse_statement(pair: Pair<Rule>) -> Statement {
         Rule::expression_stmt => {
             let p = pair.into_inner().next().unwrap();
             let s = p.clone().as_span();
-            Statement::ExprStmt(
-                ExprStmt {
-                    expr: parse_expression(p),
-                    pos: s,
-                }
-            )
+            Statement::ExprStmt(ExprStmt {
+                expr: parse_expression(p),
+                pos: s,
+            })
         }
         Rule::function_declare => {
             let mut inner = pair.clone().into_inner();
             Statement::FunctionDeclare(FunctionDeclare {
                 name: inner.next().unwrap().as_str(),
-                args: inner.next().unwrap().into_inner().map(|w| w.as_str())
+                args: inner
+                    .next()
+                    .unwrap()
+                    .into_inner()
+                    .map(|w| w.as_str())
                     .collect(),
                 body: parse_program(inner.next().unwrap().into_inner()),
                 pos: pair.as_span(),
             })
         }
-        _ => unreachable!()
+        _ => unreachable!(),
     }
 }
 
@@ -274,7 +275,7 @@ pub fn parse(code: &str) -> Result<Program, pest::error::Error<Rule>> {
             let ast = parse_program(res);
             Ok(ast)
         }
-        Err(e) => Err(e)
+        Err(e) => Err(e),
     }
 }
 
@@ -284,14 +285,18 @@ mod tests {
 
     #[test]
     fn parsing() {
-        let res = parse("
-(println)(a + 99 % 3)(123)");
+        let res = parse(
+            "
+(println)(a + 99 % 3)(123)",
+        );
         match res {
             Ok(x) => {
                 // dbg!(&x);
                 assert_eq!(x.len(), 1);
             }
-            Err(x) => { panic!("{}", x.to_string()); }
+            Err(x) => {
+                panic!("{}", x.to_string());
+            }
         };
 
         let res = parse("9223372036854775808");

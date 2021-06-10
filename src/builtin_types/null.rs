@@ -4,8 +4,8 @@ use std::collections::HashMap;
 
 use crate::builtin_types::any::any_class;
 use crate::env::Environment;
-use crate::obj::{BaseObject, Class, not_callable};
 use crate::obj::ValueType::*;
+use crate::obj::{not_callable, BaseObject, Class};
 
 fn k1(_: BaseObject) -> String {
     "null".to_string()

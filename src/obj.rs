@@ -3,10 +3,15 @@
 use crate::env::*;
 use crate::obj::ValueType::*;
 
-pub type CallFuncType<'a> = fn(BaseObject<'a>, Vec<BaseObject<'a>>, Environment<'a>) -> ObjResult<'a>;
+pub type CallFuncType<'a> =
+    fn(BaseObject<'a>, Vec<BaseObject<'a>>, Environment<'a>) -> ObjResult<'a>;
 
 #[inline]
-pub fn not_callable<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: Environment) -> ObjResult<'a> {
+pub fn not_callable<'a>(
+    this: BaseObject<'a>,
+    _args: Vec<BaseObject<'a>>,
+    _: Environment,
+) -> ObjResult<'a> {
     Err(format!(
         "'{}' ({}) is not callable",
         this.to_string(),
