@@ -8,8 +8,8 @@ use crate::builtin_types::any::any_class;
 use crate::builtin_types::bool::new_boolean;
 use crate::builtin_types::native_function::new_native_function;
 use crate::env::Environment;
-use crate::obj::*;
 use crate::obj::ValueType::*;
+use crate::obj::*;
 
 #[inline]
 fn add<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
@@ -228,16 +228,31 @@ pub fn new_integer<'a>(x: i64) -> BaseObject<'a> {
 
     int_env.insert("div".to_string(), new_native_function(("Integer./", div)));
 
-    int_env.insert("modulo".to_string(), new_native_function(("Integer.%", mod_)));
+    int_env.insert(
+        "modulo".to_string(),
+        new_native_function(("Integer.%", mod_)),
+    );
 
     int_env.insert("gt".to_string(), new_native_function(("Integer.>", gt)));
     int_env.insert("lt".to_string(), new_native_function(("Integer.<", lt)));
-    int_env.insert("gteq".to_string(), new_native_function(("Integer.>=", gteq)));
-    int_env.insert("lteq".to_string(), new_native_function(("Integer.<=", lteq)));
+    int_env.insert(
+        "gteq".to_string(),
+        new_native_function(("Integer.>=", gteq)),
+    );
+    int_env.insert(
+        "lteq".to_string(),
+        new_native_function(("Integer.<=", lteq)),
+    );
 
-    int_env.insert("to_neg".to_string(), new_native_function(("- Integer", neg)));
+    int_env.insert(
+        "to_neg".to_string(),
+        new_native_function(("- Integer", neg)),
+    );
 
-    int_env.insert("to_pos".to_string(), new_native_function(("+ Integer", pos)));
+    int_env.insert(
+        "to_pos".to_string(),
+        new_native_function(("+ Integer", pos)),
+    );
 
     int_env.insert("i".to_string(), new_native_function(("Integer.i", pos)));
 

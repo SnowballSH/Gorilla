@@ -74,8 +74,13 @@ pub fn run_bytecode<'a>(code: Vec<u8>) -> Result<Option<BaseObject<'a>>, (String
     }
 }
 
-pub fn run_code_with_env<'a>(code: &str, env: Environment<'a>)
-                             -> (Result<Option<BaseObject<'a>>, (String, usize)>, Environment<'a>) {
+pub fn run_code_with_env<'a>(
+    code: &str,
+    env: Environment<'a>,
+) -> (
+    Result<Option<BaseObject<'a>>, (String, usize)>,
+    Environment<'a>,
+) {
     let mut compiler = Compiler::new(code);
     let p = parse(code);
     if let Err(e) = p {
@@ -107,7 +112,7 @@ pub fn infix_map(op: &str) -> &str {
         ">" => "gt",
         "<=" => "lteq",
         ">=" => "gteq",
-        _ => op
+        _ => op,
     }
 }
 
@@ -115,6 +120,6 @@ pub fn prefix_map(op: &str) -> &str {
     match op {
         "+" => "to_pos",
         "-" => "to_neg",
-        _ => op
+        _ => op,
     }
 }

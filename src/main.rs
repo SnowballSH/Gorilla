@@ -1,26 +1,26 @@
 #![forbid(unsafe_code)]
 
-use std::{io, thread};
 use std::env::args;
 use std::fs::File;
 use std::io::{Read, Write};
+use std::{io, thread};
 
 use console::style;
 
 use crate::env::Environment;
 use crate::helpers::{compile_code, run_bytecode, run_code, run_code_with_env};
 
+pub mod ast;
+pub mod builtin_types;
+pub mod compiler;
 pub mod env;
 pub mod grammar;
-pub mod builtin_types;
+pub mod helpers;
 pub mod modules;
 pub mod obj;
-pub mod vm;
-pub mod parser;
-pub mod ast;
-pub mod compiler;
-pub mod helpers;
 mod overall_test;
+pub mod parser;
+pub mod vm;
 
 fn get_input() -> String {
     let mut input = String::new();
@@ -37,7 +37,10 @@ fn _main() {
     if argv.len() < 2 {
         let mut environment = Environment::default();
 
-        println!("{}", style("Welcome to Gorilla repl. Type :quit to quit.").yellow());
+        println!(
+            "{}",
+            style("Welcome to Gorilla repl. Type :quit to quit.").yellow()
+        );
 
         loop {
             let ip = get_input();

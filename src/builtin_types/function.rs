@@ -4,8 +4,8 @@ use crate::builtin_types::any::any_class;
 use crate::builtin_types::null::new_null;
 use crate::env::Environment;
 use crate::grammar::Grammar;
-use crate::obj::*;
 use crate::obj::ValueType::*;
+use crate::obj::*;
 use crate::vm::VM;
 
 fn k1(this: BaseObject) -> String {
@@ -25,7 +25,12 @@ fn call<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, e: Environment<'a>)
     let x = inner!(this.clone().internal_value, if Function);
 
     if x.1.len() != args.len() {
-        return Err(format!("{} expected {} arguments, got {}", this.to_inspect_string(), x.1.len(), args.len()));
+        return Err(format!(
+            "{} expected {} arguments, got {}",
+            this.to_inspect_string(),
+            x.1.len(),
+            args.len()
+        ));
     }
 
     let mut s = x.2;
@@ -42,12 +47,8 @@ fn call<'a>(this: BaseObject<'a>, args: Vec<BaseObject<'a>>, e: Environment<'a>)
     let res = v.run();
 
     match res {
-        Ok(x) => {
-            Ok(x.unwrap_or(new_null()))
-        }
-        Err(e) => {
-            Err(format!("In {}: {}", this.to_inspect_string(), e))
-        }
+        Ok(x) => Ok(x.unwrap_or(new_null())),
+        Err(e) => Err(format!("In {}: {}", this.to_inspect_string(), e)),
     }
 }
 

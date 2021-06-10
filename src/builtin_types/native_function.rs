@@ -3,8 +3,8 @@
 use inner::inner;
 
 use crate::env::Environment;
-use crate::obj::*;
 use crate::obj::ValueType::*;
+use crate::obj::*;
 
 fn k1(this: BaseObject) -> String {
     let x = inner!(this.internal_value, if NativeFunction);
@@ -50,10 +50,17 @@ mod tests {
 
     #[test]
     fn basic() {
-        fn idk<'a>(_this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
+        fn idk<'a>(
+            _this: BaseObject<'a>,
+            _args: Vec<BaseObject<'a>>,
+            _: Environment<'a>,
+        ) -> ObjResult<'a> {
             Ok(new_integer(1))
         }
         let f = new_native_function(("idk", idk));
-        assert_eq!(f.call(f.clone(), vec![], Environment::default()).unwrap(), new_integer(1))
+        assert_eq!(
+            f.call(f.clone(), vec![], Environment::default()).unwrap(),
+            new_integer(1)
+        )
     }
 }

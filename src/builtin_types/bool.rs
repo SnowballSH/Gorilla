@@ -9,8 +9,8 @@ use crate::builtin_types::any::any_class;
 use crate::builtin_types::integer::new_integer;
 use crate::builtin_types::native_function::new_native_function;
 use crate::env::Environment;
-use crate::obj::{BaseObject, Class, not_callable, ObjResult};
 use crate::obj::ValueType::*;
+use crate::obj::{not_callable, BaseObject, Class, ObjResult};
 
 fn k1(this: BaseObject) -> String {
     let a = inner!(this.internal_value, if Bool);
@@ -26,7 +26,11 @@ fn k4<'a>(this: BaseObject<'a>, other: BaseObject<'a>) -> bool {
 }
 
 #[inline]
-fn to_int<'a>(this: BaseObject<'a>, _args: Vec<BaseObject<'a>>, _: Environment<'a>) -> ObjResult<'a> {
+fn to_int<'a>(
+    this: BaseObject<'a>,
+    _args: Vec<BaseObject<'a>>,
+    _: Environment<'a>,
+) -> ObjResult<'a> {
     let a = inner!(this.parent().unwrap().internal_value, if Bool);
     Ok(new_integer(if a { 1 } else { 0 }))
 }

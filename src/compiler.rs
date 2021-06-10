@@ -195,6 +195,22 @@ impl<'a> Compiler<'a> {
                 self.emit_unsigned_int(1);
             }
 
+            Expression::Vec_(mut x) => {
+                let line = span_to_line(self.source, x.pos);
+                self.update_line(line);
+
+                let l = x.values.len();
+
+                x.values.reverse();
+
+                for y in x.values {
+                    self.compile_expr(y);
+                }
+
+                self.emit_grammar(Grammar::Vector);
+                self.emit_unsigned_int(l as u64);
+            }
+
             Expression::If(x) => {
                 let p = x.pos;
                 let pos = span_to_line(self.source, p);
@@ -289,11 +305,18 @@ mod tests {
         let code = "624485";
         let mut compiler = Compiler::new(code);
         compiler.compile(parse(code).unwrap());
-        assert_eq!(compiler.result, vec![
-            Grammar::Magic as u8,
-            Grammar::Integer as u8, 3, 0xe5, 0x8e, 0x26,
-            Grammar::Pop as u8,
-        ]);
+        assert_eq!(
+            compiler.result,
+            vec![
+                Grammar::Magic as u8,
+                Grammar::Integer as u8,
+                3,
+                0xe5,
+                0x8e,
+                0x26,
+                Grammar::Pop as u8,
+            ]
+        );
     }
 
     #[test]
@@ -304,37 +327,71 @@ mod tests {
         1";
         let mut compiler = Compiler::new(code);
         compiler.compile(parse(code).unwrap_or_else(|x| panic!("{}", x.to_string())));
-        assert_eq!(compiler.result, vec![
-            Grammar::Magic as u8,
-            Grammar::Integer as u8, 1, 1,
-            Grammar::JumpIfFalse as u8, 1, 4,
-            Grammar::Null as u8,
-            Grammar::Jump as u8, 1, 4,
-            Grammar::Advance as u8,
-            Grammar::Integer as u8, 1, 5,
-            Grammar::Pop as u8,
-            Grammar::Advance as u8,
-            Grammar::Advance as u8,
-            Grammar::Integer as u8, 1, 1,
-            Grammar::Pop as u8,
-        ]);
+        assert_eq!(
+            compiler.result,
+            vec![
+                Grammar::Magic as u8,
+                Grammar::Integer as u8,
+                1,
+                1,
+                Grammar::JumpIfFalse as u8,
+                1,
+                4,
+                Grammar::Null as u8,
+                Grammar::Jump as u8,
+                1,
+                4,
+                Grammar::Advance as u8,
+                Grammar::Integer as u8,
+                1,
+                5,
+                Grammar::Pop as u8,
+                Grammar::Advance as u8,
+                Grammar::Advance as u8,
+                Grammar::Integer as u8,
+                1,
+                1,
+                Grammar::Pop as u8,
+            ]
+        );
 
         let code = "if 1 1 else if 1 1 else 1";
         let mut compiler = Compiler::new(code);
         compiler.compile(parse(code).unwrap_or_else(|x| panic!("{}", x.to_string())));
-        assert_eq!(compiler.result, vec![
-            Grammar::Magic as u8,
-            Grammar::Integer as u8, 1, 1,
-            Grammar::JumpIfFalse as u8, 1, 6,
-            Grammar::Integer as u8, 1, 1,
-            Grammar::Jump as u8, 1, 15,
-            Grammar::Integer as u8, 1, 1,
-            Grammar::JumpIfFalse as u8, 1, 6,
-            Grammar::Integer as u8, 1, 1,
-            Grammar::Jump as u8, 1, 3,
-            Grammar::Integer as u8, 1, 1,
-            Grammar::Pop as u8,
-        ]);
+        assert_eq!(
+            compiler.result,
+            vec![
+                Grammar::Magic as u8,
+                Grammar::Integer as u8,
+                1,
+                1,
+                Grammar::JumpIfFalse as u8,
+                1,
+                6,
+                Grammar::Integer as u8,
+                1,
+                1,
+                Grammar::Jump as u8,
+                1,
+                15,
+                Grammar::Integer as u8,
+                1,
+                1,
+                Grammar::JumpIfFalse as u8,
+                1,
+                6,
+                Grammar::Integer as u8,
+                1,
+                1,
+                Grammar::Jump as u8,
+                1,
+                3,
+                Grammar::Integer as u8,
+                1,
+                1,
+                Grammar::Pop as u8,
+            ]
+        );
     }
 
     #[test]
@@ -342,16 +399,27 @@ mod tests {
         let code = "while 1 2";
         let mut compiler = Compiler::new(code);
         compiler.compile(parse(code).unwrap_or_else(|x| panic!("{}", x.to_string())));
-        assert_eq!(compiler.result, vec![
-            Grammar::Magic as u8,
-            Grammar::Integer as u8, 1, 1,
-            Grammar::JumpIfFalse as u8, 1, 7,
-            Grammar::Integer as u8, 1, 2,
-            Grammar::Pop as u8,
-            Grammar::JumpTo as u8, 1, 1,
-            Grammar::Null as u8,
-            Grammar::Pop as u8,
-        ]);
+        assert_eq!(
+            compiler.result,
+            vec![
+                Grammar::Magic as u8,
+                Grammar::Integer as u8,
+                1,
+                1,
+                Grammar::JumpIfFalse as u8,
+                1,
+                7,
+                Grammar::Integer as u8,
+                1,
+                2,
+                Grammar::Pop as u8,
+                Grammar::JumpTo as u8,
+                1,
+                1,
+                Grammar::Null as u8,
+                Grammar::Pop as u8,
+            ]
+        );
     }
 
     #[test]
@@ -359,17 +427,45 @@ mod tests {
         let code = "fn abc(a, b) a + b";
         let mut compiler = Compiler::new(code);
         compiler.compile(parse(code).unwrap_or_else(|x| panic!("{}", x.to_string())));
-        assert_eq!(compiler.result, vec![
-            Grammar::Magic as u8,
-            Grammar::Function as u8,
-            1, 3, b'a', b'b', b'c',
-            1, 2, 1, 1, b'a', 1, 1, b'b',
-            1, 18,
-            Grammar::Getvar as u8, 1, 1, b'b',
-            Grammar::Getvar as u8, 1, 1, b'a',
-            Grammar::GetInstance as u8, 1, 3, b'a', b'd', b'd',
-            Grammar::Call as u8, 1, 1,
-            Grammar::Pop as u8,
-        ]);
+        assert_eq!(
+            compiler.result,
+            vec![
+                Grammar::Magic as u8,
+                Grammar::Function as u8,
+                1,
+                3,
+                b'a',
+                b'b',
+                b'c',
+                1,
+                2,
+                1,
+                1,
+                b'a',
+                1,
+                1,
+                b'b',
+                1,
+                18,
+                Grammar::Getvar as u8,
+                1,
+                1,
+                b'b',
+                Grammar::Getvar as u8,
+                1,
+                1,
+                b'a',
+                Grammar::GetInstance as u8,
+                1,
+                3,
+                b'a',
+                b'd',
+                b'd',
+                Grammar::Call as u8,
+                1,
+                1,
+                Grammar::Pop as u8,
+            ]
+        );
     }
 }

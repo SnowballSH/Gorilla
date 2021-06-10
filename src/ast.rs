@@ -11,6 +11,7 @@ pub enum Expression<'a> {
     Call(Box<Call<'a>>),
     GetInstance(Box<GetInstance<'a>>),
     Index(Box<Index<'a>>),
+    Vec_(Box<VectorDec<'a>>),
 
     If(Box<If<'a>>),
     While(Box<While<'a>>),
@@ -82,6 +83,12 @@ pub struct Call<'a> {
 pub struct Index<'a> {
     pub callee: Expression<'a>,
     pub index: Expression<'a>,
+    pub pos: Span<'a>,
+}
+
+#[derive(Debug, Clone)]
+pub struct VectorDec<'a> {
+    pub values: Vec<Expression<'a>>,
     pub pos: Span<'a>,
 }
 
