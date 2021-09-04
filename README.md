@@ -6,6 +6,10 @@
 
 ### NEWS
 
+## Continuation: [Glacier](https://github.com/SnowballSH/RustGlacier)
+
+---
+
 I'm sorry to announce this, but development of Gorilla 1.0 has been stopped.
 
 I've had tons of fun building this language. I learned testing, parsing, bytecodes, encoding, and many more.
@@ -20,8 +24,6 @@ However, that does not mean I will stop making programming languages. A new idea
 
 Thank you for those who stared or forked this repository, and those who supported me and followed along. You guys
 provided amazing mental support.
-
-See you in my next programming language -- it will be awesome, I promise.
 
 ---
 
